@@ -49,19 +49,6 @@
             color: white;
         }
         
-        .purchase-card {
-            transition: all 0.3s ease;
-            border: none;
-            border-radius: 20px;
-            background: white;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-        }
-        
-        .purchase-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
-        }
-        
         .status-badge {
             padding: 5px 12px;
             border-radius: 20px;
@@ -118,11 +105,18 @@
             to { transform: translateX(0); opacity: 1; }
         }
         
-        .purchase-item {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 10px;
-            margin-bottom: 10px;
+        .supplier-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 20px;
+            background: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            height: 100%;
+        }
+        
+        .supplier-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -143,44 +137,25 @@
         </div>
         
         <nav class="nav flex-column">
-            <a href="dashboard.html" class="nav-link">
-                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
-            </a>
-            <a href="medicines.html" class="nav-link">
-                <i class="fas fa-capsules me-2"></i> Medicines
-            </a>
-            <a href="customers.html" class="nav-link">
-                <i class="fas fa-users me-2"></i> Customers
-            </a>
-            <a href="sales.html" class="nav-link">
-                <i class="fas fa-shopping-cart me-2"></i> POS Sales
-            </a>
-            <a href="purchases.html" class="nav-link active">
-                <i class="fas fa-truck me-2"></i> Purchases
-            </a>
-            <a href="suppliers.html" class="nav-link">
-                <i class="fas fa-parachute-box me-2"></i> Suppliers
-            </a>
-            <a href="prescriptions.html" class="nav-link">
-                <i class="fas fa-file-prescription me-2"></i> Prescriptions
-            </a>
-            <a href="reports.html" class="nav-link">
-                <i class="fas fa-chart-line me-2"></i> Reports
-            </a>
+            <a href="dashboard.html" class="nav-link"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a>
+            <a href="medicines.html" class="nav-link"><i class="fas fa-capsules me-2"></i> Medicines</a>
+            <a href="customers.html" class="nav-link"><i class="fas fa-users me-2"></i> Customers</a>
+            <a href="sales.html" class="nav-link"><i class="fas fa-shopping-cart me-2"></i> POS Sales</a>
+            <a href="purchases.html" class="nav-link active"><i class="fas fa-truck me-2"></i> Purchases</a>
+            <a href="suppliers.html" class="nav-link"><i class="fas fa-parachute-box me-2"></i> Suppliers</a>
+            <a href="prescriptions.html" class="nav-link"><i class="fas fa-file-prescription me-2"></i> Prescriptions</a>
+            <a href="reports.html" class="nav-link"><i class="fas fa-chart-line me-2"></i> Reports</a>
             <hr class="bg-secondary my-3">
-            <a href="login.html" class="nav-link" id="logoutBtn">
-                <i class="fas fa-sign-out-alt me-2"></i> Logout
-            </a>
+            <a href="login.html" class="nav-link" id="logoutBtn"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
         </nav>
     </div>
 </div>
 
 <!-- Main Content -->
 <div class="main-content">
-    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
-            <h2 class="fw-bold gradient-text">Purchase Management</h2>
+            <h2 class="fw-bold gradient-text">📦 Purchase Management</h2>
             <p class="text-muted">Manage supplier purchases, track inventory, and handle payments</p>
         </div>
         <button class="btn btn-gradient rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addPurchaseModal" onclick="resetPurchaseForm()">
@@ -198,9 +173,7 @@
                             <p class="text-muted mb-1">Total Purchases</p>
                             <h3 class="fw-bold text-primary" id="totalPurchases">$0</h3>
                         </div>
-                        <div class="bg-primary bg-opacity-10 p-3 rounded-3">
-                            <i class="fas fa-shopping-cart fa-2x text-primary"></i>
-                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-3"><i class="fas fa-shopping-cart fa-2x text-primary"></i></div>
                     </div>
                 </div>
             </div>
@@ -213,9 +186,7 @@
                             <p class="text-muted mb-1">Total Due</p>
                             <h3 class="fw-bold text-warning" id="totalDue">$0</h3>
                         </div>
-                        <div class="bg-warning bg-opacity-10 p-3 rounded-3">
-                            <i class="fas fa-dollar-sign fa-2x text-warning"></i>
-                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-3"><i class="fas fa-dollar-sign fa-2x text-warning"></i></div>
                     </div>
                 </div>
             </div>
@@ -228,9 +199,7 @@
                             <p class="text-muted mb-1">This Month</p>
                             <h3 class="fw-bold text-success" id="monthlyPurchases">$0</h3>
                         </div>
-                        <div class="bg-success bg-opacity-10 p-3 rounded-3">
-                            <i class="fas fa-calendar-alt fa-2x text-success"></i>
-                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded-3"><i class="fas fa-calendar-alt fa-2x text-success"></i></div>
                     </div>
                 </div>
             </div>
@@ -243,9 +212,7 @@
                             <p class="text-muted mb-1">Total Suppliers</p>
                             <h3 class="fw-bold text-info" id="totalSuppliers">0</h3>
                         </div>
-                        <div class="bg-info bg-opacity-10 p-3 rounded-3">
-                            <i class="fas fa-truck fa-2x text-info"></i>
-                        </div>
+                        <div class="bg-info bg-opacity-10 p-3 rounded-3"><i class="fas fa-truck fa-2x text-info"></i></div>
                     </div>
                 </div>
             </div>
@@ -254,72 +221,30 @@
     
     <!-- Tabs -->
     <ul class="nav nav-tabs mb-4" role="tablist">
-        <li class="nav-item">
-            <a class="nav-link active" data-bs-toggle="tab" href="#purchasesList">
-                <i class="fas fa-list me-2"></i>Purchase List
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="tab" href="#returns">
-                <i class="fas fa-undo-alt me-2"></i>Purchase Returns
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="tab" href="#suppliersList">
-                <i class="fas fa-parachute-box me-2"></i>Suppliers
-            </a>
-        </li>
+        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#purchasesList"><i class="fas fa-list me-2"></i>Purchase List</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#returns"><i class="fas fa-undo-alt me-2"></i>Purchase Returns</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#suppliersList"><i class="fas fa-parachute-box me-2"></i>Suppliers</a></li>
     </ul>
     
-    <!-- Tab Content -->
     <div class="tab-content">
         <!-- Purchases List Tab -->
         <div class="tab-pane fade show active" id="purchasesList">
-            <!-- Filters -->
             <div class="card border-0 shadow-sm mb-4 rounded-4">
                 <div class="card-body">
                     <div class="row g-3">
-                        <div class="col-md-3">
-                            <input type="text" class="form-control rounded-3" id="searchPurchase" placeholder="Search by invoice...">
-                        </div>
-                        <div class="col-md-3">
-                            <select class="form-select rounded-3" id="supplierFilter">
-                                <option value="">All Suppliers</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <select class="form-select rounded-3" id="statusFilter">
-                                <option value="">All Status</option>
-                                <option value="paid">Paid</option>
-                                <option value="pending">Pending</option>
-                                <option value="partial">Partial</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <input type="date" class="form-control rounded-3" id="dateFilter">
-                        </div>
+                        <div class="col-md-3"><input type="text" class="form-control rounded-3" id="searchPurchase" placeholder="Search by invoice..."></div>
+                        <div class="col-md-3"><select class="form-select rounded-3" id="supplierFilter"><option value="">All Suppliers</option></select></div>
+                        <div class="col-md-3"><select class="form-select rounded-3" id="statusFilter"><option value="">All Status</option><option value="paid">Paid</option><option value="pending">Pending</option><option value="partial">Partial</option></select></div>
+                        <div class="col-md-3"><input type="date" class="form-control rounded-3" id="dateFilter"></div>
                     </div>
                 </div>
             </div>
             
-            <!-- Purchases Table -->
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Invoice No</th>
-                                    <th>Supplier</th>
-                                    <th>Date</th>
-                                    <th>Items</th>
-                                    <th>Total Amount</th>
-                                    <th>Paid</th>
-                                    <th>Due</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
+                            <thead class="table-light"><tr><th>Invoice No</th><th>Supplier</th><th>Date</th><th>Items</th><th>Total Amount</th><th>Paid</th><th>Due</th><th>Status</th><th>Actions</th></tr></thead>
                             <tbody id="purchasesTableBody"></tbody>
                         </table>
                     </div>
@@ -330,21 +255,10 @@
         <!-- Returns Tab -->
         <div class="tab-pane fade" id="returns">
             <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body">
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Return ID</th>
-                                    <th>Original Invoice</th>
-                                    <th>Supplier</th>
-                                    <th>Items Returned</th>
-                                    <th>Return Amount</th>
-                                    <th>Reason</th>
-                                    <th>Date</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light"><tr><th>Return ID</th><th>Original Invoice</th><th>Supplier</th><th>Return Amount</th><th>Reason</th><th>Date</th><th>Status</th></tr></thead>
                             <tbody id="returnsTableBody"></tbody>
                         </table>
                     </div>
@@ -368,103 +282,40 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <!-- Purchase Information -->
                 <div class="row mb-4">
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Invoice Number</label>
-                        <input type="text" class="form-control rounded-3" id="purchaseInvoiceNo" readonly>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Purchase Date</label>
-                        <input type="date" class="form-control rounded-3" id="purchaseDate">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Supplier *</label>
-                        <select class="form-select rounded-3" id="purchaseSupplier" required>
-                            <option value="">Select Supplier</option>
-                        </select>
-                    </div>
+                    <div class="col-md-4"><label class="form-label fw-semibold">Invoice Number</label><input type="text" class="form-control rounded-3" id="purchaseInvoiceNo" readonly></div>
+                    <div class="col-md-4"><label class="form-label fw-semibold">Purchase Date</label><input type="date" class="form-control rounded-3" id="purchaseDate"></div>
+                    <div class="col-md-4"><label class="form-label fw-semibold">Supplier *</label><select class="form-select rounded-3" id="purchaseSupplier" required><option value="">Select Supplier</option></select></div>
                 </div>
                 
-                <!-- Add Medicine Section -->
                 <div class="card mb-3 border-0 shadow-sm rounded-4">
-                    <div class="card-header bg-light rounded-top-4">
-                        <h6 class="mb-0"><i class="fas fa-capsules me-2"></i>Add Medicines</h6>
-                    </div>
+                    <div class="card-header bg-light rounded-top-4"><h6 class="mb-0"><i class="fas fa-capsules me-2"></i>Add Medicines</h6></div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-4">
-                                <select class="form-select rounded-3" id="selectMedicine">
-                                    <option value="">Search Medicine...</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <input type="number" class="form-control rounded-3" id="purchaseQty" placeholder="Quantity">
-                            </div>
-                            <div class="col-md-2">
-                                <input type="number" class="form-control rounded-3" id="purchasePrice" placeholder="Unit Price" step="0.01">
-                            </div>
-                            <div class="col-md-2">
-                                <input type="text" class="form-control rounded-3" id="purchaseBatch" placeholder="Batch No">
-                            </div>
-                            <div class="col-md-2">
-                                <input type="date" class="form-control rounded-3" id="purchaseExpiry">
-                            </div>
-                            <div class="col-12 mt-2">
-                                <button class="btn btn-primary rounded-3" onclick="addPurchaseItem()">
-                                    <i class="fas fa-plus me-2"></i>Add to List
-                                </button>
-                            </div>
+                            <div class="col-md-4"><select class="form-select rounded-3" id="selectMedicine"><option value="">Search Medicine...</option></select></div>
+                            <div class="col-md-2"><input type="number" class="form-control rounded-3" id="purchaseQty" placeholder="Quantity"></div>
+                            <div class="col-md-2"><input type="number" class="form-control rounded-3" id="purchasePrice" placeholder="Unit Price" step="0.01"></div>
+                            <div class="col-md-2"><input type="text" class="form-control rounded-3" id="purchaseBatch" placeholder="Batch No"></div>
+                            <div class="col-md-2"><input type="date" class="form-control rounded-3" id="purchaseExpiry"></div>
+                            <div class="col-12 mt-2"><button class="btn btn-primary rounded-3" onclick="addPurchaseItem()"><i class="fas fa-plus me-2"></i>Add to List</button></div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Purchase Items Table -->
                 <div class="table-responsive mb-3">
                     <table class="table table-bordered">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Medicine</th>
-                                <th>Batch No</th>
-                                <th>Expiry Date</th>
-                                <th>Quantity</th>
-                                <th>Unit Price</th>
-                                <th>Total</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
+                        <thead class="table-light"><tr><th>Medicine</th><th>Batch No</th><th>Expiry Date</th><th>Quantity</th><th>Unit Price</th><th>Total</th><th>Action</th></tr></thead>
                         <tbody id="purchaseItemsBody"></tbody>
-                        <tfoot>
-                            <tr class="table-active">
-                                <td colspan="5" class="text-end fw-bold">Total Amount:</td>
-                                <td class="fw-bold" id="purchaseTotalAmount">$0.00</td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
+                        <tfoot><tr class="table-active"><td colspan="5" class="text-end fw-bold">Total Amount:</td><td class="fw-bold" id="purchaseTotalAmount">$0.00</td><td></td></tr></tfoot>
                     </table>
                 </div>
                 
-                <!-- Payment Information -->
                 <div class="row">
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Payment Method</label>
-                        <select class="form-select rounded-3" id="paymentMethod">
-                            <option value="cash">💵 Cash</option>
-                            <option value="bank">🏦 Bank Transfer</option>
-                            <option value="cheque">📝 Cheque</option>
-                            <option value="due">⏰ Due</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Paid Amount</label>
-                        <input type="number" class="form-control rounded-3" id="paidAmount" value="0" step="0.01">
-                    </div>
+                    <div class="col-md-6"><label class="form-label fw-semibold">Payment Method</label><select class="form-select rounded-3" id="paymentMethod"><option value="cash">💵 Cash</option><option value="bank">🏦 Bank Transfer</option><option value="cheque">📝 Cheque</option><option value="due">⏰ Due</option></select></div>
+                    <div class="col-md-6"><label class="form-label fw-semibold">Paid Amount</label><input type="number" class="form-control rounded-3" id="paidAmount" value="0" step="0.01"></div>
                 </div>
             </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-gradient rounded-3" onclick="savePurchase()">Save Purchase</button>
-            </div>
+            <div class="modal-footer border-0"><button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-gradient rounded-3" onclick="savePurchase()">Save Purchase</button></div>
         </div>
     </div>
 </div>
@@ -473,20 +324,9 @@
 <div class="modal fade" id="purchaseDetailsModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content rounded-4">
-            <div class="modal-header bg-gradient text-white border-0 rounded-top-4">
-                <h5 class="modal-title"><i class="fas fa-info-circle me-2"></i>Purchase Details</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
+            <div class="modal-header bg-gradient text-white border-0 rounded-top-4"><h5 class="modal-title"><i class="fas fa-info-circle me-2"></i>Purchase Details</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
             <div class="modal-body" id="purchaseDetailsContent"></div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary rounded-3" onclick="printPurchaseInvoice()">
-                    <i class="fas fa-print me-2"></i>Print Invoice
-                </button>
-                <button type="button" class="btn btn-success rounded-3" onclick="makeSupplierPayment()">
-                    <i class="fas fa-dollar-sign me-2"></i>Make Payment
-                </button>
-            </div>
+            <div class="modal-footer border-0"><button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Close</button><button type="button" class="btn btn-primary rounded-3" onclick="printPurchaseInvoice()"><i class="fas fa-print me-2"></i>Print Invoice</button><button type="button" class="btn btn-success rounded-3" onclick="makeSupplierPayment()"><i class="fas fa-dollar-sign me-2"></i>Make Payment</button></div>
         </div>
     </div>
 </div>
@@ -507,8 +347,11 @@
     // ============================================
     function loadSuppliersFromStorage() {
         const stored = localStorage.getItem(SUPPLIER_STORAGE_KEY);
-        if (stored) {
-            return JSON.parse(stored);
+        if (stored && stored !== 'undefined' && stored !== 'null') {
+            try {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            } catch(e) {}
         }
         return [
             { id: 1, name: "MediSource Pharma", contact: "Ahmed Khan", phone: "+1234567890", email: "ahmed@medisource.com", address: "123 Pharma Street", due: 5000 },
@@ -519,21 +362,27 @@
     
     function loadMedicinesFromStorage() {
         const stored = localStorage.getItem(MEDICINE_STORAGE_KEY);
-        if (stored) {
-            return JSON.parse(stored);
+        if (stored && stored !== 'undefined' && stored !== 'null') {
+            try {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            } catch(e) {}
         }
         return [
-            { id: 1, name: "Paracetamol 500mg", generic: "Acetaminophen", purchasePrice: 2.50, sellingPrice: 5.00, stock: 150 },
-            { id: 2, name: "Amoxicillin 250mg", generic: "Amoxicillin", purchasePrice: 5.00, sellingPrice: 10.00, stock: 8 },
-            { id: 3, name: "Vitamin C 1000mg", generic: "Ascorbic Acid", purchasePrice: 8.00, sellingPrice: 15.00, stock: 45 },
-            { id: 4, name: "Aspirin 100mg", generic: "Acetylsalicylic", purchasePrice: 3.00, sellingPrice: 8.00, stock: 120 }
+            { id: 1, name: "Paracetamol 500mg", purchasePrice: 2.50, stock: 150 },
+            { id: 2, name: "Amoxicillin 250mg", purchasePrice: 5.00, stock: 8 },
+            { id: 3, name: "Vitamin C 1000mg", purchasePrice: 8.00, stock: 45 },
+            { id: 4, name: "Aspirin 100mg", purchasePrice: 3.00, stock: 120 }
         ];
     }
     
     function loadPurchasesFromStorage() {
         const stored = localStorage.getItem(PURCHASE_STORAGE_KEY);
-        if (stored) {
-            return JSON.parse(stored);
+        if (stored && stored !== 'undefined' && stored !== 'null') {
+            try {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            } catch(e) {}
         }
         return [
             {
@@ -574,12 +423,13 @@
     
     function loadReturnsFromStorage() {
         const stored = localStorage.getItem(RETURN_STORAGE_KEY);
-        if (stored) {
-            return JSON.parse(stored);
+        if (stored && stored !== 'undefined' && stored !== 'null') {
+            try {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            } catch(e) {}
         }
-        return [
-            { id: 1, purchaseId: 1, invoiceNo: "PO-2024-001", supplierName: "MediSource Pharma", items: "Paracetamol 500mg (10 pcs)", amount: 25, reason: "Expired", date: "2024-02-20", status: "approved" }
-        ];
+        return [];
     }
     
     let suppliers = loadSuppliersFromStorage();
@@ -588,37 +438,20 @@
     let returns = loadReturnsFromStorage();
     let purchaseItems = [];
     let currentPurchaseId = null;
-    let currentPage = 1;
-    const itemsPerPage = 10;
     
-    // ============================================
-    // SAVE TO STORAGE
-    // ============================================
-    function savePurchasesToStorage() {
-        localStorage.setItem(PURCHASE_STORAGE_KEY, JSON.stringify(purchases));
-    }
+    function savePurchasesToStorage() { localStorage.setItem(PURCHASE_STORAGE_KEY, JSON.stringify(purchases)); }
+    function saveReturnsToStorage() { localStorage.setItem(RETURN_STORAGE_KEY, JSON.stringify(returns)); }
     
-    function saveReturnsToStorage() {
-        localStorage.setItem(RETURN_STORAGE_KEY, JSON.stringify(returns));
-    }
-    
-    // ============================================
-    // AUTHENTICATION CHECK
-    // ============================================
     function checkAuth() {
         const user = localStorage.getItem('user') || sessionStorage.getItem('user');
-        if (!user) {
-            window.location.href = 'login.html';
-            return;
+        if (!user) window.location.href = 'login.html';
+        else {
+            const userData = JSON.parse(user);
+            document.getElementById('userName').textContent = userData.name;
+            document.getElementById('userRole').textContent = userData.role.toUpperCase();
         }
-        const userData = JSON.parse(user);
-        document.getElementById('userName').textContent = userData.name;
-        document.getElementById('userRole').textContent = userData.role.toUpperCase();
     }
     
-    // ============================================
-    // INITIALIZE
-    // ============================================
     function init() {
         generateInvoiceNo();
         document.getElementById('purchaseDate').value = new Date().toISOString().split('T')[0];
@@ -644,46 +477,41 @@
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const count = purchases.length + 1;
-        const invoiceNo = `PO-${year}${month}-${String(count).padStart(3, '0')}`;
-        document.getElementById('purchaseInvoiceNo').value = invoiceNo;
+        document.getElementById('purchaseInvoiceNo').value = `PO-${year}${month}-${String(count).padStart(3, '0')}`;
     }
     
     function loadSuppliers() {
         const supplierSelect = document.getElementById('purchaseSupplier');
         const filterSelect = document.getElementById('supplierFilter');
-        
         supplierSelect.innerHTML = '<option value="">Select Supplier</option>';
         filterSelect.innerHTML = '<option value="">All Suppliers</option>';
-        
         suppliers.forEach(supplier => {
-            const option = `<option value="${supplier.id}">${supplier.name} (${supplier.contact})</option>`;
-            supplierSelect.innerHTML += option;
-            filterSelect.innerHTML += option;
+            if (supplier && supplier.id && supplier.name) {
+                supplierSelect.innerHTML += `<option value="${supplier.id}">${supplier.name} (${supplier.contact || ''})</option>`;
+                filterSelect.innerHTML += `<option value="${supplier.id}">${supplier.name}</option>`;
+            }
         });
     }
     
     function loadMedicines() {
         const medicineSelect = document.getElementById('selectMedicine');
         medicineSelect.innerHTML = '<option value="">Search Medicine...</option>';
-        
         medicines.forEach(medicine => {
-            const option = `<option value="${medicine.id}" data-price="${medicine.purchasePrice}">${medicine.name} ($${medicine.purchasePrice})</option>`;
-            medicineSelect.innerHTML += option;
+            if (medicine && medicine.id && medicine.name) {
+                medicineSelect.innerHTML += `<option value="${medicine.id}" data-price="${medicine.purchasePrice || 0}">${medicine.name} ($${medicine.purchasePrice || 0})</option>`;
+            }
         });
-        
-        // Auto-fill price when medicine selected
         medicineSelect.onchange = function() {
             const selected = medicineSelect.options[medicineSelect.selectedIndex];
             const price = selected.getAttribute('data-price');
-            if (price) {
-                document.getElementById('purchasePrice').value = price;
-            }
+            if (price) document.getElementById('purchasePrice').value = price;
         };
     }
     
     function addPurchaseItem() {
-        const medicineId = document.getElementById('selectMedicine').value;
-        const medicineName = document.getElementById('selectMedicine').options[document.getElementById('selectMedicine').selectedIndex]?.text.split(' (')[0];
+        const selectElem = document.getElementById('selectMedicine');
+        const medicineId = selectElem.value;
+        const medicineName = selectElem.options[selectElem.selectedIndex]?.text.split(' (')[0];
         const qty = parseInt(document.getElementById('purchaseQty').value);
         const unitPrice = parseFloat(document.getElementById('purchasePrice').value);
         const batchNo = document.getElementById('purchaseBatch').value;
@@ -694,8 +522,6 @@
             return;
         }
         
-        const total = qty * unitPrice;
-        
         purchaseItems.push({
             medicineId: parseInt(medicineId),
             medicineName: medicineName,
@@ -703,9 +529,8 @@
             expiryDate: expiryDate,
             qty: qty,
             unitPrice: unitPrice,
-            total: total
+            total: qty * unitPrice
         });
-        
         updatePurchaseItemsTable();
         
         document.getElementById('selectMedicine').value = '';
@@ -718,54 +543,49 @@
     function updatePurchaseItemsTable() {
         const tbody = document.getElementById('purchaseItemsBody');
         let total = 0;
-        
         if(purchaseItems.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No items added</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No items added</td></tr>';
         } else {
             tbody.innerHTML = purchaseItems.map((item, index) => {
                 total += item.total;
-                return `
-                    <tr>
-                        <td>${item.medicineName}</td>
-                        <td>${item.batchNo || '-'}</td>
-                        <td>${item.expiryDate || '-'}</td>
-                        <td>${item.qty}</td>
-                        <td>$${item.unitPrice.toFixed(2)}</td>
-                        <td>$${item.total.toFixed(2)}</td>
-                        <td><button class="btn btn-sm btn-danger rounded-3" onclick="removePurchaseItem(${index})"><i class="fas fa-trash"></i></button></td>
-                    </tr>
-                `;
+                return `<tr>
+                    <td>${item.medicineName}</td>
+                    <td>${item.batchNo || '-'}</td>
+                    <td>${item.expiryDate || '-'}</td>
+                    <td>${item.qty}</td>
+                    <td>$${item.unitPrice.toFixed(2)}</td>
+                    <td>$${item.total.toFixed(2)}</td>
+                    <td><button class="btn btn-sm btn-danger rounded-3" onclick="removePurchaseItem(${index})"><i class="fas fa-trash"></i></button></td>
+                </tr>`;
             }).join('');
         }
-        
         document.getElementById('purchaseTotalAmount').textContent = `$${total.toFixed(2)}`;
     }
     
-    function removePurchaseItem(index) {
-        purchaseItems.splice(index, 1);
-        updatePurchaseItemsTable();
-    }
+    function removePurchaseItem(index) { purchaseItems.splice(index, 1); updatePurchaseItemsTable(); }
     
     function savePurchase() {
         const supplierId = document.getElementById('purchaseSupplier').value;
-        const invoiceNo = document.getElementById('purchaseInvoiceNo').value;
         const date = document.getElementById('purchaseDate').value;
         const paymentMethod = document.getElementById('paymentMethod').value;
-        let paidAmount = parseFloat(document.getElementById('paidAmount').value);
+        let paidAmount = parseFloat(document.getElementById('paidAmount').value) || 0;
         const totalAmount = parseFloat(document.getElementById('purchaseTotalAmount').textContent.replace('$', ''));
         
         if(!supplierId || purchaseItems.length === 0) {
             showToast('Please select supplier and add items', 'warning');
             return;
         }
-        
-        if(isNaN(paidAmount)) paidAmount = 0;
         if(paidAmount > totalAmount) {
             showToast('Paid amount cannot exceed total amount', 'danger');
             return;
         }
         
         const supplier = suppliers.find(s => s.id == supplierId);
+        if (!supplier) {
+            showToast('Supplier not found', 'danger');
+            return;
+        }
+        
         const due = totalAmount - paidAmount;
         let status = 'paid';
         if(paidAmount === 0) status = 'pending';
@@ -773,7 +593,7 @@
         
         const newPurchase = {
             id: Date.now(),
-            invoiceNo: invoiceNo,
+            invoiceNo: document.getElementById('purchaseInvoiceNo').value,
             supplierId: parseInt(supplierId),
             supplierName: supplier.name,
             date: date,
@@ -791,7 +611,7 @@
         
         // Update supplier due
         const supplierIndex = suppliers.findIndex(s => s.id == supplierId);
-        if(supplierIndex !== -1) {
+        if(supplierIndex !== -1 && suppliers[supplierIndex]) {
             suppliers[supplierIndex].due = (suppliers[supplierIndex].due || 0) + due;
             localStorage.setItem(SUPPLIER_STORAGE_KEY, JSON.stringify(suppliers));
         }
@@ -799,7 +619,7 @@
         // Update medicine stock
         purchaseItems.forEach(item => {
             const medicineIndex = medicines.findIndex(m => m.id === item.medicineId);
-            if(medicineIndex !== -1) {
+            if(medicineIndex !== -1 && medicines[medicineIndex]) {
                 medicines[medicineIndex].stock = (medicines[medicineIndex].stock || 0) + item.qty;
             }
         });
@@ -809,7 +629,6 @@
         updatePurchaseItemsTable();
         generateInvoiceNo();
         document.getElementById('paidAmount').value = '0';
-        document.getElementById('paymentMethod').value = 'cash';
         document.getElementById('purchaseSupplier').value = '';
         
         loadPurchases();
@@ -827,6 +646,7 @@
         const dateFilter = document.getElementById('dateFilter')?.value || '';
         
         let filtered = purchases.filter(p => {
+            if (!p || !p.invoiceNo) return false;
             const matchesSearch = p.invoiceNo.toLowerCase().includes(searchTerm);
             const matchesSupplier = !supplierFilter || p.supplierId == supplierFilter;
             const matchesStatus = !statusFilter || p.status === statusFilter;
@@ -836,33 +656,24 @@
         
         const tbody = document.getElementById('purchasesTableBody');
         if(filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No purchases found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4">No purchases found</td></tr>';
         } else {
             tbody.innerHTML = filtered.map(p => {
-                let statusClass = 'status-paid';
-                if(p.status === 'pending') statusClass = 'status-pending';
-                else if(p.status === 'partial') statusClass = 'status-partial';
-                
-                return `
-                    <tr>
-                        <td><strong>${p.invoiceNo}</strong></td>
-                        <td>${p.supplierName}</td>
-                        <td>${p.date}</td>
-                        <td>${p.items.length} items</td>
-                        <td>$${p.totalAmount.toFixed(2)}</td>
-                        <td>$${p.paid.toFixed(2)}</td>
-                        <td class="${p.due > 0 ? 'text-danger fw-bold' : 'text-success'}">$${p.due.toFixed(2)}</td>
-                        <td><span class="status-badge ${statusClass}">${p.status.toUpperCase()}</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-info rounded-3 me-1" onclick="viewPurchase(${p.id})" title="View">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger rounded-3" onclick="returnPurchase(${p.id})" title="Return">
-                                <i class="fas fa-undo-alt"></i>
-                            </button>
-                         </td>
-                     </tr>
-                `;
+                let statusClass = p.status === 'paid' ? 'status-paid' : (p.status === 'pending' ? 'status-pending' : 'status-partial');
+                return `<tr>
+                    <td><strong>${p.invoiceNo || 'N/A'}</strong></td>
+                    <td>${p.supplierName || 'N/A'}</td>
+                    <td>${p.date || 'N/A'}</td>
+                    <td>${p.items ? p.items.length : 0} items</td>
+                    <td>$${(p.totalAmount || 0).toFixed(2)}</td>
+                    <td>$${(p.paid || 0).toFixed(2)}</td>
+                    <td class="${p.due > 0 ? 'text-danger fw-bold' : 'text-success'}">$${(p.due || 0).toFixed(2)}</td>
+                    <td><span class="status-badge ${statusClass}">${(p.status || 'pending').toUpperCase()}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-info rounded-3 me-1" onclick="viewPurchase(${p.id})" title="View"><i class="fas fa-eye"></i></button>
+                        <button class="btn btn-sm btn-danger rounded-3" onclick="returnPurchase(${p.id})" title="Return"><i class="fas fa-undo-alt"></i></button>
+                    </td>
+                </tr>`;
             }).join('');
         }
     }
@@ -871,56 +682,27 @@
         const purchase = purchases.find(p => p.id === id);
         if(!purchase) return;
         
-        const itemsHtml = purchase.items.map(item => `
-            <tr>
-                <td>${item.medicineName}</td>
-                <td>${item.batchNo || '-'}</td>
-                <td>${item.expiryDate || '-'}</td>
-                <td>${item.qty}</td>
-                <td>$${item.unitPrice.toFixed(2)}</td>
-                <td>$${item.total.toFixed(2)}</td>
-            </tr>
-        `).join('');
+        const itemsHtml = (purchase.items || []).map(item => `<tr><td>${item.medicineName || 'N/A'}</td><td>${item.batchNo || '-'}</td><td>${item.expiryDate || '-'}</td><td>${item.qty || 0}</td><td>$${(item.unitPrice || 0).toFixed(2)}</td><td>$${(item.total || 0).toFixed(2)}</td></tr>`).join('');
         
-        const detailsHtml = `
+        document.getElementById('purchaseDetailsContent').innerHTML = `
             <div class="container">
                 <div class="row mb-4">
-                    <div class="col-6">
-                        <div class="bg-light rounded-3 p-3">
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded-3">
                             <h6 class="fw-bold text-primary mb-2"><i class="fas fa-info-circle me-2"></i>Purchase Information</h6>
-                            <p class="mb-1"><strong>Invoice No:</strong> ${purchase.invoiceNo}<br>
-                            <strong>Date:</strong> ${purchase.date}<br>
-                            <strong>Supplier:</strong> ${purchase.supplierName}<br>
-                            <strong>Status:</strong> <span class="status-badge status-${purchase.status}">${purchase.status.toUpperCase()}</span></p>
+                            <p><strong>Invoice:</strong> ${purchase.invoiceNo || 'N/A'}<br><strong>Date:</strong> ${purchase.date || 'N/A'}<br><strong>Supplier:</strong> ${purchase.supplierName || 'N/A'}<br><strong>Status:</strong> <span class="status-badge status-${purchase.status || 'pending'}">${(purchase.status || 'pending').toUpperCase()}</span></p>
                         </div>
                     </div>
-                    <div class="col-6">
-                        <div class="bg-light rounded-3 p-3">
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded-3">
                             <h6 class="fw-bold text-primary mb-2"><i class="fas fa-dollar-sign me-2"></i>Payment Information</h6>
-                            <p class="mb-1"><strong>Total Amount:</strong> $${purchase.totalAmount.toFixed(2)}<br>
-                            <strong>Paid:</strong> $${purchase.paid.toFixed(2)}<br>
-                            <strong>Due:</strong> $${purchase.due.toFixed(2)}<br>
-                            <strong>Payment Method:</strong> ${purchase.paymentMethod.toUpperCase()}</p>
+                            <p><strong>Total:</strong> $${(purchase.totalAmount || 0).toFixed(2)}<br><strong>Paid:</strong> $${(purchase.paid || 0).toFixed(2)}<br><strong>Due:</strong> $${(purchase.due || 0).toFixed(2)}<br><strong>Method:</strong> ${(purchase.paymentMethod || 'N/A').toUpperCase()}</p>
                         </div>
                     </div>
                 </div>
-                
                 <h6 class="fw-bold mb-3"><i class="fas fa-capsules me-2"></i>Items Purchased</h6>
-                <div class="table-responsive">
-                    <table class="table table-bordered">
-                        <thead class="table-light">
-                            <tr><th>Medicine</th><th>Batch No</th><th>Expiry Date</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr>
-                        </thead>
-                        <tbody>${itemsHtml}</tbody>
-                        <tfoot>
-                            <tr class="table-active"><td colspan="5" class="text-end fw-bold">Grand Total:</td><td class="fw-bold">$${purchase.totalAmount.toFixed(2)}</td></tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-        `;
-        
-        document.getElementById('purchaseDetailsContent').innerHTML = detailsHtml;
+                <div class="table-responsive"><table class="table table-bordered"><thead class="table-light"><tr><th>Medicine</th><th>Batch</th><th>Expiry</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead><tbody>${itemsHtml}</tbody><tfoot><tr class="table-active"><td colspan="5" class="text-end fw-bold">Grand Total:</td><td class="fw-bold">$${(purchase.totalAmount || 0).toFixed(2)}</td></tr></tfoot></table></div>
+            </div>`;
         currentPurchaseId = id;
         new bootstrap.Modal(document.getElementById('purchaseDetailsModal')).show();
     }
@@ -928,35 +710,24 @@
     function returnPurchase(id) {
         const purchase = purchases.find(p => p.id === id);
         if(!purchase) return;
-        
         const returnAmount = prompt('Enter return amount:', '0');
         if(returnAmount && parseFloat(returnAmount) > 0) {
             const amount = parseFloat(returnAmount);
-            
-            const returnRecord = {
-                id: Date.now(),
-                purchaseId: id,
-                invoiceNo: purchase.invoiceNo,
-                supplierId: purchase.supplierId,
-                supplierName: purchase.supplierName,
-                amount: amount,
-                reason: 'Return',
-                date: new Date().toISOString().split('T')[0],
-                status: 'approved'
-            };
-            
-            returns.unshift(returnRecord);
+            returns.unshift({ 
+                id: Date.now(), 
+                purchaseId: id, 
+                invoiceNo: purchase.invoiceNo, 
+                supplierName: purchase.supplierName, 
+                amount: amount, 
+                reason: 'Return', 
+                date: new Date().toISOString().split('T')[0], 
+                status: 'approved' 
+            });
             saveReturnsToStorage();
-            
             purchase.totalAmount -= amount;
             purchase.due -= amount;
-            
-            if(purchase.due < 0) {
-                purchase.paid += Math.abs(purchase.due);
-                purchase.due = 0;
-            }
+            if(purchase.due < 0) { purchase.paid += Math.abs(purchase.due); purchase.due = 0; }
             if(purchase.due === 0) purchase.status = 'paid';
-            
             savePurchasesToStorage();
             showToast(`Return of $${amount} processed`, 'success');
             loadPurchases();
@@ -967,48 +738,50 @@
     
     function loadReturns() {
         const tbody = document.getElementById('returnsTableBody');
-        tbody.innerHTML = returns.map(r => `
-            <tr>
+        if(returns.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No returns found</td></tr>';
+        } else {
+            tbody.innerHTML = returns.map(r => `<tr>
                 <td>${r.id}</td>
-                <td>${r.invoiceNo}</td>
-                <td>${r.supplierName}</td>
-                <td>${r.items || '-'}</td>
-                <td>$${r.amount}</td>
-                <td>${r.reason}</td>
-                <td>${r.date}</td>
-                <td><span class="badge bg-success">${r.status}</span></td>
-            </tr>
-        `).join('');
+                <td>${r.invoiceNo || 'N/A'}</td>
+                <td>${r.supplierName || 'N/A'}</td>
+                <td>$${(r.amount || 0).toFixed(2)}</td>
+                <td>${r.reason || '-'}</td>
+                <td>${r.date || 'N/A'}</td>
+                <td><span class="badge bg-success">${r.status || 'approved'}</span></td>
+            </tr>`).join('');
+        }
     }
     
     function loadSuppliersGrid() {
         const grid = document.getElementById('suppliersGrid');
-        grid.innerHTML = suppliers.map(s => `
-            <div class="col-md-6 col-lg-4">
-                <div class="card purchase-card h-100">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div>
-                                <h6 class="fw-bold mb-1">${s.name}</h6>
-                                <p class="text-muted small mb-0">${s.contact}</p>
+        if(!suppliers.length) {
+            grid.innerHTML = '<div class="col-12 text-center py-5"><i class="fas fa-truck fa-4x text-muted mb-3"></i><h5 class="text-muted">No suppliers found</h5></div>';
+        } else {
+            grid.innerHTML = suppliers.map(s => `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card supplier-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="fw-bold mb-1">${s.name || 'N/A'}</h6>
+                                    <p class="text-muted small mb-0">${s.contact || 'N/A'}</p>
+                                </div>
+                                <div class="bg-primary bg-opacity-10 p-2 rounded-3">
+                                    <i class="fas fa-truck fa-2x text-primary"></i>
+                                </div>
                             </div>
-                            <div class="bg-primary bg-opacity-10 p-2 rounded-3">
-                                <i class="fas fa-truck fa-2x text-primary"></i>
+                            <p class="small mb-1"><i class="fas fa-phone me-2 text-primary"></i> ${s.phone || 'N/A'}</p>
+                            <p class="small mb-1"><i class="fas fa-envelope me-2 text-primary"></i> ${s.email || 'N/A'}</p>
+                            <p class="small mb-3"><i class="fas fa-map-marker-alt me-2 text-primary"></i> ${s.address ? s.address.substring(0, 40) + (s.address.length > 40 ? '...' : '') : 'N/A'}</p>
+                            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                <span class="fw-bold">Due: <span class="${s.due > 0 ? 'text-danger' : 'text-success'}">$${(s.due || 0).toFixed(2)}</span></span>
+                                <button class="btn btn-sm btn-outline-primary rounded-3" onclick="viewSupplierPurchases(${s.id})">View Purchases</button>
                             </div>
-                        </div>
-                        <p class="small mb-1"><i class="fas fa-phone me-2 text-primary"></i>${s.phone}</p>
-                        <p class="small mb-1"><i class="fas fa-envelope me-2 text-primary"></i>${s.email}</p>
-                        <p class="small mb-3"><i class="fas fa-map-marker-alt me-2 text-primary"></i>${s.address}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-bold">Due: <span class="${s.due > 0 ? 'text-danger' : 'text-success'}">$${s.due}</span></span>
-                            <button class="btn btn-sm btn-outline-primary rounded-3" onclick="viewSupplierPurchases(${s.id})">
-                                View Purchases
-                            </button>
                         </div>
                     </div>
-                </div>
-            </div>
-        `).join('');
+                </div>`).join('');
+        }
     }
     
     function viewSupplierPurchases(supplierId) {
@@ -1023,14 +796,13 @@
             const purchase = purchases.find(p => p.id === currentPurchaseId);
             if(purchase) {
                 const paymentAmount = parseFloat(amount);
+                if(paymentAmount > purchase.due) {
+                    showToast(`Amount exceeds due amount of $${purchase.due}`, 'warning');
+                    return;
+                }
                 purchase.paid += paymentAmount;
                 purchase.due -= paymentAmount;
-                
-                if(purchase.due <= 0) {
-                    purchase.due = 0;
-                    purchase.status = 'paid';
-                }
-                
+                if(purchase.due <= 0) { purchase.due = 0; purchase.status = 'paid'; }
                 savePurchasesToStorage();
                 showToast(`Payment of $${paymentAmount} recorded`, 'success');
                 loadPurchases();
@@ -1043,38 +815,29 @@
     function printPurchaseInvoice() {
         const content = document.getElementById('purchaseDetailsContent').innerHTML;
         const printWindow = window.open('', '_blank');
-        printWindow.document.write(`
-            <html>
-                <head><title>Purchase Invoice</title>
-                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-                <style>body{padding:20px}</style></head>
-                <body><div class="container">${content}</div>
-                <script>window.onload=function(){window.print();setTimeout(()=>window.close(),500)}<\/script>
-                </body>
-            </html>
-        `);
+        printWindow.document.write(`<html><head><title>Purchase Invoice</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"><style>body{padding:20px}</style></head><body><div class="container">${content}</div><script>window.onload=function(){window.print();setTimeout(()=>window.close(),500)}<\/script></body></html>`);
         printWindow.document.close();
     }
     
     function updateStats() {
-        const total = purchases.reduce((sum, p) => sum + p.totalAmount, 0);
-        const totalDue = purchases.reduce((sum, p) => sum + p.due, 0);
+        const total = purchases.reduce((sum, p) => sum + (p.totalAmount || 0), 0);
+        const totalDue = purchases.reduce((sum, p) => sum + (p.due || 0), 0);
         const currentMonth = new Date().getMonth() + 1;
-        const monthlyTotal = purchases
-            .filter(p => new Date(p.date).getMonth() + 1 === currentMonth)
-            .reduce((sum, p) => sum + p.totalAmount, 0);
-        
+        const monthlyTotal = purchases.filter(p => p && p.date && new Date(p.date).getMonth() + 1 === currentMonth).reduce((sum, p) => sum + (p.totalAmount || 0), 0);
         document.getElementById('totalPurchases').textContent = `$${total.toFixed(2)}`;
         document.getElementById('totalDue').textContent = `$${totalDue.toFixed(2)}`;
         document.getElementById('monthlyPurchases').textContent = `$${monthlyTotal.toFixed(2)}`;
         document.getElementById('totalSuppliers').textContent = suppliers.length;
     }
     
-    // ============================================
-    // TOAST MESSAGE
-    // ============================================
     function showToast(message, type) {
-        const container = document.getElementById('toast-container') || createToastContainer();
+        const container = document.getElementById('toast-container') || (() => { 
+            const c = document.createElement('div'); 
+            c.id = 'toast-container'; 
+            c.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;min-width:320px'; 
+            document.body.appendChild(c); 
+            return c; 
+        })();
         const toast = document.createElement('div');
         toast.className = `alert alert-${type} alert-dismissible fade show toast-custom`;
         toast.style.cssText = 'margin-bottom:10px;box-shadow:0 5px 20px rgba(0,0,0,0.15);border-radius:12px';
@@ -1083,35 +846,14 @@
         setTimeout(() => toast.remove(), 3000);
     }
     
-    function createToastContainer() {
-        const container = document.createElement('div');
-        container.id = 'toast-container';
-        container.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;min-width:320px';
-        document.body.appendChild(container);
-        return container;
-    }
+    function logout() { localStorage.clear(); sessionStorage.clear(); window.location.href = 'login.html'; }
+    document.getElementById('logoutBtn')?.addEventListener('click', (e) => { e.preventDefault(); logout(); });
     
-    // ============================================
-    // LOGOUT
-    // ============================================
-    function logout() {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = 'login.html';
-    }
-    
-    document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        logout();
-    });
-    
-    // ============================================
-    // AUTO REFRESH (30 seconds)
-    // ============================================
+    // Auto refresh interval
     let refreshInterval = setInterval(() => {
-        purchases = loadPurchasesFromStorage();
         suppliers = loadSuppliersFromStorage();
         medicines = loadMedicinesFromStorage();
+        purchases = loadPurchasesFromStorage();
         returns = loadReturnsFromStorage();
         loadPurchases();
         updateStats();
@@ -1119,32 +861,18 @@
         loadReturns();
     }, 30000);
     
-    // ============================================
-    // EVENT LISTENERS
-    // ============================================
+    // Event Listeners
     document.getElementById('searchPurchase')?.addEventListener('input', () => loadPurchases());
     document.getElementById('supplierFilter')?.addEventListener('change', () => loadPurchases());
     document.getElementById('statusFilter')?.addEventListener('change', () => loadPurchases());
     document.getElementById('dateFilter')?.addEventListener('change', () => loadPurchases());
     
-    // ============================================
-    // INITIALIZE
-    // ============================================
+    // Initialize
     checkAuth();
     init();
     
-    window.addEventListener('beforeunload', () => {
-        if(refreshInterval) clearInterval(refreshInterval);
-    });
-    
-    // GSAP Animation
-    gsap.from(".card", {
-        duration: 0.6,
-        y: 30,
-        opacity: 0,
-        stagger: 0.1,
-        ease: "back.out(1.2)"
-    });
+    window.addEventListener('beforeunload', () => { if(refreshInterval) clearInterval(refreshInterval); });
+    gsap.from(".card", { duration: 0.6, y: 30, opacity: 0, stagger: 0.1, ease: "back.out(1.2)" });
 </script>
 </body>
 </html>
