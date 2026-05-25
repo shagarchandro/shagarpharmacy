@@ -25,16 +25,23 @@
             width: 280px;
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             z-index: 1000;
+            transition: all 0.3s ease;
         }
         
         .main-content {
             margin-left: 280px;
             padding: 20px;
+            transition: all 0.3s ease;
         }
         
         .btn-gradient {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
         
         .card-hover {
@@ -105,21 +112,60 @@
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
+            z-index: 1;
         }
         
         .stock-low { background: #ff9800; color: white; }
         .stock-out { background: #f44336; color: white; }
         .stock-good { background: #4caf50; color: white; }
+        
+        .medicine-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        
+        /* Image preview */
+        .image-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-top: 10px;
+            border: 2px solid #667eea;
+        }
+        
+        /* Toast animation */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .toast-custom {
+            animation: slideIn 0.3s ease;
+        }
     </style>
 </head>
 <body>
 
-<!-- Sidebar (Same as dashboard) -->
-<div class="sidebar">
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
     <div class="p-4">
         <div class="d-flex align-items-center gap-2 mb-4">
             <i class="fas fa-hospital-user text-white fs-3"></i>
             <span class="text-white fw-bold fs-5">MediCare</span>
+        </div>
+        
+        <div class="user-info text-center mb-4">
+            <img src="https://ui-avatars.com/api/?name=User&background=667eea&color=fff" class="rounded-circle mb-2" width="60" height="60">
+            <h6 class="text-white mb-1" id="userName">Admin User</h6>
+            <small class="text-white-50" id="userRole">Administrator</small>
         </div>
         
         <nav class="nav flex-column">
@@ -135,7 +181,14 @@
             <a href="sales.html" class="nav-link text-white-50 mb-2">
                 <i class="fas fa-shopping-cart me-2"></i> POS Sales
             </a>
-            <a href="#" class="nav-link text-white-50 mb-2">
+            <a href="purchases.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-truck me-2"></i> Purchases
+            </a>
+            <a href="suppliers.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-parachute-box me-2"></i> Suppliers
+            </a>
+            <hr class="bg-secondary my-3">
+            <a href="#" class="nav-link text-white-50" id="logoutBtn">
                 <i class="fas fa-sign-out-alt me-2"></i> Logout
             </a>
         </nav>
@@ -143,14 +196,14 @@
 </div>
 
 <!-- Main Content -->
-<div class="main-content">
+<div class="main-content" id="mainContent">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold gradient-text">Medicine Management</h2>
             <p class="text-muted">Manage your pharmacy inventory efficiently</p>
         </div>
-        <button class="btn btn-gradient rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
+        <button class="btn btn-gradient rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addMedicineModal" onclick="resetMedicineForm()">
             <i class="fas fa-plus me-2"></i>Add New Medicine
         </button>
     </div>
@@ -171,6 +224,7 @@
                     <option>Antibiotics</option>
                     <option>Vitamins</option>
                     <option>First Aid</option>
+                    <option>Chronic Care</option>
                 </select>
                 <select class="form-select" id="stockFilter">
                     <option value="">All Stock Status</option>
@@ -248,29 +302,30 @@
 </div>
 
 <!-- Add/Edit Medicine Modal -->
-<div class="modal fade" id="addMedicineModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+<div class="modal fade" id="addMedicineModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-gradient text-white">
-                <h5 class="modal-title">Add New Medicine</h5>
+                <h5 class="modal-title" id="modalTitle">Add New Medicine</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="medicineForm">
+                    <input type="hidden" id="editId" value="">
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label fw-semibold">Medicine Name *</label>
                             <input type="text" class="form-control" id="medName" required>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label fw-semibold">Generic Name</label>
                             <input type="text" class="form-control" id="genericName">
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label fw-semibold">Brand Name</label>
                             <input type="text" class="form-control" id="brandName">
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label fw-semibold">Category *</label>
                             <select class="form-select" id="category" required>
                                 <option>Pain Relief</option>
@@ -280,63 +335,67 @@
                                 <option>Chronic Care</option>
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label fw-semibold">Batch Number</label>
                             <input type="text" class="form-control" id="batchNo">
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label fw-semibold">Barcode</label>
                             <input type="text" class="form-control" id="barcode">
                             <button type="button" class="btn btn-sm btn-secondary mt-1" onclick="generateBarcode()">
-                                Generate Barcode
+                                <i class="fas fa-qrcode me-1"></i>Generate
                             </button>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label fw-semibold">Purchase Price</label>
-                            <input type="number" class="form-control" id="purchasePrice">
+                            <label class="form-label fw-semibold">Rack Number</label>
+                            <input type="text" class="form-control" id="rackNo" placeholder="A-12">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label fw-semibold">Selling Price *</label>
-                            <input type="number" class="form-control" id="sellingPrice" required>
+                            <label class="form-label fw-semibold">Purchase Price ($)</label>
+                            <input type="number" step="0.01" class="form-control" id="purchasePrice">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label fw-semibold">Wholesale Price</label>
-                            <input type="number" class="form-control" id="wholesalePrice">
+                            <label class="form-label fw-semibold">Selling Price ($) *</label>
+                            <input type="number" step="0.01" class="form-control" id="sellingPrice" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-semibold">Wholesale Price ($)</label>
+                            <input type="number" step="0.01" class="form-control" id="wholesalePrice">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label class="form-label fw-semibold">Stock Quantity *</label>
                             <input type="number" class="form-control" id="stock" required>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-semibold">Min Stock Alert</label>
+                            <input type="number" class="form-control" id="minStock" value="10">
+                        </div>
+                        <div class="col-md-3 mb-3">
                             <label class="form-label fw-semibold">Manufacturing Date</label>
                             <input type="date" class="form-control" id="mfgDate">
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label fw-semibold">Expiry Date *</label>
                             <input type="date" class="form-control" id="expiryDate" required>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">Minimum Stock Alert</label>
-                            <input type="number" class="form-control" id="minStock" value="10">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">Rack Number</label>
-                            <input type="text" class="form-control" id="rackNo">
-                        </div>
                         <div class="col-12 mb-3">
                             <label class="form-label fw-semibold">Description</label>
-                            <textarea class="form-control" id="description" rows="3"></textarea>
+                            <textarea class="form-control" id="description" rows="2" placeholder="Medicine description, usage, side effects..."></textarea>
                         </div>
                         <div class="col-12 mb-3">
                             <label class="form-label fw-semibold">Medicine Image</label>
-                            <input type="file" class="form-control" id="medicineImage" accept="image/*">
+                            <input type="file" class="form-control" id="medicineImage" accept="image/jpeg,image/png,image/jpg,image/gif" onchange="previewImage(this)">
+                            <div id="imagePreviewContainer" class="mt-2"></div>
+                            <small class="text-muted">Upload medicine image (Max 2MB). Supported: JPG, PNG, GIF</small>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-gradient" onclick="saveMedicine()">Save Medicine</button>
+                <button type="button" class="btn btn-gradient" onclick="saveMedicine()">
+                    <i class="fas fa-save me-2"></i>Save Medicine
+                </button>
             </div>
         </div>
     </div>
@@ -346,83 +405,148 @@
 <div class="modal fade" id="qrModal" tabindex="-1">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-gradient text-white">
                 <h5 class="modal-title">Medicine QR Code</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body text-center">
                 <div id="qrCode"></div>
-                <button class="btn btn-primary mt-3" onclick="printQR()">Print QR</button>
+                <button class="btn btn-primary mt-3 w-100" onclick="printQR()">
+                    <i class="fas fa-print me-2"></i>Print QR
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Sample Medicine Data
-    let medicines = [
-        {
-            id: 1,
-            name: "Paracetamol 500mg",
-            genericName: "Acetaminophen",
-            brand: "Tylenol",
-            category: "Pain Relief",
-            batchNo: "BATCH001",
-            barcode: "8901234567890",
-            purchasePrice: 2.50,
-            sellingPrice: 5.00,
-            wholesalePrice: 3.50,
-            stock: 150,
-            minStock: 50,
-            mfgDate: "2024-01-01",
-            expiryDate: "2025-12-31",
-            rackNo: "A-12",
-            description: "Used for pain relief and fever reduction"
-        },
-        {
-            id: 2,
-            name: "Amoxicillin 250mg",
-            genericName: "Amoxicillin",
-            brand: "Amoxil",
-            category: "Antibiotics",
-            batchNo: "BATCH002",
-            barcode: "8901234567891",
-            purchasePrice: 5.00,
-            sellingPrice: 10.00,
-            wholesalePrice: 7.00,
-            stock: 8,
-            minStock: 30,
-            mfgDate: "2024-02-01",
-            expiryDate: "2025-01-31",
-            rackNo: "B-05",
-            description: "Antibiotic for bacterial infections"
-        },
-        {
-            id: 3,
-            name: "Vitamin C 1000mg",
-            genericName: "Ascorbic Acid",
-            brand: "Nature's Way",
-            category: "Vitamins",
-            batchNo: "BATCH003",
-            barcode: "8901234567892",
-            purchasePrice: 8.00,
-            sellingPrice: 15.00,
-            wholesalePrice: 11.00,
-            stock: 45,
-            minStock: 20,
-            mfgDate: "2024-03-01",
-            expiryDate: "2025-02-28",
-            rackNo: "C-08",
-            description: "Immune system support"
-        }
-    ];
+    // ============================================
+    // STORAGE KEYS
+    // ============================================
+    const STORAGE_KEY = 'pharmacy_medicines';
     
+    // ============================================
+    // LOAD MEDICINES FROM LOCALSTORAGE
+    // ============================================
+    function loadMedicinesFromStorage() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            return JSON.parse(stored);
+        } else {
+            // Default sample data
+            const defaultMedicines = [
+                {
+                    id: 1,
+                    name: "Paracetamol 500mg",
+                    genericName: "Acetaminophen",
+                    brand: "Tylenol",
+                    category: "Pain Relief",
+                    batchNo: "BATCH001",
+                    barcode: "8901234567890",
+                    purchasePrice: 2.50,
+                    sellingPrice: 5.00,
+                    wholesalePrice: 3.50,
+                    stock: 150,
+                    minStock: 50,
+                    mfgDate: "2024-01-01",
+                    expiryDate: "2025-12-31",
+                    rackNo: "A-12",
+                    description: "Used for pain relief and fever reduction",
+                    image: "https://via.placeholder.com/300x200/667eea/ffffff?text=Paracetamol"
+                },
+                {
+                    id: 2,
+                    name: "Amoxicillin 250mg",
+                    genericName: "Amoxicillin",
+                    brand: "Amoxil",
+                    category: "Antibiotics",
+                    batchNo: "BATCH002",
+                    barcode: "8901234567891",
+                    purchasePrice: 5.00,
+                    sellingPrice: 10.00,
+                    wholesalePrice: 7.00,
+                    stock: 8,
+                    minStock: 30,
+                    mfgDate: "2024-02-01",
+                    expiryDate: "2025-06-30",
+                    rackNo: "B-05",
+                    description: "Antibiotic for bacterial infections",
+                    image: "https://via.placeholder.com/300x200/10b981/ffffff?text=Amoxicillin"
+                },
+                {
+                    id: 3,
+                    name: "Vitamin C 1000mg",
+                    genericName: "Ascorbic Acid",
+                    brand: "Nature's Way",
+                    category: "Vitamins",
+                    batchNo: "BATCH003",
+                    barcode: "8901234567892",
+                    purchasePrice: 8.00,
+                    sellingPrice: 15.00,
+                    wholesalePrice: 11.00,
+                    stock: 45,
+                    minStock: 20,
+                    mfgDate: "2024-03-01",
+                    expiryDate: "2025-08-31",
+                    rackNo: "C-08",
+                    description: "Immune system support",
+                    image: "https://via.placeholder.com/300x200/f59e0b/ffffff?text=Vitamin+C"
+                }
+            ];
+            saveMedicinesToStorage(defaultMedicines);
+            return defaultMedicines;
+        }
+    }
+    
+    // ============================================
+    // SAVE MEDICINES TO LOCALSTORAGE
+    // ============================================
+    function saveMedicinesToStorage(medicines) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(medicines));
+    }
+    
+    // ============================================
+    // GLOBAL MEDICINES ARRAY
+    // ============================================
+    let medicines = loadMedicinesFromStorage();
     let currentPage = 1;
     const itemsPerPage = 12;
+    let currentEditId = null;
+    let currentImageData = null;
     
-    // Display Medicines
+    // ============================================
+    // IMAGE PREVIEW FUNCTION
+    // ============================================
+    function previewImage(input) {
+        const container = document.getElementById('imagePreviewContainer');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentImageData = e.target.result;
+                container.innerHTML = `
+                    <div class="position-relative d-inline-block">
+                        <img src="${e.target.result}" class="image-preview" alt="Preview">
+                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 rounded-circle" 
+                                onclick="removeImage()" style="width: 25px; height: 25px; padding: 0;">
+                            <i class="fas fa-times fa-xs"></i>
+                        </button>
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    
+    function removeImage() {
+        document.getElementById('medicineImage').value = '';
+        document.getElementById('imagePreviewContainer').innerHTML = '';
+        currentImageData = null;
+    }
+    
+    // ============================================
+    // DISPLAY MEDICINES
+    // ============================================
     function displayMedicines() {
         const searchTerm = document.getElementById('searchMedicine').value.toLowerCase();
         const categoryFilter = document.getElementById('categoryFilter').value;
@@ -430,9 +554,9 @@
         
         let filtered = medicines.filter(med => {
             const matchesSearch = med.name.toLowerCase().includes(searchTerm) ||
-                                 med.genericName.toLowerCase().includes(searchTerm) ||
-                                 med.brand.toLowerCase().includes(searchTerm) ||
-                                 med.batchNo.toLowerCase().includes(searchTerm);
+                                 (med.genericName && med.genericName.toLowerCase().includes(searchTerm)) ||
+                                 (med.brand && med.brand.toLowerCase().includes(searchTerm)) ||
+                                 (med.batchNo && med.batchNo.toLowerCase().includes(searchTerm));
             
             const matchesCategory = !categoryFilter || med.category === categoryFilter;
             
@@ -463,68 +587,106 @@
         
         // Render grid
         const grid = document.getElementById('medicinesGrid');
-        grid.innerHTML = paginated.map(med => {
-            const daysToExpiry = Math.ceil((new Date(med.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
-            let stockClass = 'stock-good';
-            if(med.stock <= med.minStock) stockClass = 'stock-low';
-            if(med.stock === 0) stockClass = 'stock-out';
-            
-            return `
-                <div class="col-md-6 col-lg-4 col-xl-3">
-                    <div class="card medicine-card h-100">
-                        <div class="position-relative">
-                            <span class="stock-badge ${stockClass}">
-                                ${med.stock === 0 ? 'Out of Stock' : med.stock <= med.minStock ? 'Low Stock' : `${med.stock} in stock`}
-                            </span>
-                            <img src="https://via.placeholder.com/300x200/667eea/ffffff?text=${med.name}" class="card-img-top" alt="${med.name}">
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title fw-bold">${med.name}</h6>
-                            <p class="text-muted small mb-2">${med.genericName} | ${med.brand}</p>
-                            <div class="mb-2">
-                                <span class="badge bg-info">${med.category}</span>
-                                <span class="badge ${daysToExpiry < 30 ? 'bg-danger' : 'bg-secondary'}">
-                                    Exp: ${med.expiryDate}
-                                </span>
+        if (paginated.length === 0) {
+            grid.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">No medicines found</h5>
+                    <p class="text-muted">Click "Add New Medicine" to add your first medicine</p>
+                </div>
+            `;
+        } else {
+            grid.innerHTML = paginated.map(med => {
+                const daysToExpiry = Math.ceil((new Date(med.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+                let stockClass = 'stock-good';
+                let stockText = `${med.stock} in stock`;
+                if(med.stock <= med.minStock) {
+                    stockClass = 'stock-low';
+                    stockText = 'Low Stock';
+                }
+                if(med.stock === 0) {
+                    stockClass = 'stock-out';
+                    stockText = 'Out of Stock';
+                }
+                
+                const medImage = med.image || `https://via.placeholder.com/300x200/667eea/ffffff?text=${encodeURIComponent(med.name)}`;
+                
+                return `
+                    <div class="col-md-6 col-lg-4 col-xl-3">
+                        <div class="card medicine-card h-100">
+                            <div class="position-relative">
+                                <span class="stock-badge ${stockClass}">${stockText}</span>
+                                <img src="${medImage}" class="card-img-top medicine-image" alt="${med.name}" 
+                                     onerror="this.src='https://via.placeholder.com/300x200/667eea/ffffff?text=Medicine'">
                             </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span class="fw-bold text-primary">$${med.sellingPrice}</span>
-                                    <small class="text-muted d-block">MRP</small>
+                            <div class="card-body">
+                                <h6 class="card-title fw-bold">${med.name}</h6>
+                                <p class="text-muted small mb-2">${med.genericName || ''} | ${med.brand || ''}</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-info">${med.category}</span>
+                                    <span class="badge ${daysToExpiry < 30 ? 'bg-danger' : 'bg-secondary'}">
+                                        Exp: ${med.expiryDate}
+                                    </span>
                                 </div>
-                                <div class="btn-group">
-                                    <button class="btn btn-sm btn-outline-primary" onclick="editMedicine(${med.id})">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-info" onclick="showQR('${med.barcode}')">
-                                        <i class="fas fa-qrcode"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteMedicine(${med.id})">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="fw-bold text-primary">$${med.sellingPrice}</span>
+                                        <small class="text-muted d-block">MRP</small>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editMedicine(${med.id})" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="showQR('${med.barcode}')" title="QR Code">
+                                            <i class="fas fa-qrcode"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteMedicine(${med.id})" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
-        }).join('');
+                `;
+            }).join('');
+        }
         
         // Pagination controls
         const pagination = document.getElementById('pagination');
-        pagination.innerHTML = `
-            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Previous</a>
-            </li>
-            ${Array.from({length: totalPages}, (_, i) => `
-                <li class="page-item ${currentPage === i+1 ? 'active' : ''}">
-                    <a class="page-link" href="#" onclick="changePage(${i+1})">${i+1}</a>
+        if (totalPages <= 1) {
+            pagination.innerHTML = '';
+        } else {
+            let paginationHtml = `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Previous</a>
                 </li>
-            `).join('')}
-            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-                <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Next</a>
-            </li>
-        `;
+            `;
+            
+            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                paginationHtml += `
+                    <li class="page-item ${currentPage === i ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                    </li>
+                `;
+            }
+            
+            if (totalPages > 5) {
+                paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                paginationHtml += `
+                    <li class="page-item ${currentPage === totalPages ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="changePage(${totalPages})">${totalPages}</a>
+                    </li>
+                `;
+            }
+            
+            paginationHtml += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Next</a>
+                </li>
+            `;
+            pagination.innerHTML = paginationHtml;
+        }
     }
     
     function changePage(page) {
@@ -532,73 +694,173 @@
         displayMedicines();
     }
     
+    // ============================================
+    // SAVE MEDICINE (ADD/UPDATE)
+    // ============================================
     function saveMedicine() {
-        const newMedicine = {
-            id: medicines.length + 1,
-            name: document.getElementById('medName').value,
+        const medName = document.getElementById('medName').value.trim();
+        const sellingPrice = parseFloat(document.getElementById('sellingPrice').value);
+        const stock = parseInt(document.getElementById('stock').value);
+        const expiryDate = document.getElementById('expiryDate').value;
+        
+        if (!medName) {
+            showToast('Medicine name is required!', 'danger');
+            return;
+        }
+        if (isNaN(sellingPrice) || sellingPrice <= 0) {
+            showToast('Valid selling price is required!', 'danger');
+            return;
+        }
+        if (isNaN(stock) || stock < 0) {
+            showToast('Valid stock quantity is required!', 'danger');
+            return;
+        }
+        if (!expiryDate) {
+            showToast('Expiry date is required!', 'danger');
+            return;
+        }
+        
+        const editId = document.getElementById('editId').value;
+        let imageUrl = null;
+        
+        if (currentImageData) {
+            imageUrl = currentImageData;
+        } else if (editId) {
+            const existing = medicines.find(m => m.id == editId);
+            if (existing && existing.image) {
+                imageUrl = existing.image;
+            }
+        }
+        
+        const medicineData = {
+            id: editId ? parseInt(editId) : Date.now(),
+            name: medName,
             genericName: document.getElementById('genericName').value,
             brand: document.getElementById('brandName').value,
             category: document.getElementById('category').value,
             batchNo: document.getElementById('batchNo').value,
-            barcode: document.getElementById('barcode').value || Math.random().toString(36).substr(2, 10),
-            purchasePrice: parseFloat(document.getElementById('purchasePrice').value),
-            sellingPrice: parseFloat(document.getElementById('sellingPrice').value),
-            wholesalePrice: parseFloat(document.getElementById('wholesalePrice').value),
-            stock: parseInt(document.getElementById('stock').value),
-            minStock: parseInt(document.getElementById('minStock').value),
+            barcode: document.getElementById('barcode').value || 'BAR-' + Date.now(),
+            purchasePrice: parseFloat(document.getElementById('purchasePrice').value) || 0,
+            sellingPrice: sellingPrice,
+            wholesalePrice: parseFloat(document.getElementById('wholesalePrice').value) || 0,
+            stock: stock,
+            minStock: parseInt(document.getElementById('minStock').value) || 10,
             mfgDate: document.getElementById('mfgDate').value,
-            expiryDate: document.getElementById('expiryDate').value,
+            expiryDate: expiryDate,
             rackNo: document.getElementById('rackNo').value,
-            description: document.getElementById('description').value
+            description: document.getElementById('description').value,
+            image: imageUrl || null
         };
         
-        medicines.push(newMedicine);
-        displayMedicines();
+        if (editId) {
+            // Update existing medicine
+            const index = medicines.findIndex(m => m.id == editId);
+            if (index !== -1) {
+                medicines[index] = medicineData;
+                showToast('Medicine updated successfully!', 'success');
+            }
+        } else {
+            // Add new medicine
+            medicines.push(medicineData);
+            showToast('Medicine added successfully!', 'success');
+        }
+        
+        // Save to localStorage
+        saveMedicinesToStorage(medicines);
+        
+        // Reset form and close modal
+        resetMedicineForm();
         bootstrap.Modal.getInstance(document.getElementById('addMedicineModal')).hide();
         
-        // Show success message
-        showToast('Medicine added successfully!', 'success');
+        // Refresh display
+        displayMedicines();
     }
     
+    // ============================================
+    // EDIT MEDICINE
+    // ============================================
     function editMedicine(id) {
         const med = medicines.find(m => m.id === id);
-        if(med) {
-            document.getElementById('medName').value = med.name;
-            document.getElementById('genericName').value = med.genericName;
-            document.getElementById('brandName').value = med.brand;
-            document.getElementById('category').value = med.category;
-            document.getElementById('batchNo').value = med.batchNo;
-            document.getElementById('barcode').value = med.barcode;
-            document.getElementById('purchasePrice').value = med.purchasePrice;
-            document.getElementById('sellingPrice').value = med.sellingPrice;
-            document.getElementById('wholesalePrice').value = med.wholesalePrice;
-            document.getElementById('stock').value = med.stock;
-            document.getElementById('minStock').value = med.minStock;
-            document.getElementById('mfgDate').value = med.mfgDate;
-            document.getElementById('expiryDate').value = med.expiryDate;
-            document.getElementById('rackNo').value = med.rackNo;
-            document.getElementById('description').value = med.description;
-            
-            new bootstrap.Modal(document.getElementById('addMedicineModal')).show();
+        if (!med) return;
+        
+        currentEditId = id;
+        document.getElementById('editId').value = id;
+        document.getElementById('modalTitle').textContent = 'Edit Medicine';
+        
+        document.getElementById('medName').value = med.name;
+        document.getElementById('genericName').value = med.genericName || '';
+        document.getElementById('brandName').value = med.brand || '';
+        document.getElementById('category').value = med.category;
+        document.getElementById('batchNo').value = med.batchNo || '';
+        document.getElementById('barcode').value = med.barcode || '';
+        document.getElementById('purchasePrice').value = med.purchasePrice || '';
+        document.getElementById('sellingPrice').value = med.sellingPrice;
+        document.getElementById('wholesalePrice').value = med.wholesalePrice || '';
+        document.getElementById('stock').value = med.stock;
+        document.getElementById('minStock').value = med.minStock;
+        document.getElementById('mfgDate').value = med.mfgDate || '';
+        document.getElementById('expiryDate').value = med.expiryDate;
+        document.getElementById('rackNo').value = med.rackNo || '';
+        document.getElementById('description').value = med.description || '';
+        
+        // Show existing image preview
+        if (med.image) {
+            const container = document.getElementById('imagePreviewContainer');
+            container.innerHTML = `
+                <div class="position-relative d-inline-block">
+                    <img src="${med.image}" class="image-preview" alt="Preview">
+                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 rounded-circle" 
+                            onclick="removeImage()" style="width: 25px; height: 25px; padding: 0;">
+                        <i class="fas fa-times fa-xs"></i>
+                    </button>
+                </div>
+            `;
+            currentImageData = med.image;
         }
+        
+        new bootstrap.Modal(document.getElementById('addMedicineModal')).show();
     }
     
+    // ============================================
+    // DELETE MEDICINE
+    // ============================================
     function deleteMedicine(id) {
-        if(confirm('Are you sure you want to delete this medicine?')) {
+        if (confirm('Are you sure you want to delete this medicine? This action cannot be undone.')) {
             medicines = medicines.filter(m => m.id !== id);
+            saveMedicinesToStorage(medicines);
             displayMedicines();
             showToast('Medicine deleted successfully!', 'success');
         }
     }
     
+    // ============================================
+    // RESET FORM
+    // ============================================
+    function resetMedicineForm() {
+        document.getElementById('medicineForm').reset();
+        document.getElementById('editId').value = '';
+        document.getElementById('modalTitle').textContent = 'Add New Medicine';
+        document.getElementById('imagePreviewContainer').innerHTML = '';
+        document.getElementById('medicineImage').value = '';
+        currentImageData = null;
+        currentEditId = null;
+    }
+    
+    // ============================================
+    // GENERATE BARCODE
+    // ============================================
     function generateBarcode() {
         const barcode = Math.random().toString(36).substr(2, 12).toUpperCase();
         document.getElementById('barcode').value = barcode;
+        showToast('Barcode generated!', 'success');
     }
     
+    // ============================================
+    // SHOW QR CODE
+    // ============================================
     function showQR(barcode) {
         const qrModal = new bootstrap.Modal(document.getElementById('qrModal'));
-        document.getElementById('qrCode').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${barcode}" alt="QR Code">`;
+        document.getElementById('qrCode').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${barcode}" alt="QR Code" class="img-fluid">`;
         qrModal.show();
     }
     
@@ -606,17 +868,66 @@
         window.print();
     }
     
+    // ============================================
+    // SHOW TOAST MESSAGE
+    // ============================================
     function showToast(message, type) {
-        // Simple toast implementation
+        const toastContainer = document.getElementById('toast-container') || createToastContainer();
         const toast = document.createElement('div');
-        toast.className = `alert alert-${type} position-fixed bottom-0 end-0 m-3`;
-        toast.style.zIndex = '9999';
-        toast.innerHTML = message;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
+        toast.className = `alert alert-${type} alert-dismissible fade show toast-custom`;
+        toast.style.marginBottom = '10px';
+        toast.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        toastContainer.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
     }
     
-    // Event listeners
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.position = 'fixed';
+        container.style.bottom = '20px';
+        container.style.right = '20px';
+        container.style.zIndex = '9999';
+        container.style.minWidth = '300px';
+        document.body.appendChild(container);
+        return container;
+    }
+    
+    // ============================================
+    // LOGOUT FUNCTION
+    // ============================================
+    function logout() {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+    }
+    
+    // ============================================
+    // CHECK AUTHENTICATION
+    // ============================================
+    function checkAuth() {
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        const userData = JSON.parse(user);
+        document.getElementById('userName').textContent = userData.name;
+        document.getElementById('userRole').textContent = userData.role.toUpperCase();
+    }
+    
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
     document.getElementById('searchMedicine').addEventListener('input', () => {
         currentPage = 1;
         displayMedicines();
@@ -629,8 +940,15 @@
         currentPage = 1;
         displayMedicines();
     });
+    document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        logout();
+    });
     
-    // Initial load
+    // ============================================
+    // INITIALIZE
+    // ============================================
+    checkAuth();
     displayMedicines();
     
     // GSAP Animations
@@ -638,7 +956,8 @@
         duration: 0.6,
         y: 30,
         opacity: 0,
-        stagger: 0.1
+        stagger: 0.1,
+        ease: "back.out(1.2)"
     });
 </script>
 </body>

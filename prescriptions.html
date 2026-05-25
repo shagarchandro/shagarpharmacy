@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Prescription Management - MediCare Pharmacy</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,7 +14,8 @@
         * { font-family: 'Inter', sans-serif; }
         
         body {
-            background: #f5f7fb;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            min-height: 100vh;
         }
         
         .sidebar {
@@ -23,37 +24,52 @@
             top: 0;
             height: 100%;
             width: 280px;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
             z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 10px 0 40px rgba(0, 0, 0, 0.1);
         }
         
         .main-content {
             margin-left: 280px;
             padding: 20px;
+            transition: all 0.3s ease;
         }
         
         .btn-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
             color: white;
         }
         
         .prescription-card {
             transition: all 0.3s ease;
             border: none;
-            border-radius: 15px;
+            border-radius: 20px;
+            background: white;
             cursor: pointer;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
         }
         
         .prescription-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
         }
         
         .status-badge {
             padding: 5px 12px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
+            display: inline-block;
         }
         
         .status-pending { background: #f59e0b; color: white; }
@@ -65,21 +81,52 @@
             width: 100%;
             height: 200px;
             object-fit: cover;
-            border-radius: 10px;
+            border-radius: 15px;
             cursor: pointer;
-        }
-        
-        .medicine-suggestion {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 10px;
             transition: all 0.3s ease;
         }
         
+        .prescription-image:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .medicine-suggestion {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+        
         .medicine-suggestion:hover {
-            background: #e9ecef;
+            background: #f1f5f9;
             transform: translateX(5px);
+            border-color: #3b82f6;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px 20px;
+            margin: 5px 15px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sidebar .nav-link:hover {
+            background: rgba(59, 130, 246, 0.2);
+            color: white;
+            transform: translateX(8px);
+        }
+        
+        .sidebar .nav-link.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
         }
         
         @media (max-width: 768px) {
@@ -91,7 +138,7 @@
             width: 100%;
             height: 300px;
             background: #000;
-            border-radius: 10px;
+            border-radius: 16px;
             overflow: hidden;
         }
         
@@ -102,50 +149,124 @@
         }
         
         .ocr-result {
-            background: #f0fdf4;
-            border-left: 4px solid #22c55e;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-left: 4px solid #10b981;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 12px;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e2e8f0;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #3b82f6;
+            border: 2px solid white;
+        }
+        
+        .toast-custom {
+            animation: slideInRight 0.3s ease;
+            border-radius: 12px;
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .medicine-tag {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            margin: 3px;
+            color: #1e293b;
+        }
+        
+        .diagnosis-text {
+            font-size: 12px;
+            color: #64748b;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
     </style>
 </head>
 <body>
 
 <!-- Sidebar -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
     <div class="p-4">
         <div class="d-flex align-items-center gap-2 mb-4">
             <i class="fas fa-hospital-user text-white fs-3"></i>
             <span class="text-white fw-bold fs-5">MediCare</span>
         </div>
         
+        <div class="user-info text-center mb-4">
+            <img src="https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff&rounded=true&size=80" class="rounded-circle mb-2" width="70" height="70" id="userAvatar">
+            <h6 class="text-white mb-1" id="userName">Admin User</h6>
+            <small class="text-white-50" id="userRole">Administrator</small>
+        </div>
+        
         <nav class="nav flex-column">
-            <a href="dashboard.html" class="nav-link text-white-50 mb-2">
+            <a href="dashboard.html" class="nav-link">
                 <i class="fas fa-tachometer-alt me-2"></i> Dashboard
             </a>
-            <a href="medicines.html" class="nav-link text-white-50 mb-2">
+            <a href="medicines.html" class="nav-link">
                 <i class="fas fa-capsules me-2"></i> Medicines
             </a>
-            <a href="customers.html" class="nav-link text-white-50 mb-2">
+            <a href="customers.html" class="nav-link">
                 <i class="fas fa-users me-2"></i> Customers
             </a>
-            <a href="sales.html" class="nav-link text-white-50 mb-2">
+            <a href="sales.html" class="nav-link">
                 <i class="fas fa-shopping-cart me-2"></i> POS Sales
             </a>
-            <a href="purchases.html" class="nav-link text-white-50 mb-2">
+            <a href="purchases.html" class="nav-link">
                 <i class="fas fa-truck me-2"></i> Purchases
             </a>
-            <a href="suppliers.html" class="nav-link text-white-50 mb-2">
+            <a href="suppliers.html" class="nav-link">
                 <i class="fas fa-parachute-box me-2"></i> Suppliers
             </a>
-            <a href="prescriptions.html" class="nav-link text-white active bg-primary bg-opacity-25 rounded">
+            <a href="prescriptions.html" class="nav-link active">
                 <i class="fas fa-file-prescription me-2"></i> Prescriptions
             </a>
-            <a href="reports.html" class="nav-link text-white-50 mb-2">
+            <a href="reports.html" class="nav-link">
                 <i class="fas fa-chart-line me-2"></i> Reports
             </a>
             <hr class="bg-secondary my-3">
-            <a href="login.html" class="nav-link text-white-50">
+            <a href="login.html" class="nav-link" id="logoutBtn">
                 <i class="fas fa-sign-out-alt me-2"></i> Logout
             </a>
         </nav>
@@ -155,16 +276,16 @@
 <!-- Main Content -->
 <div class="main-content">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
             <h2 class="fw-bold gradient-text">Prescription Management</h2>
             <p class="text-muted">Manage patient prescriptions, track filling status, and suggest medicines</p>
         </div>
-        <div>
-            <button class="btn btn-outline-primary rounded-pill px-4 me-2" data-bs-toggle="modal" data-bs-target="#scanPrescriptionModal">
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#scanPrescriptionModal">
                 <i class="fas fa-camera me-2"></i>Scan Prescription
             </button>
-            <button class="btn btn-gradient rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addPrescriptionModal">
+            <button class="btn btn-gradient rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addPrescriptionModal" onclick="resetPrescriptionForm()">
                 <i class="fas fa-plus me-2"></i>New Prescription
             </button>
         </div>
@@ -172,60 +293,60 @@
     
     <!-- Stats Cards -->
     <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1">Total Prescriptions</p>
-                            <h3 class="fw-bold" id="totalPrescriptions">0</h3>
+                            <h3 class="fw-bold text-primary" id="totalPrescriptions">0</h3>
                         </div>
-                        <div class="bg-primary bg-opacity-10 p-3 rounded">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-3">
                             <i class="fas fa-file-prescription fa-2x text-primary"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1">Pending Filling</p>
                             <h3 class="fw-bold text-warning" id="pendingCount">0</h3>
                         </div>
-                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-3">
                             <i class="fas fa-clock fa-2x text-warning"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1">Filled Today</p>
                             <h3 class="fw-bold text-success" id="filledToday">0</h3>
                         </div>
-                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                        <div class="bg-success bg-opacity-10 p-3 rounded-3">
                             <i class="fas fa-check-circle fa-2x text-success"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1">Total Patients</p>
                             <h3 class="fw-bold text-info" id="totalPatients">0</h3>
                         </div>
-                        <div class="bg-info bg-opacity-10 p-3 rounded">
+                        <div class="bg-info bg-opacity-10 p-3 rounded-3">
                             <i class="fas fa-users fa-2x text-info"></i>
                         </div>
                     </div>
@@ -235,17 +356,17 @@
     </div>
     
     <!-- Search and Filter -->
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 rounded-4">
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-4">
                     <div class="position-relative">
                         <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                        <input type="text" class="form-control ps-5" id="searchPrescription" placeholder="Search by patient name, doctor or prescription ID...">
+                        <input type="text" class="form-control ps-5 rounded-3" id="searchPrescription" placeholder="Search by patient name, doctor or prescription ID...">
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <select class="form-select" id="statusFilter">
+                    <select class="form-select rounded-3" id="statusFilter">
                         <option value="">All Status</option>
                         <option value="pending">Pending</option>
                         <option value="filled">Filled</option>
@@ -254,10 +375,10 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <input type="date" class="form-control" id="dateFilter" placeholder="Filter by date">
+                    <input type="date" class="form-control rounded-3" id="dateFilter">
                 </div>
                 <div class="col-md-2">
-                    <button class="btn btn-outline-primary w-100" onclick="exportPrescriptions()">
+                    <button class="btn btn-outline-primary w-100 rounded-3" onclick="exportPrescriptions()">
                         <i class="fas fa-file-excel me-2"></i>Export
                     </button>
                 </div>
@@ -276,10 +397,10 @@
 
 <!-- Add Prescription Modal -->
 <div class="modal fade" id="addPrescriptionModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-gradient text-white">
-                <h5 class="modal-title">New Prescription</h5>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header bg-gradient text-white border-0 rounded-top-4">
+                <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>New Prescription</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -287,50 +408,51 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Patient Name *</label>
-                            <input type="text" class="form-control" id="patientName" required>
+                            <input type="text" class="form-control rounded-3" id="patientName" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Patient Phone</label>
-                            <input type="tel" class="form-control" id="patientPhone">
+                            <input type="tel" class="form-control rounded-3" id="patientPhone">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Doctor Name *</label>
-                            <input type="text" class="form-control" id="doctorName" required>
+                            <input type="text" class="form-control rounded-3" id="doctorName" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Doctor Contact</label>
-                            <input type="text" class="form-control" id="doctorContact">
+                            <input type="text" class="form-control rounded-3" id="doctorContact">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Prescription Date *</label>
-                            <input type="date" class="form-control" id="prescriptionDate" required>
+                            <input type="date" class="form-control rounded-3" id="prescriptionDate" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Valid Until</label>
-                            <input type="date" class="form-control" id="validUntil">
+                            <input type="date" class="form-control rounded-3" id="validUntil">
                         </div>
                         <div class="col-12 mb-3">
                             <label class="form-label fw-semibold">Diagnosis / Notes</label>
-                            <textarea class="form-control" id="diagnosis" rows="2"></textarea>
+                            <textarea class="form-control rounded-3" id="diagnosis" rows="2" placeholder="Enter diagnosis or medical notes..."></textarea>
                         </div>
                         <div class="col-12 mb-3">
                             <label class="form-label fw-semibold">Prescribed Medicines</label>
                             <div id="prescribedMedicinesList"></div>
-                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addMedicineField()">
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-3 mt-2" onclick="addMedicineField()">
                                 <i class="fas fa-plus me-1"></i>Add Medicine
                             </button>
                         </div>
                         <div class="col-12 mb-3">
                             <label class="form-label fw-semibold">Upload Prescription Image</label>
-                            <input type="file" class="form-control" id="prescriptionImage" accept="image/*" multiple>
+                            <input type="file" class="form-control rounded-3" id="prescriptionImage" accept="image/*" multiple>
                             <small class="text-muted">Upload clear image of prescription</small>
+                            <div id="imagePreviewContainer" class="mt-2"></div>
                         </div>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-gradient" onclick="savePrescription()">Save Prescription</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-gradient rounded-3" onclick="savePrescription()">Save Prescription</button>
             </div>
         </div>
     </div>
@@ -338,10 +460,10 @@
 
 <!-- Scan Prescription Modal -->
 <div class="modal fade" id="scanPrescriptionModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-gradient text-white">
-                <h5 class="modal-title">Scan Prescription</h5>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header bg-gradient text-white border-0 rounded-top-4">
+                <h5 class="modal-title"><i class="fas fa-camera me-2"></i>Scan Prescription</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -350,10 +472,10 @@
                         <div class="camera-preview" id="cameraPreview">
                             <video id="video" autoplay playsinline></video>
                         </div>
-                        <button class="btn btn-primary w-100 mt-2" onclick="captureImage()">
+                        <button class="btn btn-primary w-100 mt-2 rounded-3" onclick="captureImage()">
                             <i class="fas fa-camera me-2"></i>Capture Image
                         </button>
-                        <button class="btn btn-secondary w-100 mt-2" onclick="uploadImage()">
+                        <button class="btn btn-secondary w-100 mt-2 rounded-3" onclick="uploadImage()">
                             <i class="fas fa-upload me-2"></i>Upload Image
                         </button>
                     </div>
@@ -361,7 +483,7 @@
                         <div id="scanResult" style="display: none;">
                             <h6 class="fw-bold">Extracted Information</h6>
                             <div id="ocrResult" class="ocr-result"></div>
-                            <button class="btn btn-success w-100 mt-2" onclick="useExtractedData()">
+                            <button class="btn btn-success w-100 mt-2 rounded-3" onclick="useExtractedData()">
                                 <i class="fas fa-check me-2"></i>Use This Data
                             </button>
                         </div>
@@ -378,10 +500,10 @@
 
 <!-- Prescription Details Modal -->
 <div class="modal fade" id="prescriptionDetailsModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header bg-gradient text-white">
-                <h5 class="modal-title">Prescription Details</h5>
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header bg-gradient text-white border-0 rounded-top-4">
+                <h5 class="modal-title"><i class="fas fa-file-prescription me-2"></i>Prescription Details</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -430,80 +552,96 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="fillPrescription()">
+            <div class="modal-footer border-0">
+                <button class="btn btn-primary rounded-3" onclick="fillPrescription()">
                     <i class="fas fa-shopping-cart me-2"></i>Fill Prescription
                 </button>
-                <button type="button" class="btn btn-success" onclick="sendPrescriptionReminder()">
+                <button class="btn btn-success rounded-3" onclick="sendPrescriptionReminder()">
                     <i class="fas fa-bell me-2"></i>Send Reminder
                 </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-
 <script>
-    // Sample Prescriptions Data
-    let prescriptions = [
-        {
-            id: 1,
-            prescriptionNo: "RX-2024-001",
-            patientName: "John Doe",
-            patientPhone: "+1234567890",
-            doctorName: "Dr. Sarah Wilson",
-            doctorContact: "drsarah@hospital.com",
-            prescriptionDate: "2024-01-15",
-            validUntil: "2024-03-15",
-            diagnosis: "Upper respiratory infection",
-            status: "pending",
-            medicines: [
-                { name: "Amoxicillin 250mg", dosage: "1 tablet 3 times daily", duration: "7 days", status: "pending" },
-                { name: "Paracetamol 500mg", dosage: "1 tablet as needed", duration: "5 days", status: "pending" }
-            ],
-            images: ["https://via.placeholder.com/300x200/667eea/ffffff?text=Prescription+1"],
-            filledDate: null
-        },
-        {
-            id: 2,
-            prescriptionNo: "RX-2024-002",
-            patientName: "Jane Smith",
-            patientPhone: "+1234567891",
-            doctorName: "Dr. Michael Brown",
-            doctorContact: "drmichael@hospital.com",
-            prescriptionDate: "2024-02-10",
-            validUntil: "2024-04-10",
-            diagnosis: "Hypertension",
-            status: "filled",
-            medicines: [
-                { name: "Lisinopril 10mg", dosage: "1 tablet daily", duration: "30 days", status: "filled" }
-            ],
-            images: ["https://via.placeholder.com/300x200/667eea/ffffff?text=Prescription+2"],
-            filledDate: "2024-02-10"
-        },
-        {
-            id: 3,
-            prescriptionNo: "RX-2024-003",
-            patientName: "Mike Johnson",
-            patientPhone: "+1234567892",
-            doctorName: "Dr. Emily Davis",
-            doctorContact: "dremily@hospital.com",
-            prescriptionDate: "2024-02-20",
-            validUntil: "2024-03-20",
-            diagnosis: "Diabetes Type 2",
-            status: "partial",
-            medicines: [
-                { name: "Metformin 500mg", dosage: "1 tablet twice daily", duration: "30 days", status: "filled" },
-                { name: "Glimepiride 2mg", dosage: "1 tablet daily", duration: "30 days", status: "pending" }
-            ],
-            images: ["https://via.placeholder.com/300x200/667eea/ffffff?text=Prescription+3"],
-            filledDate: null
-        }
-    ];
+    // ============================================
+    // STORAGE KEY
+    // ============================================
+    const PRESCRIPTION_STORAGE_KEY = 'pharmacy_prescriptions';
     
+    // ============================================
+    // LOAD PRESCRIPTIONS FROM LOCALSTORAGE
+    // ============================================
+    function loadPrescriptionsFromStorage() {
+        const stored = localStorage.getItem(PRESCRIPTION_STORAGE_KEY);
+        if (stored) {
+            return JSON.parse(stored);
+        }
+        // Default sample data - This will always show if no data exists
+        return [
+            {
+                id: 1,
+                prescriptionNo: "RX-2024-001",
+                patientName: "John Doe",
+                patientPhone: "+1234567890",
+                doctorName: "Dr. Sarah Wilson",
+                doctorContact: "drsarah@hospital.com",
+                prescriptionDate: "2024-01-15",
+                validUntil: "2024-03-15",
+                diagnosis: "Upper respiratory infection",
+                status: "pending",
+                medicines: [
+                    { name: "Amoxicillin 250mg", dosage: "1 tablet 3 times daily", duration: "7 days", status: "pending" },
+                    { name: "Paracetamol 500mg", dosage: "1 tablet as needed", duration: "5 days", status: "pending" }
+                ],
+                images: [],
+                filledDate: null,
+                createdAt: "2024-01-15T10:00:00"
+            },
+            {
+                id: 2,
+                prescriptionNo: "RX-2024-002",
+                patientName: "Jane Smith",
+                patientPhone: "+1234567891",
+                doctorName: "Dr. Michael Brown",
+                doctorContact: "drmichael@hospital.com",
+                prescriptionDate: "2024-02-10",
+                validUntil: "2024-04-10",
+                diagnosis: "Hypertension",
+                status: "filled",
+                medicines: [
+                    { name: "Lisinopril 10mg", dosage: "1 tablet daily", duration: "30 days", status: "filled" }
+                ],
+                images: [],
+                filledDate: "2024-02-10",
+                createdAt: "2024-02-10T09:30:00"
+            },
+            {
+                id: 3,
+                prescriptionNo: "RX-2024-003",
+                patientName: "Mike Johnson",
+                patientPhone: "+1234567892",
+                doctorName: "Dr. Emily Davis",
+                doctorContact: "dremily@hospital.com",
+                prescriptionDate: "2024-02-20",
+                validUntil: "2024-03-20",
+                diagnosis: "Diabetes Type 2",
+                status: "partial",
+                medicines: [
+                    { name: "Metformin 500mg", dosage: "1 tablet twice daily", duration: "30 days", status: "filled" },
+                    { name: "Glimepiride 2mg", dosage: "1 tablet daily", duration: "30 days", status: "pending" }
+                ],
+                images: [],
+                filledDate: null,
+                createdAt: "2024-02-20T14:15:00"
+            }
+        ];
+    }
+    
+    let prescriptions = loadPrescriptionsFromStorage();
     let currentPage = 1;
     const itemsPerPage = 6;
     let currentPrescriptionId = null;
@@ -511,8 +649,32 @@
     let stream = null;
     let capturedImage = null;
     let extractedData = null;
+    let uploadedImages = [];
     
-    // Initialize Camera
+    // ============================================
+    // SAVE TO STORAGE
+    // ============================================
+    function savePrescriptionsToStorage() {
+        localStorage.setItem(PRESCRIPTION_STORAGE_KEY, JSON.stringify(prescriptions));
+    }
+    
+    // ============================================
+    // AUTHENTICATION CHECK
+    // ============================================
+    function checkAuth() {
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        const userData = JSON.parse(user);
+        document.getElementById('userName').textContent = userData.name;
+        document.getElementById('userRole').textContent = userData.role.toUpperCase();
+    }
+    
+    // ============================================
+    // CAMERA FUNCTIONS
+    // ============================================
     async function initCamera() {
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -524,7 +686,6 @@
         }
     }
     
-    // Capture Image
     function captureImage() {
         const video = document.getElementById('video');
         const canvas = document.createElement('canvas');
@@ -533,12 +694,9 @@
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         capturedImage = canvas.toDataURL('image/jpeg');
-        
-        // Simulate OCR (In real app, send to backend for OCR processing)
         simulateOCR(capturedImage);
     }
     
-    // Upload Image
     function uploadImage() {
         const input = document.createElement('input');
         input.type = 'file';
@@ -555,9 +713,7 @@
         input.click();
     }
     
-    // Simulate OCR (AI Text Extraction)
     function simulateOCR(imageData) {
-        // Simulated AI extraction
         extractedData = {
             patientName: "Robert Taylor",
             patientPhone: "+9876543210",
@@ -587,7 +743,6 @@
         showToast("Prescription scanned successfully!", "success");
     }
     
-    // Use Extracted Data
     function useExtractedData() {
         if(extractedData) {
             document.getElementById('patientName').value = extractedData.patientName;
@@ -602,7 +757,6 @@
             bootstrap.Modal.getInstance(document.getElementById('scanPrescriptionModal')).hide();
             new bootstrap.Modal(document.getElementById('addPrescriptionModal')).show();
             
-            // Stop camera
             if(stream) {
                 stream.getTracks().forEach(track => track.stop());
             }
@@ -611,24 +765,27 @@
         }
     }
     
-    // Add Medicine Field
+    // ============================================
+    // MEDICINE FIELD FUNCTIONS
+    // ============================================
     function addMedicineField(name = '', dosage = '', duration = '') {
         const index = medicineFields.length;
         const div = document.createElement('div');
-        div.className = 'medicine-field border rounded p-3 mb-2';
+        div.className = 'medicine-field border rounded-3 p-3 mb-2';
+        div.style.background = '#f8fafc';
         div.innerHTML = `
             <div class="row g-2">
                 <div class="col-md-5">
-                    <input type="text" class="form-control" placeholder="Medicine Name" value="${name}" id="medName_${index}">
+                    <input type="text" class="form-control rounded-3" placeholder="Medicine Name" value="${name.replace(/"/g, '&quot;')}" id="medName_${index}">
                 </div>
                 <div class="col-md-4">
-                    <input type="text" class="form-control" placeholder="Dosage (e.g., 1 tab 3x daily)" value="${dosage}" id="medDosage_${index}">
+                    <input type="text" class="form-control rounded-3" placeholder="Dosage" value="${dosage.replace(/"/g, '&quot;')}" id="medDosage_${index}">
                 </div>
                 <div class="col-md-2">
-                    <input type="text" class="form-control" placeholder="Duration" value="${duration}" id="medDuration_${index}">
+                    <input type="text" class="form-control rounded-3" placeholder="Duration" value="${duration.replace(/"/g, '&quot;')}" id="medDuration_${index}">
                 </div>
                 <div class="col-md-1">
-                    <button class="btn btn-danger btn-sm" onclick="removeMedicineField(${index})">
+                    <button class="btn btn-danger btn-sm rounded-3 w-100" onclick="removeMedicineField(${index})">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -638,7 +795,6 @@
         medicineFields.push({ index, div });
     }
     
-    // Remove Medicine Field
     function removeMedicineField(index) {
         const field = medicineFields.find(f => f.index === index);
         if(field) {
@@ -647,7 +803,18 @@
         }
     }
     
-    // Save Prescription
+    function resetPrescriptionForm() {
+        medicineFields.forEach(field => field.div.remove());
+        medicineFields = [];
+        document.getElementById('prescriptionForm').reset();
+        document.getElementById('prescriptionDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('imagePreviewContainer').innerHTML = '';
+        uploadedImages = [];
+    }
+    
+    // ============================================
+    // SAVE PRESCRIPTION
+    // ============================================
     function savePrescription() {
         const medicines = [];
         medicineFields.forEach(field => {
@@ -664,10 +831,16 @@
             return;
         }
         
+        const patientName = document.getElementById('patientName').value;
+        if(!patientName) {
+            showToast("Patient name is required", "warning");
+            return;
+        }
+        
         const newPrescription = {
-            id: prescriptions.length + 1,
-            prescriptionNo: `RX-2024-${String(prescriptions.length + 1).padStart(3, '0')}`,
-            patientName: document.getElementById('patientName').value,
+            id: Date.now(),
+            prescriptionNo: `RX-${new Date().getFullYear()}-${String(prescriptions.length + 1).padStart(4, '0')}`,
+            patientName: patientName,
             patientPhone: document.getElementById('patientPhone').value,
             doctorName: document.getElementById('doctorName').value,
             doctorContact: document.getElementById('doctorContact').value,
@@ -676,21 +849,15 @@
             diagnosis: document.getElementById('diagnosis').value,
             status: 'pending',
             medicines: medicines,
-            images: [],
-            filledDate: null
+            images: uploadedImages,
+            filledDate: null,
+            createdAt: new Date().toISOString()
         };
         
-        prescriptions.push(newPrescription);
+        prescriptions.unshift(newPrescription);
+        savePrescriptionsToStorage();
         
-        // Reset form
-        medicineFields = [];
-        document.getElementById('prescribedMedicinesList').innerHTML = '';
-        document.getElementById('patientName').value = '';
-        document.getElementById('patientPhone').value = '';
-        document.getElementById('doctorName').value = '';
-        document.getElementById('doctorContact').value = '';
-        document.getElementById('diagnosis').value = '';
-        
+        resetPrescriptionForm();
         displayPrescriptions();
         updateStats();
         
@@ -698,7 +865,9 @@
         showToast("Prescription saved successfully!", "success");
     }
     
-    // Display Prescriptions
+    // ============================================
+    // DISPLAY PRESCRIPTIONS - FIXED TO SHOW ALL
+    // ============================================
     function displayPrescriptions() {
         const searchTerm = document.getElementById('searchPrescription').value.toLowerCase();
         const statusFilter = document.getElementById('statusFilter').value;
@@ -713,68 +882,87 @@
             return matchesSearch && matchesStatus && matchesDate;
         });
         
-        // Update stats
         updateStats();
         
-        // Pagination
         const totalPages = Math.ceil(filtered.length / itemsPerPage);
         const start = (currentPage - 1) * itemsPerPage;
         const paginated = filtered.slice(start, start + itemsPerPage);
         
-        // Render grid
         const grid = document.getElementById('prescriptionsGrid');
-        grid.innerHTML = paginated.map(p => {
-            const statusClass = p.status === 'pending' ? 'status-pending' : 
-                               p.status === 'filled' ? 'status-filled' : 
-                               p.status === 'partial' ? 'status-partial' : 'status-expired';
-            
-            return `
-                <div class="col-md-6 col-lg-4">
-                    <div class="card prescription-card h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="badge ${statusClass}">${p.status.toUpperCase()}</span>
-                                <small class="text-muted">${p.prescriptionNo}</small>
-                            </div>
-                            <h6 class="fw-bold mb-1">${p.patientName}</h6>
-                            <p class="text-muted small mb-2">${p.doctorName}</p>
-                            <p class="small mb-1"><i class="fas fa-calendar me-2 text-primary"></i>${p.prescriptionDate}</p>
-                            <p class="small mb-2"><i class="fas fa-stethoscope me-2 text-primary"></i>${p.diagnosis.substring(0, 50)}${p.diagnosis.length > 50 ? '...' : ''}</p>
-                            <div class="mb-2">
-                                ${p.medicines.slice(0, 2).map(m => `
-                                    <span class="badge bg-secondary me-1">${m.name}</span>
-                                `).join('')}
-                                ${p.medicines.length > 2 ? `<span class="badge bg-secondary">+${p.medicines.length - 2}</span>` : ''}
-                            </div>
-                            <div class="d-flex gap-2 mt-3">
-                                <button class="btn btn-sm btn-outline-primary flex-grow-1" onclick="viewPrescription(${p.id})">
-                                    <i class="fas fa-eye me-1"></i>View
-                                </button>
-                                <button class="btn btn-sm btn-outline-success" onclick="fillPrescriptionFromCard(${p.id})">
-                                    <i class="fas fa-shopping-cart me-1"></i>Fill
-                                </button>
+        if(paginated.length === 0) {
+            grid.innerHTML = '<div class="col-12 text-center py-5"><i class="fas fa-file-prescription fa-4x text-muted mb-3"></i><h5 class="text-muted">No prescriptions found</h5><p class="text-muted">Click "New Prescription" to add your first prescription</p></div>';
+        } else {
+            grid.innerHTML = paginated.map(p => {
+                let statusClass = 'status-pending';
+                let statusText = 'PENDING';
+                if(p.status === 'filled') { statusClass = 'status-filled'; statusText = 'FILLED'; }
+                else if(p.status === 'partial') { statusClass = 'status-partial'; statusText = 'PARTIAL'; }
+                else if(p.status === 'expired') { statusClass = 'status-expired'; statusText = 'EXPIRED'; }
+                
+                return `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card prescription-card h-100">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <span class="status-badge ${statusClass}">${statusText}</span>
+                                    <small class="text-muted">${p.prescriptionNo}</small>
+                                </div>
+                                <h5 class="fw-bold mb-1">${p.patientName}</h5>
+                                <p class="text-muted small mb-2"><i class="fas fa-user-md me-1"></i>${p.doctorName}</p>
+                                <p class="small mb-2"><i class="fas fa-calendar-alt me-2 text-primary"></i>${p.prescriptionDate}</p>
+                                <div class="diagnosis-text mb-2">
+                                    <i class="fas fa-stethoscope me-2 text-primary"></i>${p.diagnosis ? p.diagnosis.substring(0, 60) : 'No diagnosis'}
+                                </div>
+                                <div class="mb-3">
+                                    ${p.medicines.map(m => `<span class="medicine-tag"><i class="fas fa-capsules me-1"></i>${m.name}</span>`).join('')}
+                                </div>
+                                <div class="d-flex gap-2 mt-3">
+                                    <button class="btn btn-sm btn-outline-primary flex-grow-1 rounded-3" onclick="viewPrescription(${p.id})">
+                                        <i class="fas fa-eye me-1"></i>View
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-success rounded-3" onclick="fillPrescriptionFromCard(${p.id})">
+                                        <i class="fas fa-shopping-cart me-1"></i>Fill
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
-        }).join('');
+                `;
+            }).join('');
+        }
         
-        // Pagination controls
+        // Pagination
         const pagination = document.getElementById('pagination');
-        pagination.innerHTML = `
-            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Previous</a>
-            </li>
-            ${Array.from({length: totalPages}, (_, i) => `
-                <li class="page-item ${currentPage === i+1 ? 'active' : ''}">
-                    <a class="page-link" href="#" onclick="changePage(${i+1})">${i+1}</a>
+        if(totalPages <= 1) {
+            pagination.innerHTML = '';
+        } else {
+            let paginationHtml = `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link rounded-3" href="#" onclick="changePage(${currentPage - 1})">Previous</a>
                 </li>
-            `).join('')}
-            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-                <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Next</a>
-            </li>
-        `;
+            `;
+            for(let i = 1; i <= Math.min(totalPages, 5); i++) {
+                paginationHtml += `
+                    <li class="page-item ${currentPage === i ? 'active' : ''}">
+                        <a class="page-link rounded-3" href="#" onclick="changePage(${i})">${i}</a>
+                    </li>
+                `;
+            }
+            if(totalPages > 5) {
+                paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                paginationHtml += `
+                    <li class="page-item ${currentPage === totalPages ? 'active' : ''}">
+                        <a class="page-link rounded-3" href="#" onclick="changePage(${totalPages})">${totalPages}</a>
+                    </li>
+                `;
+            }
+            paginationHtml += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link rounded-3" href="#" onclick="changePage(${currentPage + 1})">Next</a>
+                </li>
+            `;
+            pagination.innerHTML = paginationHtml;
+        }
     }
     
     function changePage(page) {
@@ -782,18 +970,23 @@
         displayPrescriptions();
     }
     
-    // Update Statistics
+    // ============================================
+    // UPDATE STATISTICS
+    // ============================================
     function updateStats() {
         document.getElementById('totalPrescriptions').textContent = prescriptions.length;
         document.getElementById('pendingCount').textContent = prescriptions.filter(p => p.status === 'pending').length;
-        document.getElementById('filledToday').textContent = prescriptions.filter(p => p.filledDate === new Date().toISOString().split('T')[0]).length;
         
-        // Unique patients
+        const todayStr = new Date().toISOString().split('T')[0];
+        document.getElementById('filledToday').textContent = prescriptions.filter(p => p.filledDate === todayStr).length;
+        
         const uniquePatients = new Set(prescriptions.map(p => p.patientName));
         document.getElementById('totalPatients').textContent = uniquePatients.size;
     }
     
-    // View Prescription Details
+    // ============================================
+    // VIEW PRESCRIPTION DETAILS
+    // ============================================
     function viewPrescription(id) {
         const prescription = prescriptions.find(p => p.id === id);
         if(!prescription) return;
@@ -803,28 +996,33 @@
         const detailsHtml = `
             <div class="row">
                 <div class="col-md-6">
-                    <h6 class="fw-bold">Patient Information</h6>
-                    <p><strong>Name:</strong> ${prescription.patientName}<br>
-                    <strong>Phone:</strong> ${prescription.patientPhone || 'N/A'}<br>
-                    <strong>Prescription No:</strong> ${prescription.prescriptionNo}</p>
+                    <div class="bg-light rounded-3 p-3 mb-3">
+                        <h6 class="fw-bold text-primary mb-2"><i class="fas fa-user me-2"></i>Patient Information</h6>
+                        <p class="mb-1"><strong>Name:</strong> ${prescription.patientName}<br>
+                        <strong>Phone:</strong> ${prescription.patientPhone || 'N/A'}<br>
+                        <strong>Prescription No:</strong> ${prescription.prescriptionNo}</p>
+                    </div>
                 </div>
                 <div class="col-md-6">
-                    <h6 class="fw-bold">Doctor Information</h6>
-                    <p><strong>Name:</strong> ${prescription.doctorName}<br>
-                    <strong>Contact:</strong> ${prescription.doctorContact || 'N/A'}<br>
-                    <strong>Date:</strong> ${prescription.prescriptionDate}<br>
-                    <strong>Valid Until:</strong> ${prescription.validUntil || 'N/A'}</p>
+                    <div class="bg-light rounded-3 p-3 mb-3">
+                        <h6 class="fw-bold text-primary mb-2"><i class="fas fa-user-md me-2"></i>Doctor Information</h6>
+                        <p class="mb-1"><strong>Name:</strong> ${prescription.doctorName}<br>
+                        <strong>Contact:</strong> ${prescription.doctorContact || 'N/A'}<br>
+                        <strong>Date:</strong> ${prescription.prescriptionDate}<br>
+                        <strong>Valid Until:</strong> ${prescription.validUntil || 'N/A'}</p>
+                    </div>
                 </div>
                 <div class="col-12">
-                    <h6 class="fw-bold">Diagnosis</h6>
-                    <p>${prescription.diagnosis || 'No diagnosis notes'}</p>
+                    <div class="bg-light rounded-3 p-3">
+                        <h6 class="fw-bold text-primary mb-2"><i class="fas fa-stethoscope me-2"></i>Diagnosis</h6>
+                        <p class="mb-0">${prescription.diagnosis || 'No diagnosis notes'}</p>
+                    </div>
                 </div>
             </div>
         `;
         
         document.getElementById('prescriptionDetails').innerHTML = detailsHtml;
         
-        // Load medicines
         document.getElementById('prescriptionMedicinesBody').innerHTML = prescription.medicines.map(m => `
             <tr>
                 <td>${m.name}</td>
@@ -833,7 +1031,7 @@
                 <td><span class="badge ${m.status === 'filled' ? 'bg-success' : 'bg-warning'}">${m.status}</span></td>
                 <td>
                     ${m.status !== 'filled' ? `
-                        <button class="btn btn-sm btn-primary" onclick="markMedicineFilled(${id}, '${m.name}')">
+                        <button class="btn btn-sm btn-primary rounded-3" onclick="markMedicineFilled(${id}, '${m.name}')">
                             Mark Filled
                         </button>
                     ` : '-'}
@@ -841,49 +1039,43 @@
             </tr>
         `).join('');
         
-        // Load images
         const imagesHtml = `
             <div class="row">
-                ${prescription.images.map(img => `
+                ${prescription.images.length > 0 ? prescription.images.map(img => `
                     <div class="col-md-4 mb-3">
                         <img src="${img}" class="prescription-image" onclick="viewImage('${img}')">
                     </div>
-                `).join('')}
-                ${prescription.images.length === 0 ? '<p class="text-muted">No images uploaded</p>' : ''}
+                `).join('') : '<p class="text-muted">No images uploaded</p>'}
             </div>
         `;
         document.getElementById('prescriptionImages').innerHTML = imagesHtml;
         
-        // Load history
         const historyHtml = `
             <div class="timeline">
                 <div class="timeline-item">
                     <small class="text-muted">${prescription.prescriptionDate}</small>
-                    <p>Prescription created by ${prescription.doctorName}</p>
+                    <p class="mb-0">Prescription created by ${prescription.doctorName}</p>
                 </div>
                 ${prescription.filledDate ? `
                     <div class="timeline-item">
                         <small class="text-muted">${prescription.filledDate}</small>
-                        <p>Prescription filled at pharmacy</p>
+                        <p class="mb-0">Prescription filled at pharmacy</p>
                     </div>
                 ` : ''}
             </div>
         `;
         document.getElementById('prescriptionHistory').innerHTML = historyHtml;
         
-        // Load AI Suggestions
         loadAISuggestions(prescription);
         
         new bootstrap.Modal(document.getElementById('prescriptionDetailsModal')).show();
     }
     
-    // Load AI Medicine Suggestions
     function loadAISuggestions(prescription) {
-        // Simulated AI suggestions based on diagnosis
         const suggestions = [
-            { name: "Alternative generic available", suggestion: "Consider generic version of prescribed medicines", savings: "Save up to 30%" },
-            { name: "Therapy substitution", suggestion: "Similar effective medicine available at lower cost", savings: "Save up to 25%" },
-            { name: "Preventive care", suggestion: "Add Vitamin D supplement for immune support", cost: "$5.99" }
+            { name: "Generic Alternative Available", suggestion: `Generic version available for ${prescription.medicines[0]?.name || 'prescribed medicines'}`, savings: "Save up to 40%" },
+            { name: "Therapy Optimization", suggestion: "Consider combination therapy for better results", savings: "Fewer pills per day" },
+            { name: "Preventive Care", suggestion: "Add Calcium + Vitamin D supplement for bone health", cost: "$8.99" }
         ];
         
         const suggestionsHtml = suggestions.map(s => `
@@ -894,7 +1086,7 @@
                         <p class="small mb-1">${s.suggestion}</p>
                         <small class="text-success">${s.savings ? s.savings : s.cost}</small>
                     </div>
-                    <button class="btn btn-sm btn-outline-success" onclick="applySuggestion('${s.name}')">
+                    <button class="btn btn-sm btn-outline-success rounded-3" onclick="applySuggestion('${s.name}')">
                         Apply
                     </button>
                 </div>
@@ -904,7 +1096,6 @@
         document.getElementById('aiSuggestions').innerHTML = suggestionsHtml || '<p class="text-muted">No suggestions available</p>';
     }
     
-    // Mark Medicine as Filled
     function markMedicineFilled(prescriptionId, medicineName) {
         const prescription = prescriptions.find(p => p.id === prescriptionId);
         if(prescription) {
@@ -912,7 +1103,6 @@
             if(medicine) {
                 medicine.status = 'filled';
                 
-                // Update prescription status
                 const allFilled = prescription.medicines.every(m => m.status === 'filled');
                 const anyFilled = prescription.medicines.some(m => m.status === 'filled');
                 
@@ -923,6 +1113,7 @@
                     prescription.status = 'partial';
                 }
                 
+                savePrescriptionsToStorage();
                 viewPrescription(prescriptionId);
                 displayPrescriptions();
                 showToast(`${medicineName} marked as filled`, "success");
@@ -930,23 +1121,17 @@
         }
     }
     
-    // Fill Prescription (Add to Cart)
     function fillPrescription() {
         const prescription = prescriptions.find(p => p.id === currentPrescriptionId);
         if(prescription) {
-            // Add to POS cart (simulated)
-            showToast(`Prescription added to POS cart. Please complete billing in POS section.`, "success");
+            const prescriptionItems = prescription.medicines.map(m => ({
+                name: m.name,
+                dosage: m.dosage,
+                duration: m.duration
+            }));
+            localStorage.setItem('prescription_to_fill', JSON.stringify(prescriptionItems));
+            localStorage.setItem('prescription_patient', prescription.patientName);
             
-            // In real app, this would redirect to POS with items pre-filled
-            setTimeout(() => {
-                window.location.href = 'sales.html';
-            }, 2000);
-        }
-    }
-    
-    function fillPrescriptionFromCard(id) {
-        const prescription = prescriptions.find(p => p.id === id);
-        if(prescription) {
             showToast(`Prescription added to cart. Redirecting to POS...`, "success");
             setTimeout(() => {
                 window.location.href = 'sales.html';
@@ -954,26 +1139,42 @@
         }
     }
     
-    // Send Prescription Reminder
-    function sendPrescriptionReminder() {
-        const prescription = prescriptions.find(p => p.id === currentPrescriptionId);
+    function fillPrescriptionFromCard(id) {
+        const prescription = prescriptions.find(p => p.id === id);
         if(prescription) {
-            showToast(`Reminder sent to ${prescription.patientPhone}`, "success");
+            const prescriptionItems = prescription.medicines.map(m => ({
+                name: m.name,
+                dosage: m.dosage,
+                duration: m.duration
+            }));
+            localStorage.setItem('prescription_to_fill', JSON.stringify(prescriptionItems));
+            localStorage.setItem('prescription_patient', prescription.patientName);
+            
+            showToast(`Prescription added to cart. Redirecting to POS...`, "success");
+            setTimeout(() => {
+                window.location.href = 'sales.html';
+            }, 1500);
         }
     }
     
-    // View Image Fullscreen
+    function sendPrescriptionReminder() {
+        const prescription = prescriptions.find(p => p.id === currentPrescriptionId);
+        if(prescription) {
+            showToast(`Reminder sent to ${prescription.patientPhone || prescription.patientName}`, "success");
+        }
+    }
+    
     function viewImage(src) {
         const modal = document.createElement('div');
         modal.className = 'modal fade';
         modal.innerHTML = `
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-body text-center">
-                        <img src="${src}" style="max-width: 100%;">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content rounded-4">
+                    <div class="modal-body text-center p-4">
+                        <img src="${src}" style="max-width: 100%; border-radius: 12px;">
                     </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <div class="modal-footer border-0">
+                        <button class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -984,39 +1185,74 @@
         modal.addEventListener('hidden.bs.modal', () => modal.remove());
     }
     
-    // Apply AI Suggestion
     function applySuggestion(suggestionName) {
         showToast(`Suggestion "${suggestionName}" applied`, "success");
     }
     
-    // Export Prescriptions
     function exportPrescriptions() {
-        let csv = "Prescription No,Patient Name,Patient Phone,Doctor Name,Diagnosis,Date,Status\n";
+        let csv = "Prescription No,Patient Name,Patient Phone,Doctor Name,Diagnosis,Date,Status,Medicines\n";
         prescriptions.forEach(p => {
-            csv += `"${p.prescriptionNo}","${p.patientName}","${p.patientPhone || ''}","${p.doctorName}","${p.diagnosis}","${p.prescriptionDate}","${p.status}"\n`;
+            const medicinesList = p.medicines.map(m => m.name).join('; ');
+            csv += `"${p.prescriptionNo}","${p.patientName}","${p.patientPhone || ''}","${p.doctorName}","${p.diagnosis || ''}","${p.prescriptionDate}","${p.status}","${medicinesList}"\n`;
         });
         
-        const blob = new Blob([csv], { type: 'text/csv' });
+        const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'prescriptions_export.csv';
+        a.download = `prescriptions_export_${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
         URL.revokeObjectURL(url);
+        showToast("Prescriptions exported successfully!", "success");
     }
     
-    // Show Toast
+    // ============================================
+    // TOAST MESSAGE
+    // ============================================
     function showToast(message, type) {
+        const container = document.getElementById('toast-container') || createToastContainer();
         const toast = document.createElement('div');
-        toast.className = `alert alert-${type} position-fixed bottom-0 end-0 m-3 shadow`;
-        toast.style.zIndex = '9999';
-        toast.style.minWidth = '250px';
-        toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>${message}`;
-        document.body.appendChild(toast);
+        toast.className = `alert alert-${type} alert-dismissible fade show toast-custom`;
+        toast.style.cssText = 'margin-bottom:10px;box-shadow:0 5px 20px rgba(0,0,0,0.15);border-radius:12px';
+        toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+        container.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
     
-    // Event Listeners
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;min-width:320px';
+        document.body.appendChild(container);
+        return container;
+    }
+    
+    // ============================================
+    // LOGOUT
+    // ============================================
+    function logout() {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+    }
+    
+    document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        logout();
+    });
+    
+    // ============================================
+    // AUTO REFRESH (30 seconds)
+    // ============================================
+    let refreshInterval = setInterval(() => {
+        prescriptions = loadPrescriptionsFromStorage();
+        displayPrescriptions();
+        updateStats();
+    }, 30000);
+    
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
     document.getElementById('searchPrescription').addEventListener('input', () => {
         currentPage = 1;
         displayPrescriptions();
@@ -1030,7 +1266,6 @@
         displayPrescriptions();
     });
     
-    // Initialize Camera when modal opens
     document.getElementById('scanPrescriptionModal').addEventListener('shown.bs.modal', () => {
         initCamera();
     });
@@ -1043,12 +1278,20 @@
         document.getElementById('scanResult').style.display = 'none';
     });
     
-    // Initial Load
+    // ============================================
+    // INITIALIZE
+    // ============================================
+    checkAuth();
     displayPrescriptions();
     updateStats();
+    document.getElementById('prescriptionDate').value = new Date().toISOString().split('T')[0];
+    
+    window.addEventListener('beforeunload', () => {
+        if(refreshInterval) clearInterval(refreshInterval);
+    });
     
     // GSAP Animation
-    gsap.from(".prescription-card", {
+    gsap.from(".prescription-card, .card.border-0", {
         duration: 0.6,
         y: 30,
         opacity: 0,

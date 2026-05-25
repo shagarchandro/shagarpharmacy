@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>POS Billing - MediCare Pharmacy</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,179 +12,507 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        
-        body {
-            background: #f5f7fb;
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
+        body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        
+        /* Premium Sidebar - Dark Navy */
         .sidebar {
             position: fixed;
             left: 0;
             top: 0;
             height: 100%;
             width: 280px;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            backdrop-filter: blur(10px);
             z-index: 1000;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 10px 0 40px rgba(0, 0, 0, 0.15);
+            overflow-y: auto;
         }
         
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
+        .sidebar::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px 20px;
+            margin: 5px 15px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+        
+        .sidebar .nav-link:hover {
+            background: rgba(59, 130, 246, 0.2);
+            color: white;
+            transform: translateX(8px);
+        }
+        
+        .sidebar .nav-link.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .sidebar .nav-link i { width: 24px; font-size: 1.2rem; }
+        
+        /* Main Content */
         .main-content {
             margin-left: 280px;
-            padding: 20px;
+            padding: 20px 30px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
+        /* Glass Effect Cards - White with subtle shadow */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Button Styles */
+        .btn-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+            color: white;
+        }
+        
+        .btn-outline-primary {
+            border-radius: 14px;
+            padding: 10px 20px;
+            font-weight: 500;
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        
+        .btn-outline-primary:hover {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            border: none;
+            border-radius: 14px;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+        
+        /* POS Container - Responsive Grid */
         .pos-container {
             display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 20px;
+            grid-template-columns: 1fr 420px;
+            gap: 24px;
         }
         
+        /* Product Grid */
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-            max-height: 500px;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 20px;
+            max-height: calc(100vh - 280px);
             overflow-y: auto;
+            padding: 5px;
         }
         
         .product-card {
             background: white;
-            border-radius: 10px;
-            padding: 10px;
+            border-radius: 20px;
+            padding: 16px 12px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
         }
+        
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.08), transparent);
+            transition: left 0.5s;
+        }
+        
+        .product-card:hover::before { left: 100%; }
         
         .product-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border-color: #667eea;
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 35px rgba(59, 130, 246, 0.15);
+            border-color: #3b82f6;
         }
         
+        .product-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 28px;
+        }
+        
+        .product-name {
+            font-weight: 700;
+            font-size: 14px;
+            margin: 8px 0 4px;
+            color: #1e293b;
+        }
+        
+        .product-price {
+            color: #3b82f6;
+            font-weight: 800;
+            font-size: 18px;
+        }
+        
+        .product-stock {
+            font-size: 11px;
+            color: #64748b;
+        }
+        
+        /* Cart Items */
         .cart-item {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 10px;
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 12px;
             transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
         }
         
         .cart-item:hover {
-            background: #e9ecef;
+            background: #f1f5f9;
+            transform: translateX(5px);
+            border-color: #3b82f6;
         }
         
         .quantity-btn {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
             border: none;
-            background: #667eea;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
             font-weight: bold;
+            transition: all 0.2s ease;
         }
         
         .quantity-btn:hover {
-            background: #764ba2;
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
         }
         
+        /* Payment Methods */
         .payment-method {
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 2px solid #e0e0e0;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 12px;
+            background: white;
+        }
+        
+        .payment-method:hover {
+            transform: scale(1.05);
+            border-color: #3b82f6;
+            background: #f8fafc;
         }
         
         .payment-method.active {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
         }
         
-        @media (max-width: 992px) {
-            .pos-container {
-                grid-template-columns: 1fr;
-            }
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            .main-content {
-                margin-left: 0;
-            }
+        .payment-method i.text-primary {
+            color: #3b82f6 !important;
         }
         
-        .barcode-container {
+        /* Search Suggestions */
+        .search-wrapper { position: relative; }
+        
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+            z-index: 1000;
+            max-height: 350px;
+            overflow-y: auto;
+            display: none;
+            margin-top: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .search-suggestion-item {
+            padding: 14px 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        
+        .search-suggestion-item:hover {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            transform: translateX(6px);
+        }
+        
+        .search-suggestion-item .suggestion-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #3b82f6;
+        }
+        
+        .search-suggestion-item .suggestion-info { flex: 1; }
+        .search-suggestion-item .suggestion-name { font-weight: 600; font-size: 14px; color: #1e293b; }
+        .search-suggestion-item .suggestion-details { font-size: 11px; color: #64748b; }
+        .search-suggestion-item .suggestion-price { font-weight: bold; color: #3b82f6; font-size: 14px; }
+        
+        /* Scanner Mode */
+        .scan-mode-active {
+            animation: pulse 1.2s ease-in-out infinite;
+            background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+            color: white !important;
+            border-color: #3b82f6 !important;
         }
         
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
         }
         
-        .scan-mode {
-            animation: pulse 1s ease-in-out infinite;
-            background: #667eea;
+        .scanner-alert {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
+            border: none;
+            border-radius: 16px;
+            animation: slideDown 0.4s ease;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        /* Toast */
+        .toast-custom {
+            animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%) scale(0.8); opacity: 0; }
+            to { transform: translateX(0) scale(1); opacity: 1; }
+        }
+        
+        /* Gradient Text - Blue theme */
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        /* Loading Spinner */
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Custom Scrollbar */
+        .product-grid::-webkit-scrollbar, .cart-items-container::-webkit-scrollbar,
+        .search-suggestions::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .product-grid::-webkit-scrollbar-track, .cart-items-container::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        
+        .product-grid::-webkit-scrollbar-thumb, .cart-items-container::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 10px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .pos-container { grid-template-columns: 1fr 380px; gap: 20px; }
+            .product-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 15px; }
+            .pos-container { grid-template-columns: 1fr; }
+            .product-grid { max-height: 400px; }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content { padding: 12px; }
+            .product-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+            .product-card { padding: 12px 8px; }
+            .product-icon { width: 45px; height: 45px; font-size: 22px; }
+            .product-name { font-size: 12px; }
+            .product-price { font-size: 14px; }
+            h2 { font-size: 1.5rem; }
+        }
+        
+        @media (max-width: 480px) {
+            .product-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+            .btn-gradient, .btn-outline-primary, .btn-danger { padding: 8px 16px; font-size: 12px; }
+            .payment-method i { font-size: 1.2rem !important; }
+            .payment-method .small { font-size: 10px; }
+        }
+        
+        /* Header text color fix */
+        .text-white-50 {
+            color: rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .text-muted {
+            color: #64748b !important;
+        }
+        
+        .bg-primary {
+            background: #3b82f6 !important;
+        }
+        
+        .badge.bg-primary {
+            background: #3b82f6 !important;
+        }
+        
+        .badge.bg-warning {
+            background: #f59e0b !important;
+            color: #1e293b !important;
+        }
+        
+        /* Form controls */
+        .form-control:focus, .form-select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Input group */
+        .input-group-text {
+            background: white;
+            border-color: #e2e8f0;
         }
     </style>
 </head>
 <body>
 
+<!-- Mobile Menu Overlay -->
+<div id="mobileOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999;" onclick="closeMobileMenu()"></div>
+
 <!-- Sidebar -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
     <div class="p-4">
-        <div class="d-flex align-items-center gap-2 mb-4">
-            <i class="fas fa-hospital-user text-white fs-3"></i>
-            <span class="text-white fw-bold fs-5">MediCare</span>
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div class="d-flex align-items-center gap-2">
+                <div class="bg-gradient rounded-lg p-2">
+                    <i class="fas fa-hospital-user text-white fs-4"></i>
+                </div>
+                <span class="text-white fw-bold fs-5">MediCare</span>
+            </div>
+            <button class="btn btn-sm text-white d-md-none" onclick="closeMobileMenu()">
+                <i class="fas fa-times fs-5"></i>
+            </button>
+        </div>
+        
+        <div class="user-info text-center mb-4">
+            <img src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff&rounded=true&size=80" class="rounded-circle mb-2" width="70" height="70" id="userAvatar">
+            <h6 class="text-white mb-1" id="userName">Staff User</h6>
+            <small class="text-white-50" id="userRole">Staff</small>
         </div>
         
         <nav class="nav flex-column">
-            <a href="dashboard.html" class="nav-link text-white-50 mb-2">
-                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
-            </a>
-            <a href="medicines.html" class="nav-link text-white-50 mb-2">
-                <i class="fas fa-capsules me-2"></i> Medicines
-            </a>
-            <a href="customers.html" class="nav-link text-white-50 mb-2">
-                <i class="fas fa-users me-2"></i> Customers
-            </a>
-            <a href="sales.html" class="nav-link text-white active bg-primary bg-opacity-25 rounded">
-                <i class="fas fa-shopping-cart me-2"></i> POS Sales
-            </a>
-            <a href="purchases.html" class="nav-link text-white-50 mb-2">
-                <i class="fas fa-truck me-2"></i> Purchases
-            </a>
-            <a href="suppliers.html" class="nav-link text-white-50 mb-2">
-                <i class="fas fa-parachute-box me-2"></i> Suppliers
-            </a>
-            <a href="reports.html" class="nav-link text-white-50 mb-2">
-                <i class="fas fa-chart-line me-2"></i> Reports
-            </a>
-            <hr class="bg-secondary my-3">
-            <a href="login.html" class="nav-link text-white-50">
-                <i class="fas fa-sign-out-alt me-2"></i> Logout
-            </a>
+            <a href="dashboard.html" class="nav-link"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
+            <a href="medicines.html" class="nav-link"><i class="fas fa-capsules"></i><span>Medicines</span></a>
+            <a href="customers.html" class="nav-link"><i class="fas fa-users"></i><span>Customers</span></a>
+            <a href="sales.html" class="nav-link active"><i class="fas fa-shopping-cart"></i><span>POS Sales</span></a>
+            <a href="purchases.html" class="nav-link"><i class="fas fa-truck"></i><span>Purchases</span></a>
+            <a href="suppliers.html" class="nav-link"><i class="fas fa-parachute-box"></i><span>Suppliers</span></a>
+            <a href="reports.html" class="nav-link"><i class="fas fa-chart-line"></i><span>Reports</span></a>
+            <hr class="bg-secondary my-3 opacity-25">
+            <a href="login.html" class="nav-link" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
         </nav>
     </div>
 </div>
 
 <!-- Main Content -->
-<div class="main-content">
+<div class="main-content" id="mainContent">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
-            <h2 class="fw-bold gradient-text">Point of Sale (POS)</h2>
-            <p class="text-muted">Fast & efficient billing system</p>
+            <h2 class="fw-bold gradient-text mb-1">🧾 Point of Sale (POS)</h2>
+            <p class="text-muted mb-0">Fast & efficient billing system</p>
         </div>
-        <div>
-            <button class="btn btn-outline-primary me-2" onclick="toggleScanMode()">
+        <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-outline-primary rounded-pill px-4" id="scannerToggleBtn" onclick="toggleScanMode()">
                 <i class="fas fa-camera me-2"></i>Barcode Scanner
             </button>
-            <button class="btn btn-outline-secondary" onclick="clearCart()">
+            <button class="btn btn-danger rounded-pill px-4" onclick="clearCart()">
                 <i class="fas fa-trash-alt me-2"></i>Clear Cart
+            </button>
+            <button class="btn btn-primary rounded-pill d-md-none" onclick="openMobileMenu()">
+                <i class="fas fa-bars me-2"></i>Menu
             </button>
         </div>
     </div>
@@ -194,109 +522,141 @@
         <!-- Left Side - Products -->
         <div>
             <!-- Search Bar -->
-            <div class="card border-0 shadow-sm mb-3">
-                <div class="card-body">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white">
-                            <i class="fas fa-search text-primary"></i>
-                        </span>
-                        <input type="text" class="form-control" id="searchProduct" 
-                               placeholder="Search by name, generic name, or scan barcode..." autofocus>
-                        <button class="btn btn-primary" onclick="searchProducts()">
-                            <i class="fas fa-search"></i>
-                        </button>
+            <div class="glass-card mb-4">
+                <div class="p-3">
+                    <div class="search-wrapper">
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0 rounded-start-4">
+                                <i class="fas fa-search text-primary"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0 bg-transparent" id="searchProduct" 
+                                   placeholder="🔍 Search by name, generic name, brand, or scan barcode..." 
+                                   autocomplete="off" style="box-shadow: none;">
+                            <button class="btn btn-primary rounded-end-4" onclick="performSearch()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div id="searchSuggestions" class="search-suggestions"></div>
                     </div>
-                    <div class="mt-2" id="scanModeIndicator" style="display: none;">
-                        <div class="alert alert-info text-center">
-                            <i class="fas fa-camera me-2"></i>
-                            Scanner Mode Active - Ready to scan barcodes
+                    
+                    <!-- Scanner Mode Indicator -->
+                    <div id="scanModeIndicator" style="display: none;" class="mt-3">
+                        <div class="alert scanner-alert text-center mb-0">
+                            <i class="fas fa-camera fa-fw me-2"></i>
+                            <strong>📷 Scanner Mode Active!</strong> Ready to scan barcodes
+                            <br>
+                            <small class="opacity-75">Type barcode numbers then press Enter</small>
                         </div>
                     </div>
                 </div>
             </div>
             
             <!-- Products Grid -->
-            <div class="product-grid" id="productsGrid"></div>
+            <div class="product-grid" id="productsGrid">
+                <div class="col-12 text-center py-5">
+                    <div class="loading-spinner"></div>
+                    <p class="mt-3 text-muted">Loading products...</p>
+                </div>
+            </div>
         </div>
         
         <!-- Right Side - Cart -->
         <div>
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pt-3">
+            <div class="glass-card">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
                     <h5 class="fw-bold mb-0">
                         <i class="fas fa-shopping-cart text-primary me-2"></i>
                         Shopping Cart
+                        <span class="badge bg-primary rounded-pill ms-2" id="cartCount">0</span>
                     </h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4" style="max-height: calc(100vh - 200px); overflow-y: auto;">
                     <!-- Customer Selection -->
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Select Customer</label>
-                        <select class="form-select" id="customerSelect">
-                            <option value="0">Walk-in Customer</option>
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-user me-1 text-primary"></i> Select Customer
+                        </label>
+                        <select class="form-select rounded-3" id="customerSelect">
+                            <option value="0">🚶 Walk-in Customer</option>
                         </select>
                     </div>
                     
                     <!-- Cart Items -->
-                    <div id="cartItems" style="max-height: 300px; overflow-y: auto;"></div>
+                    <div id="cartItems" class="cart-items-container" style="max-height: 250px; overflow-y: auto;"></div>
                     
                     <!-- Cart Summary -->
                     <div class="mt-3 pt-3 border-top">
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Subtotal:</span>
+                            <span class="text-muted">Subtotal:</span>
                             <span class="fw-bold" id="subtotal">$0.00</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Discount (5%):</span>
+                            <span class="text-muted">Discount (<span id="discountPercent">0</span>%):</span>
                             <span class="fw-bold text-danger" id="discount">-$0.00</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Tax (VAT 10%):</span>
+                            <span class="text-muted">Tax (VAT 10%):</span>
                             <span class="fw-bold" id="tax">$0.00</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-3 pt-2 border-top">
+                        <div class="d-flex justify-content-between pt-2 border-top mt-2">
                             <span class="fs-5 fw-bold">Total:</span>
-                            <span class="fs-4 fw-bold text-primary" id="total">$0.00</span>
+                            <span class="fs-3 fw-bold gradient-text" id="total">$0.00</span>
+                        </div>
+                        
+                        <!-- Discount Slider -->
+                        <div class="mt-3">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-tags me-1 text-primary"></i> Discount
+                            </label>
+                            <div class="d-flex gap-2 align-items-center">
+                                <i class="fas fa-percent text-muted"></i>
+                                <input type="range" class="form-range flex-grow-1" id="discountSlider" min="0" max="100" value="0" step="1">
+                                <input type="number" class="form-control" id="discountInput" style="width: 70px; border-radius: 12px;" value="0" min="0" max="100">
+                            </div>
                         </div>
                         
                         <!-- Payment Methods -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Payment Method</label>
+                        <div class="mt-3">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-credit-card me-1 text-primary"></i> Payment Method
+                            </label>
                             <div class="row g-2">
                                 <div class="col-4">
-                                    <div class="payment-method text-center p-2 rounded active" data-method="cash">
-                                        <i class="fas fa-money-bill-wave fa-2x mb-1"></i>
-                                        <div class="small">Cash</div>
+                                    <div class="payment-method text-center active" data-method="cash">
+                                        <i class="fas fa-money-bill-wave fa-2x mb-1 text-primary"></i>
+                                        <div class="small fw-semibold">Cash</div>
                                     </div>
                                 </div>
                                 <div class="col-4">
-                                    <div class="payment-method text-center p-2 rounded" data-method="card">
-                                        <i class="fab fa-cc-visa fa-2x mb-1"></i>
-                                        <div class="small">Card</div>
+                                    <div class="payment-method text-center" data-method="card">
+                                        <i class="fab fa-cc-visa fa-2x mb-1 text-primary"></i>
+                                        <div class="small fw-semibold">Card</div>
                                     </div>
                                 </div>
                                 <div class="col-4">
-                                    <div class="payment-method text-center p-2 rounded" data-method="mobile">
-                                        <i class="fas fa-mobile-alt fa-2x mb-1"></i>
-                                        <div class="small">Mobile Banking</div>
+                                    <div class="payment-method text-center" data-method="mobile">
+                                        <i class="fas fa-mobile-alt fa-2x mb-1 text-primary"></i>
+                                        <div class="small fw-semibold">Mobile</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Cash Amount (for cash payment) -->
+                        <!-- Cash Amount -->
                         <div class="mb-3" id="cashAmountDiv">
-                            <label class="form-label fw-semibold">Cash Amount</label>
-                            <input type="number" class="form-control" id="cashAmount" placeholder="Enter cash amount">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-dollar-sign me-1 text-primary"></i> Cash Amount
+                            </label>
+                            <input type="number" class="form-control rounded-3" id="cashAmount" placeholder="Enter cash amount" step="0.01">
                             <small class="text-muted" id="changeAmount"></small>
                         </div>
                         
                         <!-- Action Buttons -->
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-gradient" onclick="processPayment()">
+                        <div class="d-grid gap-2 mt-3">
+                            <button class="btn btn-gradient py-3 rounded-3" onclick="processPayment()">
                                 <i class="fas fa-receipt me-2"></i>Process Payment
                             </button>
-                            <button class="btn btn-outline-secondary" onclick="printInvoice()">
+                            <button class="btn btn-outline-secondary py-2 rounded-3" onclick="printInvoice()">
                                 <i class="fas fa-print me-2"></i>Print Invoice
                             </button>
                         </div>
@@ -308,20 +668,20 @@
 </div>
 
 <!-- Invoice Modal -->
-<div class="modal fade" id="invoiceModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+<div class="modal fade invoice-modal" id="invoiceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-gradient text-white">
-                <h5 class="modal-title">Invoice</h5>
+            <div class="modal-header" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none;">
+                <h5 class="modal-title"><i class="fas fa-file-invoice me-2"></i>Invoice</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="invoiceContent"></div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="printInvoiceModal()">
+            <div class="modal-body p-4" id="invoiceContent"></div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary rounded-3" onclick="printInvoiceModal()">
                     <i class="fas fa-print me-2"></i>Print
                 </button>
-                <button type="button" class="btn btn-success" onclick="downloadInvoicePDF()">
+                <button type="button" class="btn btn-success rounded-3" onclick="downloadInvoicePDF()">
                     <i class="fas fa-file-pdf me-2"></i>Download PDF
                 </button>
             </div>
@@ -333,17 +693,48 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
-    // Sample Products Data
-    let products = [
-        { id: 1, name: "Paracetamol 500mg", generic: "Acetaminophen", price: 5.00, stock: 150, image: "💊" },
-        { id: 2, name: "Amoxicillin 250mg", generic: "Amoxicillin", price: 10.00, stock: 8, image: "💊" },
-        { id: 3, name: "Vitamin C 1000mg", generic: "Ascorbic Acid", price: 15.00, stock: 45, image: "🍊" },
-        { id: 4, name: "Aspirin 100mg", generic: "Acetylsalicylic Acid", price: 8.00, stock: 120, image: "💊" },
-        { id: 5, name: "Omeprazole 20mg", generic: "Omeprazole", price: 12.00, stock: 60, image: "💊" },
-        { id: 6, name: "Loratadine 10mg", generic: "Loratadine", price: 7.00, stock: 35, image: "💊" },
-        { id: 7, name: "Ibuprofen 400mg", generic: "Ibuprofen", price: 6.00, stock: 90, image: "💊" },
-        { id: 8, name: "Cetirizine 10mg", generic: "Cetirizine", price: 9.00, stock: 55, image: "💊" }
-    ];
+    // ============================================
+    // STORAGE KEYS
+    // ============================================
+    const STORAGE_KEY = 'pharmacy_medicines';
+    
+    // ============================================
+    // LOAD PRODUCTS FROM LOCALSTORAGE
+    // ============================================
+    function loadProductsFromStorage() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            const medicines = JSON.parse(stored);
+            return medicines.map(med => ({
+                id: med.id,
+                name: med.name,
+                generic: med.genericName || '',
+                brand: med.brand || '',
+                price: med.sellingPrice,
+                stock: med.stock,
+                image: med.image ? '<img src="'+med.image+'" style="width: 40px; height: 40px; object-fit: cover; border-radius: 12px;">' : '💊',
+                barcode: med.barcode || med.id.toString()
+            }));
+        }
+        // Default products if no data
+        return [
+            { id: 1, name: "Paracetamol 500mg", generic: "Acetaminophen", brand: "Tylenol", price: 5.00, stock: 150, image: "💊", barcode: "8901234567890" },
+            { id: 2, name: "Amoxicillin 250mg", generic: "Amoxicillin", brand: "Amoxil", price: 10.00, stock: 8, image: "💊", barcode: "8901234567891" },
+            { id: 3, name: "Vitamin C 1000mg", generic: "Ascorbic Acid", brand: "Nature's Way", price: 15.00, stock: 45, image: "🍊", barcode: "8901234567892" },
+            { id: 4, name: "Aspirin 100mg", generic: "Acetylsalicylic Acid", brand: "Bayer", price: 8.00, stock: 120, image: "💊", barcode: "8901234567893" },
+            { id: 5, name: "Omeprazole 20mg", generic: "Omeprazole", brand: "Prilosec", price: 12.00, stock: 60, image: "💊", barcode: "8901234567894" },
+            { id: 6, name: "Loratadine 10mg", generic: "Loratadine", brand: "Claritin", price: 7.00, stock: 35, image: "💊", barcode: "8901234567895" },
+            { id: 7, name: "Ibuprofen 400mg", generic: "Ibuprofen", brand: "Advil", price: 6.00, stock: 90, image: "💊", barcode: "8901234567896" },
+            { id: 8, name: "Cetirizine 10mg", generic: "Cetirizine", brand: "Zyrtec", price: 9.00, stock: 55, image: "💊", barcode: "8901234567897" }
+        ];
+    }
+    
+    let products = loadProductsFromStorage();
+    let cart = [];
+    let selectedPaymentMethod = 'cash';
+    let scanMode = false;
+    let barcodeBuffer = '';
+    let lastKeyTime = 0;
     
     // Sample Customers
     let customers = [
@@ -352,15 +743,26 @@
         { id: 3, name: "Mike Johnson", phone: "+1234567892" }
     ];
     
-    let cart = [];
-    let selectedPaymentMethod = 'cash';
-    let scanMode = false;
-    let barcodeBuffer = '';
-    let lastKeyTime = 0;
+    // ============================================
+    // AUTHENTICATION CHECK
+    // ============================================
+    function checkAuth() {
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        const userData = JSON.parse(user);
+        document.getElementById('userName').textContent = userData.name;
+        document.getElementById('userRole').textContent = userData.role.toUpperCase();
+    }
     
-    // Load Customers
+    // ============================================
+    // LOAD CUSTOMERS
+    // ============================================
     function loadCustomers() {
         const select = document.getElementById('customerSelect');
+        select.innerHTML = '<option value="0">🚶 Walk-in Customer</option>';
         customers.forEach(cust => {
             const option = document.createElement('option');
             option.value = cust.id;
@@ -369,56 +771,115 @@
         });
     }
     
-    // Display Products
+    // ============================================
+    // DISPLAY PRODUCTS
+    // ============================================
     function displayProducts(searchTerm = '') {
-        const filtered = products.filter(p => 
-            p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.generic.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        let filtered = products;
+        
+        if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            filtered = products.filter(p => 
+                p.name.toLowerCase().includes(term) ||
+                (p.generic && p.generic.toLowerCase().includes(term)) ||
+                (p.brand && p.brand.toLowerCase().includes(term)) ||
+                (p.barcode && p.barcode.includes(term))
+            );
+        }
         
         const grid = document.getElementById('productsGrid');
+        if (filtered.length === 0) {
+            grid.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+                    <h6 class="text-muted">No products found</h6>
+                    <small class="text-muted">Try a different search term</small>
+                </div>
+            `;
+            return;
+        }
+        
         grid.innerHTML = filtered.map(p => `
             <div class="product-card" onclick="addToCart(${p.id})">
-                <div class="fs-1">${p.image}</div>
-                <div class="fw-bold small">${p.name}</div>
-                <div class="text-primary fw-bold">$${p.price}</div>
-                <div class="text-muted small">Stock: ${p.stock}</div>
+                <div class="product-icon">${p.image}</div>
+                <div class="product-name">${p.name.length > 25 ? p.name.substring(0, 22) + '...' : p.name}</div>
+                <div class="product-price">$${p.price}</div>
+                <div class="product-stock">📦 Stock: ${p.stock}</div>
+                ${p.stock <= 10 ? '<span class="badge bg-warning text-dark mt-1">⚠️ Low Stock</span>' : ''}
             </div>
         `).join('');
     }
     
-    // Add to Cart
+    // ============================================
+    // SEARCH WITH SUGGESTIONS
+    // ============================================
+    function performSearch() {
+        const searchTerm = document.getElementById('searchProduct').value;
+        displayProducts(searchTerm);
+        hideSuggestions();
+    }
+    
+    function showSuggestions() {
+        const searchTerm = document.getElementById('searchProduct').value.toLowerCase();
+        if (!searchTerm || searchTerm.length < 2) { hideSuggestions(); return; }
+        
+        const suggestions = products.filter(p => 
+            p.name.toLowerCase().includes(searchTerm) ||
+            (p.generic && p.generic.toLowerCase().includes(searchTerm)) ||
+            (p.brand && p.brand.toLowerCase().includes(searchTerm))
+        ).slice(0, 8);
+        
+        if (suggestions.length === 0) { hideSuggestions(); return; }
+        
+        const suggestionsDiv = document.getElementById('searchSuggestions');
+        suggestionsDiv.innerHTML = suggestions.map(p => `
+            <div class="search-suggestion-item" onclick="selectSuggestion(${p.id})">
+                <div class="suggestion-icon"><i class="fas fa-capsules"></i></div>
+                <div class="suggestion-info">
+                    <div class="suggestion-name">${p.name}</div>
+                    <div class="suggestion-details">${p.generic || ''} ${p.brand ? '| ' + p.brand : ''} | Stock: ${p.stock}</div>
+                </div>
+                <div class="suggestion-price">$${p.price}</div>
+            </div>
+        `).join('');
+        suggestionsDiv.style.display = 'block';
+    }
+    
+    function selectSuggestion(productId) { addToCart(productId); document.getElementById('searchProduct').value = ''; hideSuggestions(); displayProducts(); }
+    function hideSuggestions() { document.getElementById('searchSuggestions').style.display = 'none'; }
+    
+    // ============================================
+    // ADD TO CART
+    // ============================================
     function addToCart(productId) {
         const product = products.find(p => p.id === productId);
-        if(!product) return;
+        if (!product) return;
+        if (product.stock <= 0) { showToast('Product out of stock!', 'danger'); return; }
         
         const existingItem = cart.find(item => item.id === productId);
-        if(existingItem) {
-            if(existingItem.quantity + 1 <= product.stock) {
+        if (existingItem) {
+            if (existingItem.quantity + 1 <= product.stock) {
                 existingItem.quantity++;
                 existingItem.total = existingItem.quantity * existingItem.price;
-            } else {
-                showToast('Not enough stock!', 'warning');
-            }
+                showToast(`${product.name} quantity updated`, 'success');
+            } else { showToast('Not enough stock!', 'warning'); }
         } else {
-            cart.push({
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                quantity: 1,
-                total: product.price
-            });
+            cart.push({ id: product.id, name: product.name, price: product.price, quantity: 1, total: product.price });
+            showToast(`➕ ${product.name} added to cart`, 'success');
         }
-        
         updateCart();
     }
     
-    // Update Cart Display
+    // ============================================
+    // UPDATE CART DISPLAY
+    // ============================================
     function updateCart() {
         const cartContainer = document.getElementById('cartItems');
+        const cartCount = document.getElementById('cartCount');
+        cartCount.textContent = cart.length;
         
-        if(cart.length === 0) {
-            cartContainer.innerHTML = '<div class="text-center text-muted py-5">Cart is empty</div>';
+        if (cart.length === 0) {
+            cartContainer.innerHTML = '<div class="text-center text-muted py-5">🛒 Cart is empty</div>';
         } else {
             cartContainer.innerHTML = cart.map(item => `
                 <div class="cart-item">
@@ -429,297 +890,202 @@
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
-                            <span class="fw-bold mx-2">${item.quantity}</span>
+                            <span class="fw-bold mx-2" style="min-width: 30px; text-align: center;">${item.quantity}</span>
                             <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
-                            <button class="btn btn-sm btn-danger ms-2" onclick="removeFromCart(${item.id})">
+                            <button class="btn btn-sm btn-danger ms-2 rounded-3" onclick="removeFromCart(${item.id})">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="text-end mt-1">
-                        <span class="fw-bold">$${item.total.toFixed(2)}</span>
-                    </div>
+                    <div class="text-end mt-1"><span class="fw-bold">$${item.total.toFixed(2)}</span></div>
                 </div>
             `).join('');
         }
-        
         calculateTotals();
     }
     
-    // Update Quantity
     function updateQuantity(productId, newQuantity) {
         const product = products.find(p => p.id === productId);
         const cartItem = cart.find(item => item.id === productId);
-        
-        if(newQuantity <= 0) {
-            removeFromCart(productId);
-        } else if(newQuantity <= product.stock) {
-            cartItem.quantity = newQuantity;
-            cartItem.total = cartItem.quantity * cartItem.price;
-            updateCart();
-        } else {
-            showToast('Not enough stock!', 'warning');
-        }
+        if (!cartItem) return;
+        if (newQuantity <= 0) removeFromCart(productId);
+        else if (newQuantity <= product.stock) { cartItem.quantity = newQuantity; cartItem.total = cartItem.quantity * cartItem.price; updateCart(); }
+        else showToast('Not enough stock!', 'warning');
     }
     
-    // Remove from Cart
-    function removeFromCart(productId) {
-        cart = cart.filter(item => item.id !== productId);
-        updateCart();
-    }
+    function removeFromCart(productId) { cart = cart.filter(item => item.id !== productId); updateCart(); showToast('Item removed from cart', 'info'); }
     
-    // Calculate Totals
+    // ============================================
+    // CALCULATE TOTALS
+    // ============================================
     function calculateTotals() {
         const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
-        const discount = subtotal * 0.05; // 5% discount
-        const tax = (subtotal - discount) * 0.10; // 10% VAT
+        const discountPercent = parseFloat(document.getElementById('discountSlider')?.value || 0);
+        const discount = subtotal * (discountPercent / 100);
+        const tax = (subtotal - discount) * 0.10;
         const total = subtotal - discount + tax;
         
         document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
         document.getElementById('discount').textContent = `-$${discount.toFixed(2)}`;
         document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
         document.getElementById('total').textContent = `$${total.toFixed(2)}`;
-        
+        document.getElementById('discountPercent').textContent = discountPercent;
         return { subtotal, discount, tax, total };
     }
     
-    // Clear Cart
-    function clearCart() {
-        if(confirm('Clear all items from cart?')) {
-            cart = [];
-            updateCart();
-        }
-    }
+    // Discount Controls
+    const discountSlider = document.getElementById('discountSlider');
+    const discountInput = document.getElementById('discountInput');
+    discountSlider?.addEventListener('input', function() { discountInput.value = this.value; calculateTotals(); });
+    discountInput?.addEventListener('input', function() { let val = parseInt(this.value) || 0; if (val > 100) val = 100; if (val < 0) val = 0; discountSlider.value = val; calculateTotals(); });
     
-    // Process Payment
+    function clearCart() { if (cart.length > 0 && confirm('Clear all items from cart?')) { cart = []; updateCart(); showToast('Cart cleared', 'info'); } }
+    
+    // ============================================
+    // PROCESS PAYMENT
+    // ============================================
     function processPayment() {
-        if(cart.length === 0) {
-            showToast('Cart is empty!', 'warning');
-            return;
-        }
-        
+        if (cart.length === 0) { showToast('Cart is empty!', 'warning'); return; }
         const { total } = calculateTotals();
         const customerId = document.getElementById('customerSelect').value;
         const paymentMethod = selectedPaymentMethod;
+        let cashAmount = 0, change = 0;
         
-        let cashAmount = 0;
-        let change = 0;
-        
-        if(paymentMethod === 'cash') {
+        if (paymentMethod === 'cash') {
             cashAmount = parseFloat(document.getElementById('cashAmount').value);
-            if(isNaN(cashAmount) || cashAmount < total) {
-                showToast('Insufficient cash amount!', 'danger');
-                return;
-            }
+            if (isNaN(cashAmount) || cashAmount < total) { showToast('Insufficient cash amount!', 'danger'); return; }
             change = cashAmount - total;
-            document.getElementById('changeAmount').innerHTML = `Change: $${change.toFixed(2)}`;
+            document.getElementById('changeAmount').innerHTML = `<span class="text-success">💰 Change: $${change.toFixed(2)}</span>`;
         }
         
-        // Generate invoice
         const invoice = {
             invoiceNo: 'INV-' + Date.now(),
             date: new Date().toLocaleString(),
-            customer: customerId === '0' ? 'Walk-in Customer' : customers.find(c => c.id == customerId).name,
+            customer: customerId === '0' ? 'Walk-in Customer' : customers.find(c => c.id == customerId)?.name || 'Walk-in Customer',
             items: [...cart],
-            subtotal: total / 1.05, // Approximate
-            discount: total * 0.0476,
-            tax: total * 0.0952,
+            subtotal: total / 1.1,
+            discount: total - (total / 1.1),
+            tax: total / 11,
             total: total,
             paymentMethod: paymentMethod,
             cashAmount: cashAmount,
             change: change
         };
         
-        // Show invoice
-        showInvoice(invoice);
-        
-        // Update stock (in real app, this would be done via API)
+        // Update stock in localStorage
+        const allMedicines = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
         cart.forEach(item => {
+            const medicineIndex = allMedicines.findIndex(m => m.id === item.id);
+            if (medicineIndex !== -1) allMedicines[medicineIndex].stock -= item.quantity;
             const product = products.find(p => p.id === item.id);
-            if(product) product.stock -= item.quantity;
+            if (product) product.stock -= item.quantity;
         });
-        
-        // Clear cart
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(allMedicines));
+        products = loadProductsFromStorage();
+        displayProducts();
+        showInvoice(invoice);
         cart = [];
         updateCart();
-        displayProducts();
-        
-        // Reset cash amount
         document.getElementById('cashAmount').value = '';
         document.getElementById('changeAmount').innerHTML = '';
     }
     
-    // Show Invoice
+    // ============================================
+    // SHOW INVOICE
+    // ============================================
     function showInvoice(invoice) {
         const invoiceHtml = `
             <div class="text-center mb-4">
-                <h3 class="fw-bold">MediCare Pharmacy</h3>
+                <h3 class="fw-bold" style="color: #3b82f6;">🏥 MediCare Pharmacy</h3>
                 <p class="mb-0">123 Healthcare Street, Medical District</p>
-                <p>Phone: +1234567890 | Email: info@medicare.com</p>
+                <p>📞 +1234567890 | ✉️ info@medicare.com</p>
                 <hr>
-                <h5>INVOICE</h5>
+                <h5>🧾 INVOICE</h5>
                 <p><strong>Invoice No:</strong> ${invoice.invoiceNo}<br>
                 <strong>Date:</strong> ${invoice.date}<br>
                 <strong>Customer:</strong> ${invoice.customer}</p>
                 <hr>
             </div>
-            
-            <table class="table table-bordered">
-                <thead class="table-light">
-                    <tr>
-                        <th>Item</th>
-                        <th>Price</th>
-                        <th>Qty</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${invoice.items.map(item => `
-                        <tr>
-                            <td>${item.name}</td>
-                            <td>$${item.price.toFixed(2)}</td>
-                            <td>${item.quantity}</td>
-                            <td>$${item.total.toFixed(2)}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="3" class="text-end fw-bold">Subtotal:</td>
-                        <td>$${invoice.subtotal.toFixed(2)}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="3" class="text-end fw-bold">Discount (5%):</td>
-                        <td>$${invoice.discount.toFixed(2)}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="3" class="text-end fw-bold">Tax (10%):</td>
-                        <td>$${invoice.tax.toFixed(2)}</td>
-                    </tr>
-                    <tr class="table-primary">
-                        <td colspan="3" class="text-end fw-bold fs-5">Total:</td>
-                        <td class="fw-bold fs-5">$${invoice.total.toFixed(2)}</td>
-                    </tr>
-                    ${invoice.paymentMethod === 'cash' ? `
-                        <tr>
-                            <td colspan="3" class="text-end">Cash:</td>
-                            <td>$${invoice.cashAmount.toFixed(2)}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="3" class="text-end">Change:</td>
-                            <td>$${invoice.change.toFixed(2)}</td>
-                        </tr>
-                    ` : ''}
-                </tfoot>
+            <table class="table table-bordered"><thead class="table-light"><tr><th>Item</th><th>Price</th><th>Qty</th><th>Total</th></tr></thead>
+            <tbody>${invoice.items.map(item => `<td>${item.name}</td><td class="text-center">$${item.price.toFixed(2)}</td><td class="text-center">${item.quantity}</td><td class="text-end">$${item.total.toFixed(2)}</td>`).join('')}</tbody>
+            <tfoot><tr><td colspan="3" class="text-end fw-bold">Subtotal:</td><td class="text-end">$${invoice.subtotal.toFixed(2)}</td></tr>
+            <tr><td colspan="3" class="text-end fw-bold">Discount:</td><td class="text-end text-danger">-$${invoice.discount.toFixed(2)}</td></tr>
+            <tr><td colspan="3" class="text-end fw-bold">Tax (10%):</td><td class="text-end">$${invoice.tax.toFixed(2)}</td></tr>
+            <tr class="table-primary"><td colspan="3" class="text-end fw-bold fs-5">Total:</td><td class="text-end fw-bold fs-5" style="color: #3b82f6;">$${invoice.total.toFixed(2)}</td></tr>
+            ${invoice.paymentMethod === 'cash' ? `<tr><td colspan="3" class="text-end">Cash:</td><td class="text-end">$${invoice.cashAmount.toFixed(2)}</td></tr>
+            <tr><td colspan="3" class="text-end">Change:</td><td class="text-end text-success">$${invoice.change.toFixed(2)}</td></tr>` : ''}</tfoot>
             </table>
-            
-            <div class="text-center mt-4">
-                <p class="mb-0">Payment Method: ${invoice.paymentMethod.toUpperCase()}</p>
-                <p class="mb-0">Thank you for shopping with us!</p>
-                <div class="mt-3">
-                    <svg id="barcode-${invoice.invoiceNo}"></svg>
-                </div>
-                <small class="text-muted">** This is a computer generated invoice **</small>
-            </div>
+            <div class="text-center mt-4"><p>Payment Method: ${invoice.paymentMethod.toUpperCase()}</p><p class="fw-bold">🙏 Thank you for shopping with us!</p>
+            <div><svg id="barcode-${invoice.invoiceNo}"></svg></div><small class="text-muted">** This is a computer generated invoice **</small></div>
         `;
-        
         document.getElementById('invoiceContent').innerHTML = invoiceHtml;
-        
-        // Generate barcode for invoice
-        JsBarcode(`#barcode-${invoice.invoiceNo}`, invoice.invoiceNo, {
-            format: "CODE128",
-            width: 2,
-            height: 40,
-            displayValue: true
-        });
-        
+        try { JsBarcode(`#barcode-${invoice.invoiceNo}`, invoice.invoiceNo, { format: "CODE128", width: 2, height: 40, displayValue: true }); } catch(e) {}
         new bootstrap.Modal(document.getElementById('invoiceModal')).show();
     }
     
-    // Print Invoice
     function printInvoiceModal() {
         const printContent = document.getElementById('invoiceContent').innerHTML;
-        const originalContent = document.body.innerHTML;
-        
-        document.body.innerHTML = `
-            <div style="padding: 20px; max-width: 800px; margin: 0 auto;">
-                ${printContent}
-            </div>
-        `;
-        
-        window.print();
-        document.body.innerHTML = originalContent;
-        location.reload();
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`<html><head><title>Invoice</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"><style>body{padding:20px}</style></head><body><div class="container">${printContent}</div><script>window.onload=function(){window.print();setTimeout(()=>window.close(),500)}<\/script></body></html>`);
+        printWindow.document.close();
     }
     
-    function printInvoice() {
-        if(cart.length > 0) {
-            processPayment();
-        } else {
-            showToast('No invoice to print!', 'warning');
-        }
-    }
+    function printInvoice() { if (cart.length > 0) processPayment(); else showToast('No invoice to print!', 'warning'); }
+    function downloadInvoicePDF() { const element = document.getElementById('invoiceContent'); html2pdf().set({ margin: 10, filename: 'invoice.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(element).save(); }
     
-    function downloadInvoicePDF() {
-        const element = document.getElementById('invoiceContent');
-        html2pdf()
-            .set({ margin: 10, filename: 'invoice.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } })
-            .from(element)
-            .save();
-    }
-    
-    // Search Products
-    function searchProducts() {
-        const searchTerm = document.getElementById('searchProduct').value;
-        displayProducts(searchTerm);
-    }
-    
-    // Toggle Scan Mode
+    // ============================================
+    // SCANNER MODE
+    // ============================================
     function toggleScanMode() {
         scanMode = !scanMode;
         const indicator = document.getElementById('scanModeIndicator');
         const searchInput = document.getElementById('searchProduct');
-        
-        if(scanMode) {
+        const scannerBtn = document.getElementById('scannerToggleBtn');
+        if (scanMode) {
             indicator.style.display = 'block';
-            searchInput.placeholder = 'Scanner Mode - Scan barcode...';
-            searchInput.classList.add('scan-mode');
-            showToast('Scanner mode activated. Scan a barcode to add product.', 'success');
+            searchInput.placeholder = '🔴 Scanner Mode - Type barcode numbers then press Enter...';
+            searchInput.classList.add('scan-mode-active');
+            scannerBtn.innerHTML = '<i class="fas fa-camera me-2"></i>Exit Scanner';
+            scannerBtn.classList.remove('btn-outline-primary');
+            scannerBtn.classList.add('btn-primary');
+            showToast('📷 Scanner Mode Active! Type barcode numbers, then press Enter', 'success');
+            searchInput.focus();
         } else {
             indicator.style.display = 'none';
-            searchInput.placeholder = 'Search by name, generic name, or scan barcode...';
-            searchInput.classList.remove('scan-mode');
+            searchInput.placeholder = '🔍 Search by name, generic name, brand, or scan barcode...';
+            searchInput.classList.remove('scan-mode-active');
+            scannerBtn.innerHTML = '<i class="fas fa-camera me-2"></i>Barcode Scanner';
+            scannerBtn.classList.remove('btn-primary');
+            scannerBtn.classList.add('btn-outline-primary');
+            barcodeBuffer = '';
+            showToast('Scanner Mode deactivated', 'info');
         }
     }
     
     // Barcode Scanner Handler
-    document.getElementById('searchProduct').addEventListener('keypress', (e) => {
-        if(scanMode) {
+    const scanInput = document.getElementById('searchProduct');
+    scanInput.addEventListener('keypress', (e) => {
+        if (scanMode) {
             const currentTime = new Date().getTime();
-            if(currentTime - lastKeyTime > 100) {
-                barcodeBuffer = '';
-            }
+            if (currentTime - lastKeyTime > 100) barcodeBuffer = '';
             lastKeyTime = currentTime;
-            
-            if(e.key === 'Enter') {
+            if (e.key === 'Enter') {
                 e.preventDefault();
-                const barcode = barcodeBuffer;
+                const barcode = barcodeBuffer.trim();
                 barcodeBuffer = '';
-                
-                // Find product by barcode (simulated - in real app, you'd have barcode field)
-                const product = products.find(p => p.id.toString() === barcode);
-                if(product) {
-                    addToCart(product.id);
-                    showToast(`${product.name} added to cart!`, 'success');
-                } else {
-                    showToast('Product not found!', 'danger');
+                if (barcode) {
+                    const product = products.find(p => p.barcode === barcode);
+                    if (product) { addToCart(product.id); showToast(`✅ ${product.name} added via scanner!`, 'success'); if (navigator.vibrate) navigator.vibrate(100); }
+                    else { showToast('❌ Product not found!', 'danger'); if (navigator.vibrate) navigator.vibrate([200, 100, 200]); }
+                    scanInput.value = '';
                 }
-                document.getElementById('searchProduct').value = '';
-            } else {
-                barcodeBuffer += e.key;
-            }
+            } else { barcodeBuffer += e.key; scanInput.value = '🔍 Scanning: ' + barcodeBuffer; }
         }
     });
+    
+    scanInput.addEventListener('input', () => { if (!scanMode && scanInput.value) { const term = scanInput.value; clearTimeout(window.searchTimeout); window.searchTimeout = setTimeout(() => { if (term.length >= 2) showSuggestions(); else if (term.length === 0) displayProducts(); }, 300); } });
+    scanInput.addEventListener('focus', () => { if (!scanMode && scanInput.value.length >= 2) showSuggestions(); });
+    document.addEventListener('click', (e) => { if (!scanInput.contains(e.target) && !document.getElementById('searchSuggestions').contains(e.target)) hideSuggestions(); });
     
     // Payment Method Selection
     document.querySelectorAll('.payment-method').forEach(method => {
@@ -727,54 +1093,52 @@
             document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
             method.classList.add('active');
             selectedPaymentMethod = method.dataset.method;
-            
-            const cashDiv = document.getElementById('cashAmountDiv');
-            if(selectedPaymentMethod === 'cash') {
-                cashDiv.style.display = 'block';
-            } else {
-                cashDiv.style.display = 'none';
-            }
+            document.getElementById('cashAmountDiv').style.display = selectedPaymentMethod === 'cash' ? 'block' : 'none';
         });
+    });
+    
+    document.getElementById('cashAmount')?.addEventListener('input', () => {
+        const total = parseFloat(document.getElementById('total')?.textContent.replace('$', '') || 0);
+        const cash = parseFloat(document.getElementById('cashAmount').value) || 0;
+        const change = cash - total;
+        document.getElementById('changeAmount').innerHTML = change >= 0 ? `<span class="text-success">💰 Change: $${change.toFixed(2)}</span>` : '<span class="text-danger">⚠️ Insufficient amount</span>';
     });
     
     // Keyboard Shortcuts
     document.addEventListener('keydown', (e) => {
-        if(e.ctrlKey && e.key === 'c') {
-            e.preventDefault();
-            clearCart();
-        }
-        if(e.ctrlKey && e.key === 'p') {
-            e.preventDefault();
-            printInvoice();
-        }
-        if(e.key === 'F2') {
-            e.preventDefault();
-            toggleScanMode();
-        }
+        if (e.ctrlKey && e.key === 'c') { e.preventDefault(); clearCart(); }
+        if (e.ctrlKey && e.key === 'p') { e.preventDefault(); printInvoice(); }
+        if (e.key === 'F2') { e.preventDefault(); toggleScanMode(); }
+        if (e.key === 'Escape') { hideSuggestions(); if (scanMode) toggleScanMode(); }
+        if (e.key === 'F1') { e.preventDefault(); showToast('💡 Tip: F2 for scanner, Ctrl+C clear cart, Ctrl+P print', 'info'); }
     });
     
-    // Show Toast
+    // Toast Message
     function showToast(message, type) {
+        const container = document.getElementById('toast-container') || (() => { const c = document.createElement('div'); c.id = 'toast-container'; c.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;min-width:320px'; document.body.appendChild(c); return c; })();
         const toast = document.createElement('div');
-        toast.className = `alert alert-${type} position-fixed bottom-0 end-0 m-3 shadow`;
-        toast.style.zIndex = '9999';
-        toast.style.minWidth = '250px';
-        toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle'} me-2"></i>${message}`;
-        document.body.appendChild(toast);
+        toast.className = `alert alert-${type} alert-dismissible fade show toast-custom`;
+        toast.style.cssText = 'margin-bottom:10px;box-shadow:0 5px 20px rgba(0,0,0,0.15);border-radius:16px';
+        toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle'} me-2"></i>${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+        container.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
     
+    // Mobile Menu Functions
+    function openMobileMenu() { document.getElementById('sidebar').classList.add('mobile-open'); document.getElementById('mobileOverlay').style.display = 'block'; }
+    function closeMobileMenu() { document.getElementById('sidebar').classList.remove('mobile-open'); document.getElementById('mobileOverlay').style.display = 'none'; }
+    
+    // Logout
+    function logout() { localStorage.clear(); sessionStorage.clear(); window.location.href = 'login.html'; }
+    document.getElementById('logoutBtn')?.addEventListener('click', (e) => { e.preventDefault(); logout(); });
+    
     // Initial Load
+    checkAuth();
     loadCustomers();
     displayProducts();
     
     // GSAP Animation
-    gsap.from(".pos-container", {
-        duration: 0.8,
-        y: 50,
-        opacity: 0,
-        ease: "back.out(1.2)"
-    });
+    gsap.from(".glass-card", { duration: 0.6, y: 30, opacity: 0, stagger: 0.1, ease: "back.out(1.2)" });
 </script>
 </body>
 </html>

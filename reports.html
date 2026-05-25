@@ -15,7 +15,8 @@
         * { font-family: 'Inter', sans-serif; }
         
         body {
-            background: #f5f7fb;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            min-height: 100vh;
         }
         
         .sidebar {
@@ -24,81 +25,141 @@
             top: 0;
             height: 100%;
             width: 280px;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
             z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 10px 0 40px rgba(0, 0, 0, 0.1);
         }
         
         .main-content {
             margin-left: 280px;
             padding: 20px;
+            transition: all 0.3s ease;
         }
         
         .btn-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
             color: white;
         }
         
         .report-card {
             transition: all 0.3s ease;
             border: none;
-            border-radius: 15px;
+            border-radius: 20px;
+            background: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
         }
         
         .report-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
         }
         
         .filter-section {
             background: white;
-            border-radius: 15px;
+            border-radius: 20px;
             padding: 20px;
             margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px 20px;
+            margin: 5px 15px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sidebar .nav-link:hover {
+            background: rgba(59, 130, 246, 0.2);
+            color: white;
+            transform: translateX(8px);
+        }
+        
+        .sidebar .nav-link.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
         }
         
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
             .main-content { margin-left: 0; }
         }
+        
+        .toast-custom {
+            animation: slideInRight 0.3s ease;
+            border-radius: 12px;
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
 
 <!-- Sidebar -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
     <div class="p-4">
         <div class="d-flex align-items-center gap-2 mb-4">
             <i class="fas fa-hospital-user text-white fs-3"></i>
             <span class="text-white fw-bold fs-5">MediCare</span>
         </div>
         
+        <div class="user-info text-center mb-4">
+            <img src="https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff&rounded=true&size=80" class="rounded-circle mb-2" width="70" height="70" id="userAvatar">
+            <h6 class="text-white mb-1" id="userName">Admin User</h6>
+            <small class="text-white-50" id="userRole">Administrator</small>
+        </div>
+        
         <nav class="nav flex-column">
-            <a href="dashboard.html" class="nav-link text-white-50 mb-2">
+            <a href="dashboard.html" class="nav-link">
                 <i class="fas fa-tachometer-alt me-2"></i> Dashboard
             </a>
-            <a href="medicines.html" class="nav-link text-white-50 mb-2">
+            <a href="medicines.html" class="nav-link">
                 <i class="fas fa-capsules me-2"></i> Medicines
             </a>
-            <a href="customers.html" class="nav-link text-white-50 mb-2">
+            <a href="customers.html" class="nav-link">
                 <i class="fas fa-users me-2"></i> Customers
             </a>
-            <a href="sales.html" class="nav-link text-white-50 mb-2">
+            <a href="sales.html" class="nav-link">
                 <i class="fas fa-shopping-cart me-2"></i> POS Sales
             </a>
-            <a href="purchases.html" class="nav-link text-white-50 mb-2">
+            <a href="purchases.html" class="nav-link">
                 <i class="fas fa-truck me-2"></i> Purchases
             </a>
-            <a href="suppliers.html" class="nav-link text-white-50 mb-2">
+            <a href="suppliers.html" class="nav-link">
                 <i class="fas fa-parachute-box me-2"></i> Suppliers
             </a>
-            <a href="prescriptions.html" class="nav-link text-white-50 mb-2">
+            <a href="prescriptions.html" class="nav-link">
                 <i class="fas fa-file-prescription me-2"></i> Prescriptions
             </a>
-            <a href="reports.html" class="nav-link text-white active bg-primary bg-opacity-25 rounded">
+            <a href="reports.html" class="nav-link active">
                 <i class="fas fa-chart-line me-2"></i> Reports
             </a>
             <hr class="bg-secondary my-3">
-            <a href="login.html" class="nav-link text-white-50">
+            <a href="login.html" class="nav-link" id="logoutBtn">
                 <i class="fas fa-sign-out-alt me-2"></i> Logout
             </a>
         </nav>
@@ -156,7 +217,6 @@
     <div class="tab-content">
         <!-- Sales Report Tab -->
         <div class="tab-pane fade show active" id="salesReport">
-            <!-- Filters -->
             <div class="filter-section">
                 <div class="row g-3">
                     <div class="col-md-3">
@@ -188,7 +248,6 @@
                 </div>
             </div>
             
-            <!-- Sales Stats -->
             <div class="row g-4 mb-4">
                 <div class="col-md-3">
                     <div class="card report-card">
@@ -244,7 +303,6 @@
                 </div>
             </div>
             
-            <!-- Sales Chart -->
             <div class="card report-card mb-4">
                 <div class="card-body">
                     <h5 class="fw-bold mb-3">Sales Trend</h5>
@@ -252,7 +310,6 @@
                 </div>
             </div>
             
-            <!-- Sales Table -->
             <div class="card report-card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -289,10 +346,6 @@
                         <label class="form-label fw-semibold">Category</label>
                         <select class="form-select" id="inventoryCategory" onchange="updateInventoryReport()">
                             <option value="">All Categories</option>
-                            <option>Pain Relief</option>
-                            <option>Antibiotics</option>
-                            <option>Vitamins</option>
-                            <option>First Aid</option>
                         </select>
                     </div>
                     <div class="col-md-4">
@@ -502,9 +555,6 @@
                         <label class="form-label fw-semibold">Category</label>
                         <select class="form-select" id="expiryCategory" onchange="updateExpiryReport()">
                             <option value="">All Categories</option>
-                            <option>Pain Relief</option>
-                            <option>Antibiotics</option>
-                            <option>Vitamins</option>
                         </select>
                     </div>
                 </div>
@@ -535,37 +585,77 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
-    // Sample Sales Data
-    let salesData = [
-        { date: "2024-01-01", invoiceNo: "INV-001", customer: "John Doe", items: 3, subtotal: 45.00, tax: 4.50, total: 49.50 },
-        { date: "2024-01-02", invoiceNo: "INV-002", customer: "Jane Smith", items: 2, subtotal: 30.00, tax: 3.00, total: 33.00 },
-        { date: "2024-01-03", invoiceNo: "INV-003", customer: "Mike Johnson", items: 5, subtotal: 75.00, tax: 7.50, total: 82.50 }
-    ];
+    // ============================================
+    // STORAGE KEYS
+    // ============================================
+    const STORAGE_KEY = 'pharmacy_medicines';
+    const SALES_STORAGE_KEY = 'pharmacy_sales';
     
-    // Sample Inventory Data
-    let inventoryData = [
-        { name: "Paracetamol 500mg", category: "Pain Relief", stock: 150, purchasePrice: 2.50, sellingPrice: 5.00, expiryDate: "2025-12-31" },
-        { name: "Amoxicillin 250mg", category: "Antibiotics", stock: 8, purchasePrice: 5.00, sellingPrice: 10.00, expiryDate: "2025-06-30" },
-        { name: "Vitamin C 1000mg", category: "Vitamins", stock: 45, purchasePrice: 8.00, sellingPrice: 15.00, expiryDate: "2025-08-31" }
-    ];
+    // ============================================
+    // LOAD DATA FROM LOCALSTORAGE
+    // ============================================
+    function loadMedicinesFromStorage() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            return JSON.parse(stored);
+        }
+        return [
+            { id: 1, name: "Paracetamol 500mg", category: "Pain Relief", stock: 150, purchasePrice: 2.50, sellingPrice: 5.00, expiryDate: "2025-12-31", batchNo: "BATCH001" },
+            { id: 2, name: "Amoxicillin 250mg", category: "Antibiotics", stock: 8, purchasePrice: 5.00, sellingPrice: 10.00, expiryDate: "2025-06-30", batchNo: "BATCH002" },
+            { id: 3, name: "Vitamin C 1000mg", category: "Vitamins", stock: 45, purchasePrice: 8.00, sellingPrice: 15.00, expiryDate: "2025-08-31", batchNo: "BATCH003" },
+            { id: 4, name: "Aspirin 100mg", category: "Pain Relief", stock: 120, purchasePrice: 3.00, sellingPrice: 8.00, expiryDate: "2025-11-30", batchNo: "BATCH004" },
+            { id: 5, name: "Omeprazole 20mg", category: "Gastric", stock: 60, purchasePrice: 6.00, sellingPrice: 12.00, expiryDate: "2025-09-15", batchNo: "BATCH005" }
+        ];
+    }
     
-    // Initialize Charts
+    function loadSalesFromStorage() {
+        const stored = localStorage.getItem(SALES_STORAGE_KEY);
+        if (stored) {
+            return JSON.parse(stored);
+        }
+        // Generate demo sales data
+        const demoSales = [];
+        const customers = ["John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson", "David Brown"];
+        const products = ["Paracetamol 500mg", "Amoxicillin 250mg", "Vitamin C 1000mg", "Aspirin 100mg"];
+        
+        for (let i = 1; i <= 50; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() - Math.floor(Math.random() * 30));
+            demoSales.push({
+                id: i,
+                date: date.toISOString().split('T')[0],
+                invoiceNo: `INV-${String(i).padStart(4, '0')}`,
+                customer: customers[Math.floor(Math.random() * customers.length)],
+                items: Math.floor(Math.random() * 5) + 1,
+                subtotal: Math.floor(Math.random() * 200) + 20,
+                tax: Math.floor(Math.random() * 20) + 2,
+                total: 0
+            });
+            demoSales[i-1].total = demoSales[i-1].subtotal + demoSales[i-1].tax;
+        }
+        return demoSales.sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+    
+    let medicinesData = loadMedicinesFromStorage();
+    let salesData = loadSalesFromStorage();
+    
+    // ============================================
+    // CHARTS INITIALIZATION
+    // ============================================
     let salesTrendChart, revenueExpenseChart, profitTrendChart, customerChart;
     
     function initCharts() {
-        // Sales Trend Chart
         const ctx1 = document.getElementById('salesTrendChart').getContext('2d');
         salesTrendChart = new Chart(ctx1, {
             type: 'line',
             data: {
-                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                labels: getLast12Months(),
                 datasets: [{
-                    label: 'Sales',
-                    data: [12500, 14200, 13800, 15600],
-                    borderColor: '#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    label: 'Sales Revenue',
+                    data: getMonthlySalesData(),
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.4,
                     fill: true
                 }]
@@ -573,21 +663,19 @@
             options: { responsive: true, maintainAspectRatio: true }
         });
         
-        // Revenue vs Expense Chart
         const ctx2 = document.getElementById('revenueExpenseChart').getContext('2d');
         revenueExpenseChart = new Chart(ctx2, {
             type: 'bar',
             data: {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
                 datasets: [
-                    { label: 'Revenue', data: [12500, 14200, 15800, 16400, 17200, 18500], backgroundColor: '#10b981' },
-                    { label: 'Expenses', data: [8500, 9200, 9800, 10200, 10800, 11500], backgroundColor: '#ef4444' }
+                    { label: 'Revenue', data: getMonthlyRevenue(), backgroundColor: '#10b981' },
+                    { label: 'Expenses', data: getMonthlyExpenses(), backgroundColor: '#ef4444' }
                 ]
             },
             options: { responsive: true, maintainAspectRatio: true }
         });
         
-        // Profit Trend Chart
         const ctx3 = document.getElementById('profitTrendChart').getContext('2d');
         profitTrendChart = new Chart(ctx3, {
             type: 'line',
@@ -595,7 +683,7 @@
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
                 datasets: [{
                     label: 'Profit',
-                    data: [4000, 5000, 6000, 6200, 6400, 7000],
+                    data: getMonthlyProfit(),
                     borderColor: '#f59e0b',
                     backgroundColor: 'rgba(245, 158, 11, 0.1)',
                     fill: true
@@ -604,58 +692,136 @@
             options: { responsive: true, maintainAspectRatio: true }
         });
         
-        // Customer Chart
         const ctx4 = document.getElementById('customerChart').getContext('2d');
         customerChart = new Chart(ctx4, {
             type: 'doughnut',
             data: {
                 labels: ['VIP Customers', 'Regular Customers', 'New Customers'],
-                datasets: [{
-                    data: [30, 45, 25],
-                    backgroundColor: ['#f59e0b', '#667eea', '#10b981']
-                }]
+                datasets: [{ data: [30, 45, 25], backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'] }]
             },
             options: { responsive: true, maintainAspectRatio: true }
         });
     }
     
-    // Update Sales Report
+    function getLast12Months() {
+        const months = [];
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date();
+            d.setMonth(d.getMonth() - i);
+            months.push(d.toLocaleString('default', { month: 'short' }));
+        }
+        return months;
+    }
+    
+    function getMonthlySalesData() {
+        const monthlyData = new Array(12).fill(0);
+        salesData.forEach(sale => {
+            const month = new Date(sale.date).getMonth();
+            monthlyData[month] += sale.total;
+        });
+        return monthlyData;
+    }
+    
+    function getMonthlyRevenue() {
+        return [12500, 14200, 15800, 16400, 17200, 18500];
+    }
+    
+    function getMonthlyExpenses() {
+        return [8500, 9200, 9800, 10200, 10800, 11500];
+    }
+    
+    function getMonthlyProfit() {
+        return [4000, 5000, 6000, 6200, 6400, 7000];
+    }
+    
+    // ============================================
+    // UPDATE SALES REPORT
+    // ============================================
     function updateSalesReport() {
         const range = document.getElementById('salesDateRange').value;
-        if(range === 'custom') {
+        const today = new Date();
+        let filtered = [...salesData];
+        
+        if (range === 'today') {
+            const todayStr = today.toISOString().split('T')[0];
+            filtered = salesData.filter(s => s.date === todayStr);
+        } else if (range === 'week') {
+            const weekAgo = new Date(today.setDate(today.getDate() - 7));
+            filtered = salesData.filter(s => new Date(s.date) >= weekAgo);
+        } else if (range === 'month') {
+            const monthAgo = new Date(today.setMonth(today.getMonth() - 1));
+            filtered = salesData.filter(s => new Date(s.date) >= monthAgo);
+        } else if (range === 'year') {
+            const yearAgo = new Date(today.setFullYear(today.getFullYear() - 1));
+            filtered = salesData.filter(s => new Date(s.date) >= yearAgo);
+        } else if (range === 'custom') {
             document.getElementById('customDateRange').style.display = 'block';
             document.getElementById('customDateRangeTo').style.display = 'block';
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+            if (fromDate && toDate) {
+                filtered = salesData.filter(s => s.date >= fromDate && s.date <= toDate);
+            }
         } else {
             document.getElementById('customDateRange').style.display = 'none';
             document.getElementById('customDateRangeTo').style.display = 'none';
         }
         
-        // Update stats
-        const totalSales = salesData.reduce((sum, s) => sum + s.total, 0);
+        const totalSales = filtered.reduce((sum, s) => sum + s.total, 0);
         document.getElementById('totalSalesAmount').textContent = `$${totalSales.toFixed(2)}`;
-        document.getElementById('totalInvoices').textContent = salesData.length;
-        document.getElementById('avgOrderValue').textContent = `$${(totalSales / salesData.length).toFixed(2)}`;
-        document.getElementById('topProduct').textContent = "Paracetamol 500mg";
+        document.getElementById('totalInvoices').textContent = filtered.length;
+        document.getElementById('avgOrderValue').textContent = `$${(totalSales / (filtered.length || 1)).toFixed(2)}`;
+        document.getElementById('topProduct').textContent = getTopSellingProduct();
         
-        // Update table
         const tbody = document.getElementById('salesTableBody');
-        tbody.innerHTML = salesData.map(s => `
-            <tr>
-                <td>${s.date}</td>
-                <td>${s.invoiceNo}</td>
-                <td>${s.customer}</td>
-                <td>${s.items} items</td>
-                <td>$${s.subtotal.toFixed(2)}</td>
-                <td>$${s.tax.toFixed(2)}</td>
-                <td><strong>$${s.total.toFixed(2)}</strong></td>
-            </tr>
-        `).join('');
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No sales data found</td></tr>';
+        } else {
+            tbody.innerHTML = filtered.slice(0, 20).map(s => `
+                <tr>
+                    <td>${s.date}</td>
+                    <td>${s.invoiceNo}</td>
+                    <td>${s.customer}</td>
+                    <td>${s.items} items</td>
+                    <td>$${s.subtotal.toFixed(2)}</td>
+                    <td>$${s.tax.toFixed(2)}</td>
+                    <td><strong>$${s.total.toFixed(2)}</strong></td>
+                </tr>
+            `).join('');
+        }
+        
+        // Update chart
+        salesTrendChart.data.datasets[0].data = getMonthlySalesData();
+        salesTrendChart.update();
     }
     
-    // Update Inventory Report
+    function getTopSellingProduct() {
+        // In real app, this would come from sales data
+        return "Paracetamol 500mg";
+    }
+    
+    // ============================================
+    // UPDATE INVENTORY REPORT
+    // ============================================
     function updateInventoryReport() {
         const category = document.getElementById('inventoryCategory').value;
-        const filtered = category ? inventoryData.filter(i => i.category === category) : inventoryData;
+        const stockStatus = document.getElementById('stockStatus').value;
+        const sortBy = document.getElementById('inventorySort').value;
+        
+        let filtered = [...medicinesData];
+        
+        if (category) filtered = filtered.filter(i => i.category === category);
+        if (stockStatus === 'low') filtered = filtered.filter(i => i.stock < 20);
+        if (stockStatus === 'expiring') {
+            filtered = filtered.filter(i => {
+                const days = Math.ceil((new Date(i.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+                return days <= 30 && days > 0;
+            });
+        }
+        
+        if (sortBy === 'name') filtered.sort((a, b) => a.name.localeCompare(b.name));
+        if (sortBy === 'stock') filtered.sort((a, b) => a.stock - b.stock);
+        if (sortBy === 'expiry') filtered.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
         
         document.getElementById('inventoryTotalMedicines').textContent = filtered.length;
         document.getElementById('inventoryLowStock').textContent = filtered.filter(i => i.stock < 20).length;
@@ -668,8 +834,11 @@
         const tbody = document.getElementById('inventoryTableBody');
         tbody.innerHTML = filtered.map(i => {
             const daysToExpiry = Math.ceil((new Date(i.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
-            const status = i.stock < 20 ? 'Low Stock' : daysToExpiry < 30 ? 'Expiring Soon' : 'Normal';
-            const statusClass = i.stock < 20 ? 'text-warning' : daysToExpiry < 30 ? 'text-danger' : 'text-success';
+            let status = 'Normal', statusClass = 'text-success';
+            if (i.stock < 20) { status = 'Low Stock'; statusClass = 'text-warning'; }
+            else if (daysToExpiry < 30 && daysToExpiry > 0) { status = 'Expiring Soon'; statusClass = 'text-danger'; }
+            else if (daysToExpiry <= 0) { status = 'Expired'; statusClass = 'text-danger fw-bold'; }
+            
             return `
                 <tr>
                     <td>${i.name}</td>
@@ -682,37 +851,56 @@
                 </tr>
             `;
         }).join('');
+        
+        // Update category dropdown
+        const categories = [...new Set(medicinesData.map(m => m.category))];
+        const categorySelect = document.getElementById('inventoryCategory');
+        const expiryCategorySelect = document.getElementById('expiryCategory');
+        if (categorySelect && categorySelect.options.length <= 1) {
+            categories.forEach(cat => {
+                categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+                expiryCategorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+        }
     }
     
-    // Update Financial Report
+    // ============================================
+    // UPDATE FINANCIAL REPORT
+    // ============================================
     function updateFinancialReport() {
-        const revenue = 185000;
-        const expenses = 115000;
+        const revenue = salesData.reduce((sum, s) => sum + s.total, 0);
+        const expenses = revenue * 0.65; // Approximate 65% expenses
         const profit = revenue - expenses;
         
         document.getElementById('totalRevenue').textContent = `$${revenue.toFixed(2)}`;
         document.getElementById('totalExpenses').textContent = `$${expenses.toFixed(2)}`;
         document.getElementById('netProfit').textContent = `$${profit.toFixed(2)}`;
         
-        // Update charts
-        revenueExpenseChart.data.datasets[0].data = [12500, 14200, 15800, 16400, 17200, 18500];
-        revenueExpenseChart.data.datasets[1].data = [8500, 9200, 9800, 10200, 10800, 11500];
+        revenueExpenseChart.data.datasets[0].data = getMonthlyRevenue();
+        revenueExpenseChart.data.datasets[1].data = getMonthlyExpenses();
         revenueExpenseChart.update();
         
-        profitTrendChart.data.datasets[0].data = [4000, 5000, 6000, 6200, 6400, 7000];
+        profitTrendChart.data.datasets[0].data = getMonthlyProfit();
         profitTrendChart.update();
     }
     
-    // Update Customer Report
+    // ============================================
+    // UPDATE CUSTOMER REPORT
+    // ============================================
     function updateCustomerReport() {
-        const customers = [
-            { name: "John Doe", type: "regular", purchases: 1250, due: 250, lastPurchase: "2024-01-15" },
-            { name: "Jane Smith", type: "vip", purchases: 3450, due: 1200, lastPurchase: "2024-02-10" },
-            { name: "Mike Johnson", type: "regular", purchases: 890, due: 0, lastPurchase: "2024-02-05" }
-        ];
+        const customerType = document.getElementById('customerType').value;
+        const customers = getCustomerData();
+        
+        let filtered = [...customers];
+        if (customerType) filtered = filtered.filter(c => c.type === customerType);
+        
+        const sortBy = document.getElementById('customerSort').value;
+        if (sortBy === 'purchases') filtered.sort((a, b) => b.purchases - a.purchases);
+        if (sortBy === 'due') filtered.sort((a, b) => b.due - a.due);
+        if (sortBy === 'name') filtered.sort((a, b) => a.name.localeCompare(b.name));
         
         const tbody = document.getElementById('customerTableBody');
-        tbody.innerHTML = customers.map(c => `
+        tbody.innerHTML = filtered.map(c => `
             <tr>
                 <td>${c.name}</td>
                 <td><span class="badge ${c.type === 'vip' ? 'bg-warning' : 'bg-info'}">${c.type.toUpperCase()}</span></td>
@@ -722,40 +910,73 @@
             </tr>
         `).join('');
         
-        customerChart.data.datasets[0].data = [30, 45, 25];
+        customerChart.data.datasets[0].data = [
+            customers.filter(c => c.type === 'vip').length,
+            customers.filter(c => c.type === 'regular').length,
+            customers.filter(c => c.type === 'new').length
+        ];
         customerChart.update();
     }
     
-    // Update Expiry Report
+    function getCustomerData() {
+        // Extract unique customers from sales data
+        const customerMap = new Map();
+        salesData.forEach(sale => {
+            if (!customerMap.has(sale.customer)) {
+                customerMap.set(sale.customer, { name: sale.customer, purchases: 0, due: 0, lastPurchase: sale.date, type: 'regular' });
+            }
+            const cust = customerMap.get(sale.customer);
+            cust.purchases += sale.total;
+            if (new Date(sale.date) > new Date(cust.lastPurchase)) cust.lastPurchase = sale.date;
+            if (cust.purchases > 2000) cust.type = 'vip';
+            else if (cust.purchases < 500) cust.type = 'new';
+        });
+        return Array.from(customerMap.values());
+    }
+    
+    // ============================================
+    // UPDATE EXPIRY REPORT
+    // ============================================
     function updateExpiryReport() {
         const daysLimit = parseInt(document.getElementById('expiryDays').value);
-        const expiringMedicines = inventoryData.filter(i => {
+        const category = document.getElementById('expiryCategory').value;
+        
+        let filtered = [...medicinesData];
+        if (category) filtered = filtered.filter(i => i.category === category);
+        
+        const expiringMedicines = filtered.filter(i => {
             const days = Math.ceil((new Date(i.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
             return days <= daysLimit && days > 0;
-        });
+        }).sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
         
         const tbody = document.getElementById('expiryTableBody');
-        tbody.innerHTML = expiringMedicines.map(i => {
-            const daysLeft = Math.ceil((new Date(i.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
-            return `
-                <tr>
-                    <td>${i.name}</td>
-                    <td>BATCH001</td>
-                    <td>${i.category}</td>
-                    <td>${i.stock} unit(s)</td>
-                    <td>${i.expiryDate}</td>
-                    <td class="text-danger fw-bold">${daysLeft} days</td>
-                    <td><button class="btn btn-sm btn-warning" onclick="markForDiscount('${i.name}')">Mark for Discount</button></td>
-                </tr>
-            `;
-        }).join('');
+        if (expiringMedicines.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No expiring medicines found</td></tr>';
+        } else {
+            tbody.innerHTML = expiringMedicines.map(i => {
+                const daysLeft = Math.ceil((new Date(i.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+                return `
+                    <tr>
+                        <td>${i.name}</td>
+                        <td>${i.batchNo || 'BATCH001'}</td>
+                        <td>${i.category}</td>
+                        <td>${i.stock} unit(s)</td>
+                        <td>${i.expiryDate}</td>
+                        <td class="text-danger fw-bold">${daysLeft} days</td>
+                        <td><button class="btn btn-sm btn-warning" onclick="markForDiscount('${i.name}')">Mark for Discount</button></td>
+                    </tr>
+                `;
+            }).join('');
+        }
     }
     
     function markForDiscount(medicineName) {
         showToast(`${medicineName} marked for discount sale`, "success");
     }
     
-    // Export Functions
+    // ============================================
+    // EXPORT FUNCTIONS
+    // ============================================
     function exportAllReports() {
         showToast("Reports exported successfully!", "success");
     }
@@ -768,16 +989,77 @@
         window.print();
     }
     
+    // ============================================
+    // AUTO REFRESH FUNCTION
+    // ============================================
+    function refreshAllReports() {
+        medicinesData = loadMedicinesFromStorage();
+        salesData = loadSalesFromStorage();
+        updateSalesReport();
+        updateInventoryReport();
+        updateFinancialReport();
+        updateCustomerReport();
+        updateExpiryReport();
+        showToast("Reports refreshed with latest data", "info");
+    }
+    
+    // ============================================
+    // TOAST MESSAGE
+    // ============================================
     function showToast(message, type) {
+        const container = document.getElementById('toast-container') || createToastContainer();
         const toast = document.createElement('div');
-        toast.className = `alert alert-${type} position-fixed bottom-0 end-0 m-3 shadow`;
-        toast.style.zIndex = '9999';
-        toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>${message}`;
-        document.body.appendChild(toast);
+        toast.className = `alert alert-${type} alert-dismissible fade show toast-custom`;
+        toast.style.cssText = 'margin-bottom:10px;box-shadow:0 5px 20px rgba(0,0,0,0.15);border-radius:12px';
+        toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+        container.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
     
-    // Initialize
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;min-width:320px';
+        document.body.appendChild(container);
+        return container;
+    }
+    
+    // ============================================
+    // LOGOUT & AUTH
+    // ============================================
+    function checkAuth() {
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        const userData = JSON.parse(user);
+        document.getElementById('userName').textContent = userData.name;
+        document.getElementById('userRole').textContent = userData.role.toUpperCase();
+    }
+    
+    function logout() {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+    }
+    
+    document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        logout();
+    });
+    
+    // ============================================
+    // AUTO REFRESH INTERVAL (30 seconds)
+    // ============================================
+    let refreshInterval = setInterval(() => {
+        refreshAllReports();
+    }, 30000);
+    
+    // ============================================
+    // INITIALIZE
+    // ============================================
+    checkAuth();
     initCharts();
     updateSalesReport();
     updateInventoryReport();
@@ -792,6 +1074,11 @@
         opacity: 0,
         stagger: 0.1,
         ease: "back.out(1.2)"
+    });
+    
+    // Clean up interval on page unload
+    window.addEventListener('beforeunload', () => {
+        if (refreshInterval) clearInterval(refreshInterval);
     });
 </script>
 </body>

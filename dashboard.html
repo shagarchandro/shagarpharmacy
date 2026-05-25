@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Dashboard - MediCare Pharmacy Management System</title>
     
     <!-- Tailwind CSS CDN -->
@@ -26,7 +26,7 @@
         }
         
         body {
-            background: #f5f7fb;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
             overflow-x: hidden;
         }
         
@@ -37,7 +37,7 @@
             top: 0;
             height: 100%;
             width: 280px;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
             transition: all 0.3s ease;
             z-index: 1000;
             box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
@@ -64,15 +64,15 @@
         }
         
         .sidebar .nav-link:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(59, 130, 246, 0.2);
             color: white;
             transform: translateX(5px);
         }
         
         .sidebar .nav-link.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
         }
         
         .sidebar .nav-link i {
@@ -94,22 +94,22 @@
         /* Cards */
         .stat-card {
             background: white;
-            border-radius: 15px;
+            border-radius: 20px;
             padding: 20px;
             transition: all 0.3s ease;
             border: none;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
         }
         
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
         }
         
         .stat-icon {
             width: 50px;
             height: 50px;
-            border-radius: 12px;
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -119,7 +119,7 @@
         /* Alert Cards */
         .alert-card {
             border-left: 4px solid;
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 15px;
             margin-bottom: 15px;
             background: white;
@@ -141,13 +141,13 @@
         /* Table Styles */
         .table-custom {
             background: white;
-            border-radius: 15px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
         }
         
         .table-custom thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
         }
         
@@ -190,8 +190,8 @@
         
         .search-wrapper .search-input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
             width: 100%;
         }
         
@@ -248,7 +248,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #667eea;
+            color: #3b82f6;
         }
         
         .search-wrapper .search-result-item .result-content {
@@ -296,7 +296,8 @@
         
         body.dark-mode .stat-card,
         body.dark-mode .alert-card,
-        body.dark-mode .table-custom {
+        body.dark-mode .table-custom,
+        body.dark-mode .glass-card {
             background: #16213e;
             color: white;
         }
@@ -366,7 +367,7 @@
         }
         
         ::-webkit-scrollbar-thumb {
-            background: #667eea;
+            background: #3b82f6;
             border-radius: 10px;
         }
         
@@ -379,7 +380,7 @@
         }
         
         .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -393,6 +394,7 @@
             z-index: 9999;
             min-width: 250px;
             animation: slideInRight 0.3s ease;
+            border-radius: 12px;
         }
         
         @keyframes slideInRight {
@@ -408,25 +410,13 @@
         
         /* Search highlight */
         .search-highlight {
-            background-color: rgba(102, 126, 234, 0.2);
+            background-color: rgba(59, 130, 246, 0.2);
             border-radius: 3px;
             padding: 0 2px;
         }
         
-        /* Session expired overlay */
-        .session-expired-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            color: white;
+        .progress-bar.bg-gradient {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
         }
     </style>
 </head>
@@ -446,7 +436,7 @@
         </div>
         
         <div class="user-info text-center mb-4 sidebar-text">
-            <img src="https://ui-avatars.com/api/?name=User&background=667eea&color=fff" class="rounded-circle mb-2" width="80" height="80" id="userAvatar">
+            <img src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff" class="rounded-circle mb-2" width="80" height="80" id="userAvatar">
             <h6 class="text-white mb-1" id="userName">Admin User</h6>
             <small class="text-white-50" id="userRole">Super Admin</small>
         </div>
@@ -500,7 +490,7 @@
 <!-- Main Content -->
 <div class="main-content" id="mainContent">
     <!-- Top Navbar -->
-    <nav class="navbar navbar-expand-lg bg-white rounded-3 shadow-sm mb-4 p-3">
+    <nav class="navbar navbar-expand-lg bg-white rounded-4 shadow-sm mb-4 p-3">
         <div class="container-fluid">
             <button class="btn btn-link d-md-none" id="mobileMenuToggle">
                 <i class="fas fa-bars fs-4"></i>
@@ -549,7 +539,7 @@
                 <!-- User Dropdown -->
                 <div class="dropdown">
                     <button class="btn btn-link dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown">
-                        <img src="https://ui-avatars.com/api/?name=User&background=667eea&color=fff" class="rounded-circle" width="40" height="40" id="navUserAvatar">
+                        <img src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff" class="rounded-circle" width="40" height="40" id="navUserAvatar">
                         <span class="d-none d-md-block" id="navUserName">Admin</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -573,14 +563,14 @@
         </div>
         
         <!-- Statistics Cards -->
-        <div class="row g-4 mb-4">
+        <div class="row g-4 mb-4" id="statsContainer">
             <div class="col-md-6 col-lg-3">
                 <div class="stat-card animate-slide-in">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <p class="text-muted mb-1">Total Sales</p>
-                            <h3 class="fw-bold mb-0">$12,450</h3>
-                            <small class="text-success"><i class="fas fa-arrow-up"></i> +12.5%</small>
+                            <h3 class="fw-bold mb-0" id="statTotalSales">$0</h3>
+                            <small class="text-success" id="statSalesTrend"><i class="fas fa-arrow-up"></i> +0%</small>
                         </div>
                         <div class="stat-icon bg-primary bg-opacity-10 text-primary">
                             <i class="fas fa-dollar-sign"></i>
@@ -594,8 +584,8 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <p class="text-muted mb-1">Today's Sales</p>
-                            <h3 class="fw-bold mb-0">$1,245</h3>
-                            <small class="text-info">Today's revenue</small>
+                            <h3 class="fw-bold mb-0" id="statTodaySales">$0</h3>
+                            <small class="text-info" id="statTodayInfo">Today's revenue</small>
                         </div>
                         <div class="stat-icon bg-info bg-opacity-10 text-info">
                             <i class="fas fa-calendar-day"></i>
@@ -609,8 +599,8 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <p class="text-muted mb-1">Monthly Profit</p>
-                            <h3 class="fw-bold mb-0">$3,890</h3>
-                            <small class="text-success"><i class="fas fa-chart-line"></i> +8.2%</small>
+                            <h3 class="fw-bold mb-0" id="statMonthlyProfit">$0</h3>
+                            <small class="text-success" id="statProfitTrend"><i class="fas fa-chart-line"></i> +0%</small>
                         </div>
                         <div class="stat-icon bg-success bg-opacity-10 text-success">
                             <i class="fas fa-chart-line"></i>
@@ -624,11 +614,67 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <p class="text-muted mb-1">Total Medicines</p>
-                            <h3 class="fw-bold mb-0">1,234</h3>
-                            <small class="text-warning">In Stock: 980</small>
+                            <h3 class="fw-bold mb-0" id="statTotalMedicines">0</h3>
+                            <small class="text-warning" id="statStockInfo">In Stock: 0</small>
                         </div>
                         <div class="stat-icon bg-warning bg-opacity-10 text-warning">
                             <i class="fas fa-capsules"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Additional Stats Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Total Customers</p>
+                            <h3 class="fw-bold text-primary" id="statTotalCustomers">0</h3>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-3">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Total Due</p>
+                            <h3 class="fw-bold text-warning" id="statTotalDue">$0</h3>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-3">
+                            <i class="fas fa-dollar-sign fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Total Suppliers</p>
+                            <h3 class="fw-bold text-info" id="statTotalSuppliers">0</h3>
+                        </div>
+                        <div class="bg-info bg-opacity-10 p-3 rounded-3">
+                            <i class="fas fa-truck fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Total Prescriptions</p>
+                            <h3 class="fw-bold text-success" id="statTotalPrescriptions">0</h3>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded-3">
+                            <i class="fas fa-file-prescription fa-2x text-success"></i>
                         </div>
                     </div>
                 </div>
@@ -679,7 +725,7 @@
         <div class="stat-card">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold mb-0">Recent Orders</h5>
-                <button class="btn btn-sm btn-primary" onclick="viewAllOrders()">View All</button>
+                <button class="btn btn-sm btn-primary rounded-3" onclick="viewAllOrders()">View All</button>
             </div>
             <div class="table-responsive">
                 <table class="table table-custom">
@@ -794,132 +840,319 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // ============================================
-    // ENHANCED SECURITY - SESSION MANAGEMENT
+    // STORAGE KEYS
     // ============================================
+    const MEDICINE_STORAGE_KEY = 'pharmacy_medicines';
+    const CUSTOMER_STORAGE_KEY = 'pharmacy_customers';
+    const SUPPLIER_STORAGE_KEY = 'pharmacy_suppliers';
+    const PRESCRIPTION_STORAGE_KEY = 'pharmacy_prescriptions';
+    const SALES_STORAGE_KEY = 'pharmacy_sales';
     
-    // Check authentication with enhanced security
-    function checkAuth() {
-        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
-        const authToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-        const loginTime = localStorage.getItem('login_time') || sessionStorage.getItem('login_time');
-        
-        // Check if user is logged in
-        if(!user || !authToken) {
-            redirectToLogin();
-            return false;
-        }
-        
-        // Check session timeout (8 hours max)
-        if(loginTime) {
-            const currentTime = new Date().getTime();
-            const timeDiff = currentTime - parseInt(loginTime);
-            const maxSessionTime = 8 * 60 * 60 * 1000; // 8 hours
-            
-            if(timeDiff > maxSessionTime) {
-                showToast('Session expired. Please login again.', 'warning');
-                logout();
-                return false;
-            }
-        }
-        
-        return JSON.parse(user);
+    // ============================================
+    // LOAD DATA FROM LOCALSTORAGE
+    // ============================================
+    function loadMedicines() {
+        const stored = localStorage.getItem(MEDICINE_STORAGE_KEY);
+        if (stored) return JSON.parse(stored);
+        return [
+            { id: 1, name: "Paracetamol 500mg", category: "Pain Relief", stock: 150, sellingPrice: 5.00, expiryDate: "2025-12-31", minStock: 50 },
+            { id: 2, name: "Amoxicillin 250mg", category: "Antibiotics", stock: 8, sellingPrice: 10.00, expiryDate: "2025-06-30", minStock: 30 },
+            { id: 3, name: "Vitamin C 1000mg", category: "Vitamins", stock: 45, sellingPrice: 15.00, expiryDate: "2025-08-31", minStock: 20 },
+            { id: 4, name: "Aspirin 100mg", category: "Pain Relief", stock: 120, sellingPrice: 8.00, expiryDate: "2025-11-30", minStock: 40 }
+        ];
     }
     
-    // Redirect to login with prevention of back button
-    function redirectToLogin() {
-        // Use replace to prevent back button
-        window.location.replace('login.html');
+    function loadCustomers() {
+        const stored = localStorage.getItem(CUSTOMER_STORAGE_KEY);
+        if (stored) return JSON.parse(stored);
+        return [
+            { id: 1, name: "John Doe", phone: "+1234567890", email: "john@example.com", due: 250, totalPurchases: 1250, type: "vip" },
+            { id: 2, name: "Jane Smith", phone: "+1234567891", email: "jane@example.com", due: 75.50, totalPurchases: 450, type: "regular" },
+            { id: 3, name: "Mike Johnson", phone: "+1234567892", email: "mike@example.com", due: 0, totalPurchases: 890, type: "regular" }
+        ];
     }
     
-    // Enhanced logout function with complete cleanup
-    function logout() {
-        // Clear all storage
-        localStorage.clear();
-        sessionStorage.clear();
+    function loadSuppliers() {
+        const stored = localStorage.getItem(SUPPLIER_STORAGE_KEY);
+        if (stored) return JSON.parse(stored);
+        return [
+            { id: 1, name: "MediSource Pharma", due: 5000, totalPurchases: 15000 },
+            { id: 2, name: "HealthCare Distributors", due: 2500, totalPurchases: 25000 },
+            { id: 3, name: "Global Medicines Ltd", due: 0, totalPurchases: 35000 }
+        ];
+    }
+    
+    function loadPrescriptions() {
+        const stored = localStorage.getItem(PRESCRIPTION_STORAGE_KEY);
+        if (stored) return JSON.parse(stored);
+        return [
+            { id: 1, patientName: "John Doe", status: "pending", prescriptionDate: "2024-01-15" },
+            { id: 2, patientName: "Jane Smith", status: "filled", prescriptionDate: "2024-02-10" }
+        ];
+    }
+    
+    function loadSales() {
+        const stored = localStorage.getItem(SALES_STORAGE_KEY);
+        if (stored) return JSON.parse(stored);
+        // Generate sample sales data for demo
+        const sampleSales = [];
+        for (let i = 1; i <= 30; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() - Math.floor(Math.random() * 30));
+            sampleSales.push({
+                id: i,
+                invoiceNo: `INV-${String(i).padStart(4, '0')}`,
+                customer: ["John Doe", "Jane Smith", "Mike Johnson"][Math.floor(Math.random() * 3)],
+                total: Math.floor(Math.random() * 200) + 20,
+                date: date.toISOString().split('T')[0],
+                status: ["Completed", "Pending", "Processing"][Math.floor(Math.random() * 3)]
+            });
+        }
+        return sampleSales;
+    }
+    
+    // ============================================
+    // UPDATE ALL STATS
+    // ============================================
+    function updateAllStats() {
+        const medicines = loadMedicines();
+        const customers = loadCustomers();
+        const suppliers = loadSuppliers();
+        const prescriptions = loadPrescriptions();
+        const sales = loadSales();
         
-        // Clear cookies if any
-        document.cookie.split(";").forEach(function(c) { 
-            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+        // Calculate sales stats
+        const totalSales = sales.reduce((sum, s) => sum + s.total, 0);
+        const todayStr = new Date().toISOString().split('T')[0];
+        const todaySales = sales.filter(s => s.date === todayStr).reduce((sum, s) => sum + s.total, 0);
+        const monthlyProfit = totalSales * 0.3; // Approximate 30% profit
+        
+        // Medicine stats
+        const totalMedicines = medicines.length;
+        const inStock = medicines.reduce((sum, m) => sum + m.stock, 0);
+        const lowStockCount = medicines.filter(m => m.stock <= m.minStock).length;
+        const expiringCount = medicines.filter(m => {
+            const days = Math.ceil((new Date(m.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+            return days <= 30 && days > 0;
+        }).length;
+        
+        // Customer stats
+        const totalCustomers = customers.length;
+        const totalDue = customers.reduce((sum, c) => sum + c.due, 0);
+        
+        // Supplier stats
+        const totalSuppliers = suppliers.length;
+        
+        // Prescription stats
+        const totalPrescriptions = prescriptions.length;
+        const pendingPrescriptions = prescriptions.filter(p => p.status === 'pending').length;
+        
+        // Update UI
+        document.getElementById('statTotalSales').textContent = `$${totalSales.toFixed(2)}`;
+        document.getElementById('statTodaySales').textContent = `$${todaySales.toFixed(2)}`;
+        document.getElementById('statMonthlyProfit').textContent = `$${monthlyProfit.toFixed(2)}`;
+        document.getElementById('statTotalMedicines').textContent = totalMedicines;
+        document.getElementById('statStockInfo').innerHTML = `In Stock: ${inStock}`;
+        document.getElementById('statTotalCustomers').textContent = totalCustomers;
+        document.getElementById('statTotalDue').textContent = `$${totalDue.toFixed(2)}`;
+        document.getElementById('statTotalSuppliers').textContent = totalSuppliers;
+        document.getElementById('statTotalPrescriptions').textContent = totalPrescriptions;
+        
+        // Update trends (simulated)
+        const trend = ((todaySales / (totalSales / 30)) * 100).toFixed(1);
+        document.getElementById('statSalesTrend').innerHTML = `<i class="fas fa-arrow-up"></i> +${trend}%`;
+        document.getElementById('statProfitTrend').innerHTML = `<i class="fas fa-chart-line"></i> +${(Math.random() * 15 + 5).toFixed(1)}%`;
+        
+        // Update alerts
+        updateLowStockAlerts(medicines);
+        updateExpiryAlerts(medicines);
+        updateTopSelling(sales);
+        updateRecentOrders(sales);
+        updateSalesChart(sales);
+    }
+    
+    function updateLowStockAlerts(medicines) {
+        const lowStock = medicines.filter(m => m.stock <= m.minStock);
+        const container = document.getElementById('lowStockAlerts');
+        if (lowStock.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted py-3">No low stock items</div>';
+        } else {
+            container.innerHTML = lowStock.map(med => `
+                <div class="alert-card alert-lowstock mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${med.name}</strong>
+                            <br>
+                            <small class="text-muted">Stock: ${med.stock} / Min: ${med.minStock}</small>
+                        </div>
+                        <button class="btn btn-sm btn-warning rounded-3" onclick="orderNow('${med.name}')">Order Now</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+    
+    function updateExpiryAlerts(medicines) {
+        const expiring = medicines.filter(m => {
+            const days = Math.ceil((new Date(m.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+            return days <= 30 && days > 0;
+        });
+        const container = document.getElementById('expiryAlerts');
+        if (expiring.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted py-3">No expiring medicines</div>';
+        } else {
+            container.innerHTML = expiring.map(med => {
+                const daysLeft = Math.ceil((new Date(med.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+                return `
+                    <div class="alert-card alert-expiry mb-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>${med.name}</strong>
+                                <br>
+                                <small class="text-muted">Expires in ${daysLeft} days</small>
+                            </div>
+                            <button class="btn btn-sm btn-danger rounded-3" onclick="takeAction('${med.name}')">Take Action</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+    
+    function updateTopSelling(sales) {
+        // Aggregate sales by medicine (simplified for demo)
+        const medicineSales = {};
+        sales.forEach(sale => {
+            const medName = ["Paracetamol 500mg", "Amoxicillin 250mg", "Vitamin C", "Aspirin 100mg"][Math.floor(Math.random() * 4)];
+            medicineSales[medName] = (medicineSales[medName] || 0) + sale.total;
         });
         
-        // Show logout message
-        showToast('Logging out... Redirecting to login page', 'success');
+        const topMedicines = Object.entries(medicineSales)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 4)
+            .map(([name, salesAmt]) => ({ name, sales: Math.floor(salesAmt / 5), percentage: Math.min(100, Math.floor(salesAmt / 100)) }));
         
-        // Use replace to prevent going back to dashboard
-        setTimeout(() => {
-            window.location.replace('login.html');
-        }, 1000);
+        const container = document.getElementById('topSellingList');
+        container.innerHTML = topMedicines.map(med => `
+            <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                    <span>${med.name}</span>
+                    <span class="fw-bold">${med.sales} units</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar bg-gradient" style="width: ${med.percentage}%"></div>
+                </div>
+            </div>
+        `).join('');
     }
     
-    // ============================================
-    // SEARCH DATA
-    // ============================================
-    const searchData = {
-        medicines: [
-            { name: 'Paracetamol 500mg', category: 'Pain Relief', price: 5.00, stock: 150 },
-            { name: 'Amoxicillin 250mg', category: 'Antibiotics', price: 10.00, stock: 8 },
-            { name: 'Vitamin C 1000mg', category: 'Vitamins', price: 15.00, stock: 45 },
-            { name: 'Aspirin 100mg', category: 'Pain Relief', price: 8.00, stock: 120 },
-            { name: 'Omeprazole 20mg', category: 'Gastric', price: 12.00, stock: 60 },
-            { name: 'Loratadine 10mg', category: 'Allergy', price: 7.00, stock: 35 }
-        ],
-        customers: [
-            { name: 'John Doe', phone: '+1234567890', email: 'john@example.com' },
-            { name: 'Jane Smith', phone: '+1234567891', email: 'jane@example.com' },
-            { name: 'Mike Johnson', phone: '+1234567892', email: 'mike@example.com' }
-        ],
-        orders: [
-            { id: '#INV-001', customer: 'John Doe', amount: 25.00, status: 'Completed' },
-            { id: '#INV-002', customer: 'Jane Smith', amount: 45.00, status: 'Pending' },
-            { id: '#INV-003', customer: 'Mike Johnson', amount: 15.00, status: 'Completed' }
-        ]
-    };
+    function updateRecentOrders(sales) {
+        const recentOrders = sales.slice(0, 5);
+        const container = document.getElementById('recentOrdersTable');
+        container.innerHTML = recentOrders.map(order => `
+            <tr>
+                <td>${order.invoiceNo}</td>
+                <td>${order.customer}</td>
+                <td>${["Paracetamol 500mg", "Amoxicillin", "Vitamin C"][Math.floor(Math.random() * 3)]}</td>
+                <td>$${order.total.toFixed(2)}</td>
+                <td>
+                    <span class="badge ${order.status === 'Completed' ? 'bg-success' : order.status === 'Pending' ? 'bg-warning' : 'bg-info'} rounded-pill">
+                        ${order.status}
+                    </span>
+                </td>
+                <td>${order.date}</td>
+            </tr>
+        `).join('');
+    }
+    
+    let salesChart = null;
+    function updateSalesChart(sales) {
+        // Group sales by month
+        const monthlyData = new Array(12).fill(0);
+        sales.forEach(sale => {
+            const month = new Date(sale.date).getMonth();
+            monthlyData[month] += sale.total;
+        });
+        
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        if (salesChart) salesChart.destroy();
+        
+        salesChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Sales Revenue',
+                    data: monthlyData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { callbacks: { label: (ctx) => `$${ctx.parsed.y.toFixed(2)}` } }
+                },
+                scales: { y: { beginAtZero: true, ticks: { callback: (v) => '$' + v.toLocaleString() } } }
+            }
+        });
+    }
     
     // ============================================
     // SEARCH FUNCTIONALITY
     // ============================================
     function performSearch(query) {
-        if(!query || query.length < 2) {
+        if (!query || query.length < 2) {
             document.getElementById('searchResults').style.display = 'none';
             return;
         }
         
         const lowerQuery = query.toLowerCase();
+        const medicines = loadMedicines();
+        const customers = loadCustomers();
+        const sales = loadSales();
         const results = [];
         
-        // Search medicines
-        searchData.medicines.forEach(med => {
-            if(med.name.toLowerCase().includes(lowerQuery) || med.category.toLowerCase().includes(lowerQuery)) {
+        medicines.forEach(med => {
+            if (med.name.toLowerCase().includes(lowerQuery)) {
                 results.push({
                     type: 'medicine',
                     title: med.name,
-                    subtitle: `${med.category} | $${med.price} | Stock: ${med.stock}`,
+                    subtitle: `Stock: ${med.stock} | $${med.sellingPrice}`,
                     icon: 'fa-capsules',
                     link: 'medicines.html'
                 });
             }
         });
         
-        // Search customers
-        searchData.customers.forEach(cust => {
-            if(cust.name.toLowerCase().includes(lowerQuery) || cust.phone.includes(lowerQuery) || cust.email.toLowerCase().includes(lowerQuery)) {
+        customers.forEach(cust => {
+            if (cust.name.toLowerCase().includes(lowerQuery)) {
                 results.push({
                     type: 'customer',
                     title: cust.name,
-                    subtitle: `${cust.phone} | ${cust.email}`,
+                    subtitle: `${cust.phone} | Due: $${cust.due}`,
                     icon: 'fa-user',
                     link: 'customers.html'
                 });
             }
         });
         
-        // Search orders
-        searchData.orders.forEach(order => {
-            if(order.id.toLowerCase().includes(lowerQuery) || order.customer.toLowerCase().includes(lowerQuery)) {
+        sales.slice(0, 5).forEach(order => {
+            if (order.invoiceNo.toLowerCase().includes(lowerQuery)) {
                 results.push({
                     type: 'order',
-                    title: order.id,
-                    subtitle: `${order.customer} | $${order.amount} | ${order.status}`,
+                    title: order.invoiceNo,
+                    subtitle: `${order.customer} | $${order.total}`,
                     icon: 'fa-receipt',
                     link: 'sales.html'
                 });
@@ -933,105 +1166,84 @@
         const resultsContainer = document.getElementById('searchResults');
         const clearBtn = document.getElementById('clearSearch');
         
-        if(results.length === 0) {
-            resultsContainer.innerHTML = `
-                <div class="search-result-item">
-                    <div class="result-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <div class="result-content">
-                        <div class="result-title">No results found</div>
-                        <div class="result-subtitle">Try a different search term</div>
-                    </div>
-                </div>
-            `;
+        if (results.length === 0) {
+            resultsContainer.innerHTML = `<div class="search-result-item"><div class="result-icon"><i class="fas fa-search"></i></div><div class="result-content"><div class="result-title">No results found</div><div class="result-subtitle">Try a different search term</div></div></div>`;
             resultsContainer.style.display = 'block';
             return;
         }
         
         function highlightText(text, query) {
-            if(!query) return text;
+            if (!query) return text;
             const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
             return text.replace(regex, '<span class="search-highlight">$1</span>');
         }
         
         resultsContainer.innerHTML = results.slice(0, 10).map(result => `
             <div class="search-result-item" onclick="navigateTo('${result.link}', '${result.title}')">
-                <div class="result-icon">
-                    <i class="fas ${result.icon}"></i>
-                </div>
+                <div class="result-icon"><i class="fas ${result.icon}"></i></div>
                 <div class="result-content">
                     <div class="result-title">${highlightText(result.title, query)}</div>
                     <div class="result-subtitle">${highlightText(result.subtitle, query)}</div>
                 </div>
-                <i class="fas fa-arrow-right text-muted" style="font-size: 12px;"></i>
+                <i class="fas fa-arrow-right text-muted"></i>
             </div>
         `).join('');
         
         resultsContainer.style.display = 'block';
-        
-        if(results.length > 0) {
-            clearBtn.style.display = 'block';
-        } else {
-            clearBtn.style.display = 'none';
-        }
+        clearBtn.style.display = results.length > 0 ? 'block' : 'none';
     }
     
     function navigateTo(link, searchTerm) {
         showToast(`Navigating to ${searchTerm}...`, 'info');
-        setTimeout(() => {
-            window.location.href = link;
-        }, 500);
+        setTimeout(() => window.location.href = link, 500);
     }
     
     // ============================================
-    // INITIALIZE - With Enhanced Security Check
+    // AUTHENTICATION
     // ============================================
-    const currentUser = checkAuth();
-    if(currentUser) {
-        const userName = currentUser.name;
-        const userRole = currentUser.role.toUpperCase();
-        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=667eea&color=fff`;
-        
-        document.getElementById('userName').textContent = userName;
-        document.getElementById('userRole').textContent = userRole;
-        document.getElementById('navUserName').textContent = userName.split(' ')[0];
-        document.getElementById('welcomeMessage').textContent = `Welcome back, ${userName.split(' ')[0]}!`;
-        
-        const avatars = document.querySelectorAll('#userAvatar, #navUserAvatar');
-        avatars.forEach(avatar => {
-            avatar.src = avatarUrl;
-        });
-        
-        applyRoleBasedAccess(currentUser.role);
+    function checkAuth() {
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        if (!user) {
+            window.location.replace('login.html');
+            return false;
+        }
+        const userData = JSON.parse(user);
+        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.name)}&background=3b82f6&color=fff`;
+        document.getElementById('userName').textContent = userData.name;
+        document.getElementById('userRole').textContent = userData.role.toUpperCase();
+        document.getElementById('navUserName').textContent = userData.name.split(' ')[0];
+        document.getElementById('welcomeMessage').textContent = `Welcome back, ${userData.name.split(' ')[0]}!`;
+        document.querySelectorAll('#userAvatar, #navUserAvatar').forEach(avatar => avatar.src = avatarUrl);
+        applyRoleBasedAccess(userData.role);
+        return true;
     }
     
-    // ============================================
-    // ROLE BASED ACCESS CONTROL
-    // ============================================
     function applyRoleBasedAccess(role) {
         const menuItems = {
-            medicines: document.getElementById('menuMedicines'),
-            customers: document.getElementById('menuCustomers'),
             purchases: document.getElementById('menuPurchases'),
             suppliers: document.getElementById('menuSuppliers'),
-            prescriptions: document.getElementById('menuPrescriptions'),
             reports: document.getElementById('menuReports'),
             settings: document.getElementById('menuSettings')
         };
         
-        if(role === 'staff') {
-            if(menuItems.purchases) menuItems.purchases.style.display = 'none';
-            if(menuItems.suppliers) menuItems.suppliers.style.display = 'none';
-            if(menuItems.reports) menuItems.reports.style.display = 'none';
-            if(menuItems.settings) menuItems.settings.style.display = 'none';
-            showToast('Staff Mode: View only access', 'info');
+        if (role === 'staff') {
+            if (menuItems.purchases) menuItems.purchases.style.display = 'none';
+            if (menuItems.suppliers) menuItems.suppliers.style.display = 'none';
+            if (menuItems.reports) menuItems.reports.style.display = 'none';
+            if (menuItems.settings) menuItems.settings.style.display = 'none';
+        } else if (role === 'pharmacist') {
+            if (menuItems.purchases) menuItems.purchases.style.display = 'none';
+            if (menuItems.suppliers) menuItems.suppliers.style.display = 'none';
+            if (menuItems.settings) menuItems.settings.style.display = 'none';
         }
-        else if(role === 'pharmacist') {
-            if(menuItems.purchases) menuItems.purchases.style.display = 'none';
-            if(menuItems.suppliers) menuItems.suppliers.style.display = 'none';
-            if(menuItems.settings) menuItems.settings.style.display = 'none';
-        }
+    }
+    
+    function logout() {
+        localStorage.clear();
+        sessionStorage.clear();
+        document.cookie.split(";").forEach(c => document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"));
+        showToast('Logging out...', 'success');
+        setTimeout(() => window.location.replace('login.html'), 1000);
     }
     
     // ============================================
@@ -1039,49 +1251,58 @@
     // ============================================
     function showToast(message, type) {
         const existingToast = document.querySelector('.toast-message');
-        if(existingToast) existingToast.remove();
+        if (existingToast) existingToast.remove();
         
         const toast = document.createElement('div');
         toast.className = `toast-message alert alert-${type} shadow-lg`;
-        toast.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; min-width: 250px; animation: slideInRight 0.3s ease;';
-        toast.innerHTML = `
-            <div class="d-flex align-items-center">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle'} me-2 fs-5"></i>
-                <div class="flex-grow-1">${message}</div>
-                <button type="button" class="btn-close btn-sm" onclick="this.parentElement.parentElement.remove()"></button>
-            </div>
-        `;
+        toast.innerHTML = `<div class="d-flex align-items-center"><i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2 fs-5"></i><div class="flex-grow-1">${message}</div><button type="button" class="btn-close btn-sm" onclick="this.parentElement.remove()"></button></div>`;
         document.body.appendChild(toast);
-        
-        setTimeout(() => {
-            if(toast) toast.remove();
-        }, 3000);
+        setTimeout(() => toast.remove(), 3000);
     }
+    
+    function orderNow(name) { showToast(`Order placed for ${name}`, 'success'); }
+    function takeAction(name) { showToast(`Alert: ${name} marked for action`, 'warning'); }
+    function viewAllOrders() { window.location.href = 'sales.html'; }
+    function showProfile() { document.querySelector('[data-bs-target="#settingsModal"]').click(); document.querySelector('a[href="#profile"]').click(); }
+    function changePassword() { document.querySelector('[data-bs-target="#settingsModal"]').click(); document.querySelector('a[href="#security"]').click(); }
+    function show2FA() { document.querySelector('[data-bs-target="#settingsModal"]').click(); document.querySelector('a[href="#security"]').click(); }
+    function updateProfile() { showToast('Profile updated successfully!', 'success'); setTimeout(() => location.reload(), 1500); }
+    function updatePassword() { 
+        const newPwd = document.getElementById('newPassword').value;
+        const confirmPwd = document.getElementById('confirmPassword').value;
+        if (!newPwd || !confirmPwd) { showToast('Please fill all password fields', 'danger'); return; }
+        if (newPwd !== confirmPwd) { showToast('New passwords do not match', 'danger'); return; }
+        showToast('Password changed successfully!', 'success');
+    }
+    function enable2FA() { showToast('2FA setup initiated. Check your email.', 'info'); }
+    function saveNotificationSettings() { showToast('Notification settings saved!', 'success'); }
+    function backupDatabase() { showToast('Database backup completed!', 'success'); }
+    function restoreDatabase() { showToast('Database restore initiated', 'info'); }
+    function saveAllSettings() { showToast('All settings saved successfully!', 'success'); bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide(); }
+    
+    // ============================================
+    // AUTO REFRESH (30 seconds)
+    // ============================================
+    let refreshInterval = setInterval(() => {
+        updateAllStats();
+    }, 30000);
     
     // ============================================
     // EVENT LISTENERS
     // ============================================
-    document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        logout();
-    });
+    document.getElementById('logoutBtn')?.addEventListener('click', (e) => { e.preventDefault(); logout(); });
+    document.getElementById('logoutDropdownBtn')?.addEventListener('click', (e) => { e.preventDefault(); logout(); });
     
-    document.getElementById('logoutDropdownBtn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        logout();
-    });
-    
-    // Search Event Listeners
+    // Search
     const searchInput = document.getElementById('globalSearch');
     const clearSearch = document.getElementById('clearSearch');
     const searchResults = document.getElementById('searchResults');
-    
     let searchTimeout;
+    
     searchInput?.addEventListener('input', (e) => {
         clearTimeout(searchTimeout);
         const query = e.target.value.trim();
-        
-        if(query.length > 0) {
+        if (query.length > 0) {
             clearSearch.style.display = 'block';
             searchTimeout = setTimeout(() => performSearch(query), 300);
         } else {
@@ -1098,33 +1319,30 @@
     });
     
     document.addEventListener('click', (e) => {
-        if(!searchInput?.contains(e.target) && !searchResults?.contains(e.target)) {
+        if (!searchInput?.contains(e.target) && !searchResults?.contains(e.target)) {
             searchResults.style.display = 'none';
         }
     });
     
-    // Toggle Sidebar
+    // Sidebar
     let sidebarCollapsed = false;
     document.getElementById('toggleSidebar')?.addEventListener('click', () => {
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('mainContent');
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('expanded');
+        document.getElementById('sidebar').classList.toggle('collapsed');
+        document.getElementById('mainContent').classList.toggle('expanded');
         sidebarCollapsed = !sidebarCollapsed;
     });
     
-    // Mobile Menu Toggle
     document.getElementById('mobileMenuToggle')?.addEventListener('click', () => {
         document.getElementById('sidebar').classList.toggle('mobile-open');
     });
     
-    // Dark Mode Toggle
+    // Dark Mode
     let darkMode = false;
     document.getElementById('darkModeToggle')?.addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
         darkMode = !darkMode;
         const icon = document.querySelector('#darkModeToggle i');
-        if(darkMode) {
+        if (darkMode) {
             icon.classList.remove('fa-moon');
             icon.classList.add('fa-sun');
             localStorage.setItem('darkMode', 'enabled');
@@ -1135,197 +1353,36 @@
         }
     });
     
-    if(localStorage.getItem('darkMode') === 'enabled') {
+    if (localStorage.getItem('darkMode') === 'enabled') {
         document.body.classList.add('dark-mode');
         const icon = document.querySelector('#darkModeToggle i');
-        if(icon) {
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
-        }
+        if (icon) icon.classList.remove('fa-moon'), icon.classList.add('fa-sun');
     }
     
     // ============================================
-    // DASHBOARD FUNCTIONS
+    // INITIALIZE
     // ============================================
-    const ctx = document.getElementById('salesChart')?.getContext('2d');
-    if(ctx) {
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                datasets: [{
-                    label: 'Sales Revenue',
-                    data: [8500, 9200, 10500, 11800, 12400, 13800, 14200, 15600, 16800, 17400, 18200, 19800],
-                    borderColor: '#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: true }
-        });
-    }
-    
-    function loadLowStockAlerts() {
-        const alerts = [
-            { name: 'Paracetamol 500mg', stock: 15, minStock: 50 },
-            { name: 'Amoxicillin 250mg', stock: 8, minStock: 30 },
-            { name: 'Vitamin C Tablets', stock: 25, minStock: 40 }
-        ];
-        const container = document.getElementById('lowStockAlerts');
-        if(container) {
-            container.innerHTML = alerts.map(alert => `
-                <div class="alert-card alert-lowstock mb-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div><strong>${alert.name}</strong><br><small class="text-muted">Stock: ${alert.stock} / Min: ${alert.minStock}</small></div>
-                        <button class="btn btn-sm btn-warning" onclick="orderNow('${alert.name}')">Order Now</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-    }
-    
-    function loadExpiryAlerts() {
-        const alerts = [
-            { name: 'Aspirin 100mg', daysLeft: 10 },
-            { name: 'Omeprazole 20mg', daysLeft: 15 },
-            { name: 'Loratadine 10mg', daysLeft: 20 }
-        ];
-        const container = document.getElementById('expiryAlerts');
-        if(container) {
-            container.innerHTML = alerts.map(alert => `
-                <div class="alert-card alert-expiry mb-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div><strong>${alert.name}</strong><br><small class="text-muted">Expires in ${alert.daysLeft} days</small></div>
-                        <button class="btn btn-sm btn-danger" onclick="takeAction('${alert.name}')">Take Action</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-    }
-    
-    function loadTopSelling() {
-        const medicines = [
-            { name: 'Paracetamol 500mg', sales: 1250, percentage: 25 },
-            { name: 'Amoxicillin 250mg', sales: 980, percentage: 20 },
-            { name: 'Vitamin C', sales: 870, percentage: 18 },
-            { name: 'Aspirin 100mg', sales: 650, percentage: 15 }
-        ];
-        const container = document.getElementById('topSellingList');
-        if(container) {
-            container.innerHTML = medicines.map(med => `
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between mb-1"><span>${med.name}</span><span class="fw-bold">${med.sales} units</span></div>
-                    <div class="progress" style="height: 8px;"><div class="progress-bar bg-gradient" style="width: ${med.percentage}%"></div></div>
-                </div>
-            `).join('');
-        }
-    }
-    
-    function loadRecentOrders() {
-        const orders = [
-            { id: '#INV-001', customer: 'John Doe', medicine: 'Paracetamol 500mg', amount: '$25.00', status: 'Completed', date: '2024-01-15' },
-            { id: '#INV-002', customer: 'Jane Smith', medicine: 'Amoxicillin', amount: '$45.00', status: 'Pending', date: '2024-01-15' },
-            { id: '#INV-003', customer: 'Mike Johnson', medicine: 'Vitamin C', amount: '$15.00', status: 'Completed', date: '2024-01-14' },
-            { id: '#INV-004', customer: 'Sarah Wilson', medicine: 'Aspirin', amount: '$35.00', status: 'Processing', date: '2024-01-14' }
-        ];
-        const container = document.getElementById('recentOrdersTable');
-        if(container) {
-            container.innerHTML = orders.map(order => `
-                <tr>
-                    <td>${order.id}</td>
-                    <td>${order.customer}</td>
-                    <td>${order.medicine}</td>
-                    <td>${order.amount}</td>
-                    <td><span class="badge ${order.status === 'Completed' ? 'bg-success' : order.status === 'Pending' ? 'bg-warning' : 'bg-info'}">${order.status}</span></td>
-                    <td>${order.date}</td>
-                </tr>
-            `).join('');
-        }
-    }
-    
-    function orderNow(medicineName) { showToast(`Order placed for ${medicineName}`, 'success'); }
-    function takeAction(medicineName) { showToast(`Alert: ${medicineName} marked for action`, 'warning'); }
-    function viewAllOrders() { showToast('Viewing all orders', 'info'); }
-    function showProfile() { document.querySelector('[data-bs-target="#settingsModal"]').click(); document.querySelector('a[href="#profile"]').click(); }
-    function changePassword() { document.querySelector('[data-bs-target="#settingsModal"]').click(); document.querySelector('a[href="#security"]').click(); }
-    function show2FA() { document.querySelector('[data-bs-target="#settingsModal"]').click(); document.querySelector('a[href="#security"]').click(); }
-    
-    function updateProfile() {
-        const name = document.getElementById('profileName').value;
-        const userData = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user'));
-        if(userData) {
-            userData.name = name;
-            if(localStorage.getItem('user')) localStorage.setItem('user', JSON.stringify(userData));
-            if(sessionStorage.getItem('user')) sessionStorage.setItem('user', JSON.stringify(userData));
-        }
-        showToast('Profile updated successfully!', 'success');
-        setTimeout(() => location.reload(), 1500);
-    }
-    
-    function updatePassword() {
-        const newPwd = document.getElementById('newPassword').value;
-        const confirmPwd = document.getElementById('confirmPassword').value;
-        if(!newPwd || !confirmPwd) { showToast('Please fill all password fields', 'danger'); return; }
-        if(newPwd !== confirmPwd) { showToast('New passwords do not match', 'danger'); return; }
-        showToast('Password changed successfully!', 'success');
-        document.getElementById('currentPassword').value = '';
-        document.getElementById('newPassword').value = '';
-        document.getElementById('confirmPassword').value = '';
-    }
-    
-    function enable2FA() { showToast('2FA setup initiated. Check your email.', 'info'); }
-    function saveNotificationSettings() { showToast('Notification settings saved!', 'success'); }
-    function backupDatabase() { showToast('Database backup completed!', 'success'); }
-    function restoreDatabase() { showToast('Database restore initiated', 'info'); }
-    function saveAllSettings() { showToast('All settings saved successfully!', 'success'); bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide(); }
-    
-    function initDashboard() {
-        loadLowStockAlerts();
-        loadExpiryAlerts();
-        loadTopSelling();
-        loadRecentOrders();
+    if (checkAuth()) {
+        updateAllStats();
         gsap.from(".stat-card", { duration: 0.8, y: 50, opacity: 0, stagger: 0.1, ease: "back.out(1.2)" });
     }
     
-    setInterval(() => {
-        if(document.visibilityState === 'visible') {
-            loadLowStockAlerts();
-            loadExpiryAlerts();
-            loadTopSelling();
-            loadRecentOrders();
-        }
-    }, 30000);
-    
-    initDashboard();
-    
-    // ============================================
-    // PREVENT BACK BUTTON AFTER LOGOUT
-    // ============================================
-    // This prevents going back to dashboard after logout
-    window.addEventListener('pageshow', function(event) {
+    window.addEventListener('pageshow', () => {
         const user = localStorage.getItem('user') || sessionStorage.getItem('user');
-        const authToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-        
-        if(!user || !authToken) {
-            // Use replace to clear history and prevent back button
-            window.location.replace('login.html');
-        }
+        if (!user) window.location.replace('login.html');
     });
     
-    // Disable back button completely using history manipulation
+    window.addEventListener('beforeunload', () => {
+        if (refreshInterval) clearInterval(refreshInterval);
+    });
+    
     (function() {
-        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
-        if(!user) {
+        if (!localStorage.getItem('user') && !sessionStorage.getItem('user')) {
             window.location.replace('login.html');
         }
-        
-        // Push a new state to prevent back button
         history.pushState(null, null, location.href);
         window.addEventListener('popstate', function() {
-            const checkUser = localStorage.getItem('user') || sessionStorage.getItem('user');
-            if(!checkUser) {
+            if (!localStorage.getItem('user') && !sessionStorage.getItem('user')) {
                 window.location.replace('login.html');
             } else {
                 history.pushState(null, null, location.href);

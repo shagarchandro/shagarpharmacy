@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Supplier Management - MediCare Pharmacy</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,7 +14,8 @@
         * { font-family: 'Inter', sans-serif; }
         
         body {
-            background: #f5f7fb;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            min-height: 100vh;
         }
         
         .sidebar {
@@ -23,37 +24,51 @@
             top: 0;
             height: 100%;
             width: 280px;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
             z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 10px 0 40px rgba(0, 0, 0, 0.1);
         }
         
         .main-content {
             margin-left: 280px;
             padding: 20px;
+            transition: all 0.3s ease;
         }
         
         .btn-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
             color: white;
         }
         
         .supplier-card {
             transition: all 0.3s ease;
             border: none;
-            border-radius: 15px;
+            border-radius: 20px;
+            background: white;
             cursor: pointer;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
         }
         
         .supplier-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
         }
         
         .supplier-logo {
             width: 60px;
             height: 60px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -61,60 +76,110 @@
             font-size: 24px;
         }
         
-        .ledger-entry {
-            border-left: 3px solid;
-            padding: 10px;
-            margin-bottom: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px 20px;
+            margin: 5px 15px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         
-        .ledger-debit { border-left-color: #ef4444; }
-        .ledger-credit { border-left-color: #10b981; }
+        .sidebar .nav-link:hover {
+            background: rgba(59, 130, 246, 0.2);
+            color: white;
+            transform: translateX(8px);
+        }
+        
+        .sidebar .nav-link.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
         
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
             .main-content { margin-left: 0; }
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .toast-custom {
+            animation: slideInRight 0.3s ease;
+            border-radius: 12px;
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .status-active { background: #10b981; color: white; }
+        .status-inactive { background: #ef4444; color: white; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
         }
     </style>
 </head>
 <body>
 
 <!-- Sidebar -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
     <div class="p-4">
         <div class="d-flex align-items-center gap-2 mb-4">
             <i class="fas fa-hospital-user text-white fs-3"></i>
             <span class="text-white fw-bold fs-5">MediCare</span>
         </div>
         
+        <div class="user-info text-center mb-4">
+            <img src="https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff&rounded=true&size=80" class="rounded-circle mb-2" width="70" height="70" id="userAvatar">
+            <h6 class="text-white mb-1" id="userName">Admin User</h6>
+            <small class="text-white-50" id="userRole">Administrator</small>
+        </div>
+        
         <nav class="nav flex-column">
-            <a href="dashboard.html" class="nav-link text-white-50 mb-2">
+            <a href="dashboard.html" class="nav-link">
                 <i class="fas fa-tachometer-alt me-2"></i> Dashboard
             </a>
-            <a href="medicines.html" class="nav-link text-white-50 mb-2">
+            <a href="medicines.html" class="nav-link">
                 <i class="fas fa-capsules me-2"></i> Medicines
             </a>
-            <a href="customers.html" class="nav-link text-white-50 mb-2">
+            <a href="customers.html" class="nav-link">
                 <i class="fas fa-users me-2"></i> Customers
             </a>
-            <a href="sales.html" class="nav-link text-white-50 mb-2">
+            <a href="sales.html" class="nav-link">
                 <i class="fas fa-shopping-cart me-2"></i> POS Sales
             </a>
-            <a href="purchases.html" class="nav-link text-white-50 mb-2">
+            <a href="purchases.html" class="nav-link">
                 <i class="fas fa-truck me-2"></i> Purchases
             </a>
-            <a href="suppliers.html" class="nav-link text-white active bg-primary bg-opacity-25 rounded">
+            <a href="suppliers.html" class="nav-link active">
                 <i class="fas fa-parachute-box me-2"></i> Suppliers
             </a>
-            <a href="prescriptions.html" class="nav-link text-white-50 mb-2">
+            <a href="prescriptions.html" class="nav-link">
                 <i class="fas fa-file-prescription me-2"></i> Prescriptions
             </a>
-            <a href="reports.html" class="nav-link text-white-50 mb-2">
+            <a href="reports.html" class="nav-link">
                 <i class="fas fa-chart-line me-2"></i> Reports
             </a>
             <hr class="bg-secondary my-3">
-            <a href="login.html" class="nav-link text-white-50">
+            <a href="login.html" class="nav-link" id="logoutBtn">
                 <i class="fas fa-sign-out-alt me-2"></i> Logout
             </a>
         </nav>
@@ -124,72 +189,72 @@
 <!-- Main Content -->
 <div class="main-content">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
             <h2 class="fw-bold gradient-text">Supplier Management</h2>
             <p class="text-muted">Manage suppliers, track purchases, and handle payments</p>
         </div>
-        <button class="btn btn-gradient rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addSupplierModal">
+        <button class="btn btn-gradient rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addSupplierModal" onclick="resetSupplierForm()">
             <i class="fas fa-plus me-2"></i>Add New Supplier
         </button>
     </div>
     
     <!-- Stats Cards -->
     <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1">Total Suppliers</p>
-                            <h3 class="fw-bold" id="totalSuppliers">0</h3>
+                            <h3 class="fw-bold text-primary" id="totalSuppliers">0</h3>
                         </div>
-                        <div class="bg-primary bg-opacity-10 p-3 rounded">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-3">
                             <i class="fas fa-truck fa-2x text-primary"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1">Total Due</p>
                             <h3 class="fw-bold text-warning" id="totalDue">$0</h3>
                         </div>
-                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-3">
                             <i class="fas fa-dollar-sign fa-2x text-warning"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1">Total Purchases</p>
                             <h3 class="fw-bold text-success" id="totalPurchases">$0</h3>
                         </div>
-                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                        <div class="bg-success bg-opacity-10 p-3 rounded-3">
                             <i class="fas fa-shopping-cart fa-2x text-success"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1">Active Suppliers</p>
                             <h3 class="fw-bold text-info" id="activeSuppliers">0</h3>
                         </div>
-                        <div class="bg-info bg-opacity-10 p-3 rounded">
+                        <div class="bg-info bg-opacity-10 p-3 rounded-3">
                             <i class="fas fa-check-circle fa-2x text-info"></i>
                         </div>
                     </div>
@@ -199,17 +264,17 @@
     </div>
     
     <!-- Search and Filter -->
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 rounded-4">
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-4">
                     <div class="position-relative">
                         <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                        <input type="text" class="form-control ps-5" id="searchSupplier" placeholder="Search by name, contact or phone...">
+                        <input type="text" class="form-control ps-5 rounded-3" id="searchSupplier" placeholder="Search by name, contact or phone...">
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <select class="form-select" id="supplierTypeFilter">
+                    <select class="form-select rounded-3" id="supplierTypeFilter">
                         <option value="">All Types</option>
                         <option value="pharmaceutical">Pharmaceutical</option>
                         <option value="distributor">Distributor</option>
@@ -217,7 +282,7 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select class="form-select" id="dueStatusFilter">
+                    <select class="form-select rounded-3" id="dueStatusFilter">
                         <option value="">All Due Status</option>
                         <option value="high">High Due (>$1000)</option>
                         <option value="medium">Medium Due ($500-$1000)</option>
@@ -226,7 +291,7 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <button class="btn btn-outline-primary w-100" onclick="exportSuppliers()">
+                    <button class="btn btn-outline-primary w-100 rounded-3" onclick="exportSuppliers()">
                         <i class="fas fa-file-excel me-2"></i>Export
                     </button>
                 </div>
@@ -245,58 +310,59 @@
 
 <!-- Add/Edit Supplier Modal -->
 <div class="modal fade" id="addSupplierModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-gradient text-white">
-                <h5 class="modal-title">Supplier Information</h5>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header bg-gradient text-white border-0 rounded-top-4">
+                <h5 class="modal-title"><i class="fas fa-truck me-2"></i>Supplier Information</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="supplierForm">
+                    <input type="hidden" id="editSupplierId" value="">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Company Name *</label>
-                            <input type="text" class="form-control" id="companyName" required>
+                            <input type="text" class="form-control rounded-3" id="companyName" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Contact Person *</label>
-                            <input type="text" class="form-control" id="contactPerson" required>
+                            <input type="text" class="form-control rounded-3" id="contactPerson" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Phone Number *</label>
-                            <input type="tel" class="form-control" id="supplierPhone" required>
+                            <input type="tel" class="form-control rounded-3" id="supplierPhone" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Email</label>
-                            <input type="email" class="form-control" id="supplierEmail">
+                            <input type="email" class="form-control rounded-3" id="supplierEmail">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Supplier Type</label>
-                            <select class="form-select" id="supplierType">
-                                <option value="pharmaceutical">Pharmaceutical Company</option>
-                                <option value="distributor">Distributor</option>
-                                <option value="wholesaler">Wholesaler</option>
+                            <select class="form-select rounded-3" id="supplierType">
+                                <option value="pharmaceutical">🏭 Pharmaceutical Company</option>
+                                <option value="distributor">📦 Distributor</option>
+                                <option value="wholesaler">📦 Wholesaler</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Tax Number (GST/VAT)</label>
-                            <input type="text" class="form-control" id="taxNumber">
+                            <input type="text" class="form-control rounded-3" id="taxNumber">
                         </div>
                         <div class="col-12 mb-3">
                             <label class="form-label fw-semibold">Address</label>
-                            <textarea class="form-control" id="supplierAddress" rows="2"></textarea>
+                            <textarea class="form-control rounded-3" id="supplierAddress" rows="2"></textarea>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Opening Due</label>
-                            <input type="number" class="form-control" id="openingDue" value="0">
+                            <input type="number" class="form-control rounded-3" id="openingDue" value="0" step="0.01">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Credit Limit</label>
-                            <input type="number" class="form-control" id="creditLimit" value="10000">
+                            <input type="number" class="form-control rounded-3" id="creditLimit" value="10000" step="0.01">
                         </div>
                         <div class="col-12 mb-3">
                             <label class="form-label fw-semibold">Payment Terms</label>
-                            <select class="form-select" id="paymentTerms">
+                            <select class="form-select rounded-3" id="paymentTerms">
                                 <option value="immediate">Immediate</option>
                                 <option value="7days">7 Days</option>
                                 <option value="15days">15 Days</option>
@@ -306,110 +372,36 @@
                         </div>
                         <div class="col-12 mb-3">
                             <label class="form-label fw-semibold">Notes</label>
-                            <textarea class="form-control" id="supplierNotes" rows="2"></textarea>
+                            <textarea class="form-control rounded-3" id="supplierNotes" rows="2"></textarea>
                         </div>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-gradient" onclick="saveSupplier()">Save Supplier</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-gradient rounded-3" onclick="saveSupplier()">Save Supplier</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Supplier Details Modal -->
-<div class="modal fade" id="supplierDetailsModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header bg-gradient text-white">
-                <h5 class="modal-title">Supplier Details</h5>
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header bg-danger text-white border-0 rounded-top-4">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div id="supplierDetails"></div>
-                
-                <!-- Tabs -->
-                <ul class="nav nav-tabs mt-3" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link active" data-bs-toggle="tab" href="#purchaseHistory">Purchase History</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#supplierLedger">Ledger</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#payments">Payments</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#products">Products Supplied</a>
-                    </li>
-                </ul>
-                
-                <div class="tab-content mt-3">
-                    <div class="tab-pane fade show active" id="purchaseHistory">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr><th>Invoice No</th><th>Date</th><th>Items</th><th>Total</th><th>Paid</th><th>Due</th><th>Status</th></tr>
-                                </thead>
-                                <tbody id="supplierPurchaseHistory"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="supplierLedger">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Balance</th></tr>
-                                </thead>
-                                <tbody id="supplierLedgerBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="payments">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="card mb-3">
-                                    <div class="card-body">
-                                        <h6 class="fw-bold">Make Payment</h6>
-                                        <input type="number" class="form-control mb-2" id="supplierPaymentAmount" placeholder="Enter amount">
-                                        <select class="form-select mb-2" id="supplierPaymentMethod">
-                                            <option>Cash</option>
-                                            <option>Bank Transfer</option>
-                                            <option>Cheque</option>
-                                        </select>
-                                        <input type="date" class="form-control mb-2" id="paymentDate">
-                                        <textarea class="form-control mb-2" rows="2" placeholder="Payment notes"></textarea>
-                                        <button class="btn btn-success w-100" onclick="recordSupplierPayment()">
-                                            <i class="fas fa-check-circle me-2"></i>Record Payment
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h6 class="fw-bold">Payment History</h6>
-                                        <div id="supplierPaymentHistory"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="products">
-                        <div id="supplierProducts"></div>
-                    </div>
-                </div>
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-trash-alt fa-4x text-danger mb-3"></i>
+                <h5 class="fw-bold">Are you sure?</h5>
+                <p class="text-muted">This action cannot be undone. This will permanently delete the supplier and all associated records.</p>
+                <p class="fw-bold text-danger" id="deleteSupplierName"></p>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="sendSupplierEmail()">
-                    <i class="fas fa-envelope me-2"></i>Send Email
-                </button>
-                <button type="button" class="btn btn-success" onclick="sendSupplierSMS()">
-                    <i class="fas fa-sms me-2"></i>Send SMS
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-secondary rounded-3 px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger rounded-3 px-4" id="confirmDeleteBtn">Delete Permanently</button>
             </div>
         </div>
     </div>
@@ -418,91 +410,141 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // Sample Supplier Data
-    let suppliers = [
-        {
-            id: 1,
-            companyName: "MediSource Pharma",
-            contactPerson: "Ahmed Khan",
-            phone: "+1234567890",
-            email: "ahmed@medisource.com",
-            address: "123 Pharma Street, New York",
-            type: "pharmaceutical",
-            taxNumber: "GST123456789",
-            due: 5000,
-            creditLimit: 10000,
-            paymentTerms: "30days",
-            totalPurchases: 15000,
-            totalPayments: 10000,
-            status: "active",
-            joinDate: "2023-01-15"
-        },
-        {
-            id: 2,
-            companyName: "HealthCare Distributors",
-            contactPerson: "Sarah Johnson",
-            phone: "+1234567891",
-            email: "sarah@healthcare.com",
-            address: "456 Health Ave, Los Angeles",
-            type: "distributor",
-            taxNumber: "GST987654321",
-            due: 2500,
-            creditLimit: 15000,
-            paymentTerms: "15days",
-            totalPurchases: 25000,
-            totalPayments: 22500,
-            status: "active",
-            joinDate: "2023-03-20"
-        },
-        {
-            id: 3,
-            companyName: "Global Medicines Ltd",
-            contactPerson: "Mike Chen",
-            phone: "+1234567892",
-            email: "mike@globalmed.com",
-            address: "789 Global Rd, Chicago",
-            type: "wholesaler",
-            taxNumber: "GST456789123",
-            due: 0,
-            creditLimit: 20000,
-            paymentTerms: "immediate",
-            totalPurchases: 35000,
-            totalPayments: 35000,
-            status: "active",
-            joinDate: "2023-06-10"
+    // ============================================
+    // STORAGE KEY
+    // ============================================
+    const SUPPLIER_STORAGE_KEY = 'pharmacy_suppliers';
+    
+    // ============================================
+    // LOAD DATA FROM LOCALSTORAGE
+    // ============================================
+    function loadSuppliersFromStorage() {
+        const stored = localStorage.getItem(SUPPLIER_STORAGE_KEY);
+        if (stored && stored !== 'undefined' && stored !== 'null') {
+            try {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    return parsed.filter(s => s && s.id && s.companyName);
+                }
+            } catch(e) {
+                console.log('Error parsing suppliers:', e);
+            }
         }
-    ];
+        return getDefaultSuppliers();
+    }
     
-    // Sample Purchase History for Suppliers
-    let supplierPurchases = {
-        1: [
-            { invoiceNo: "PO-2024-001", date: "2024-01-15", items: 2, total: 500, paid: 300, due: 200, status: "Partial" },
-            { invoiceNo: "PO-2024-008", date: "2024-02-20", items: 3, total: 750, paid: 750, due: 0, status: "Paid" }
-        ],
-        2: [
-            { invoiceNo: "PO-2024-002", date: "2024-02-10", items: 1, total: 1600, paid: 1600, due: 0, status: "Paid" },
-            { invoiceNo: "PO-2024-015", date: "2024-03-05", items: 2, total: 900, paid: 0, due: 900, status: "Pending" }
-        ],
-        3: [
-            { invoiceNo: "PO-2024-005", date: "2024-01-25", items: 4, total: 2000, paid: 2000, due: 0, status: "Paid" }
-        ]
-    };
+    function getDefaultSuppliers() {
+        return [
+            {
+                id: 1,
+                companyName: "MediSource Pharma",
+                contactPerson: "Ahmed Khan",
+                phone: "+1234567890",
+                email: "ahmed@medisource.com",
+                address: "123 Pharma Street, New York",
+                type: "pharmaceutical",
+                taxNumber: "GST123456789",
+                due: 5000,
+                creditLimit: 10000,
+                paymentTerms: "30days",
+                totalPurchases: 15000,
+                totalPayments: 10000,
+                status: "active",
+                joinDate: "2023-01-15",
+                notes: "Regular supplier for antibiotics"
+            },
+            {
+                id: 2,
+                companyName: "HealthCare Distributors",
+                contactPerson: "Sarah Johnson",
+                phone: "+1234567891",
+                email: "sarah@healthcare.com",
+                address: "456 Health Ave, Los Angeles",
+                type: "distributor",
+                taxNumber: "GST987654321",
+                due: 2500,
+                creditLimit: 15000,
+                paymentTerms: "15days",
+                totalPurchases: 25000,
+                totalPayments: 22500,
+                status: "active",
+                joinDate: "2023-03-20",
+                notes: "Reliable distributor"
+            },
+            {
+                id: 3,
+                companyName: "Global Medicines Ltd",
+                contactPerson: "Mike Chen",
+                phone: "+1234567892",
+                email: "mike@globalmed.com",
+                address: "789 Global Rd, Chicago",
+                type: "wholesaler",
+                taxNumber: "GST456789123",
+                due: 0,
+                creditLimit: 20000,
+                paymentTerms: "immediate",
+                totalPurchases: 35000,
+                totalPayments: 35000,
+                status: "active",
+                joinDate: "2023-06-10",
+                notes: "International supplier"
+            }
+        ];
+    }
     
+    let suppliers = loadSuppliersFromStorage();
     let currentPage = 1;
     const itemsPerPage = 6;
-    let currentSupplierId = null;
+    let deleteSupplierId = null;
     
-    // Display Suppliers
+    // ============================================
+    // SAVE TO STORAGE
+    // ============================================
+    function saveSuppliersToStorage() {
+        localStorage.setItem(SUPPLIER_STORAGE_KEY, JSON.stringify(suppliers));
+    }
+    
+    // ============================================
+    // AUTHENTICATION CHECK
+    // ============================================
+    function checkAuth() {
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        const userData = JSON.parse(user);
+        document.getElementById('userName').textContent = userData.name;
+        document.getElementById('userRole').textContent = userData.role.toUpperCase();
+    }
+    
+    // ============================================
+    // RESET FORM
+    // ============================================
+    function resetSupplierForm() {
+        document.getElementById('supplierForm').reset();
+        document.getElementById('editSupplierId').value = '';
+        document.getElementById('openingDue').value = '0';
+        document.getElementById('creditLimit').value = '10000';
+        document.getElementById('supplierType').value = 'pharmaceutical';
+        document.getElementById('paymentTerms').value = '30days';
+    }
+    
+    // ============================================
+    // DISPLAY SUPPLIERS
+    // ============================================
     function displaySuppliers() {
         const searchTerm = document.getElementById('searchSupplier').value.toLowerCase();
         const typeFilter = document.getElementById('supplierTypeFilter').value;
         const dueFilter = document.getElementById('dueStatusFilter').value;
         
-        let filtered = suppliers.filter(sup => {
-            const matchesSearch = sup.companyName.toLowerCase().includes(searchTerm) ||
-                                 sup.contactPerson.toLowerCase().includes(searchTerm) ||
-                                 sup.phone.includes(searchTerm);
-            
+        // Filter out any invalid suppliers
+        let validSuppliers = suppliers.filter(sup => sup && sup.id && sup.companyName);
+        
+        let filtered = validSuppliers.filter(sup => {
+            const matchesSearch = (sup.companyName || '').toLowerCase().includes(searchTerm) ||
+                                 (sup.contactPerson || '').toLowerCase().includes(searchTerm) ||
+                                 (sup.phone || '').includes(searchTerm);
             const matchesType = !typeFilter || sup.type === typeFilter;
             
             let matchesDue = true;
@@ -516,8 +558,8 @@
         
         // Update stats
         document.getElementById('totalSuppliers').textContent = filtered.length;
-        document.getElementById('totalDue').textContent = '$' + filtered.reduce((sum, s) => sum + s.due, 0).toFixed(2);
-        document.getElementById('totalPurchases').textContent = '$' + filtered.reduce((sum, s) => sum + s.totalPurchases, 0).toFixed(2);
+        document.getElementById('totalDue').textContent = '$' + filtered.reduce((sum, s) => sum + (s.due || 0), 0).toFixed(2);
+        document.getElementById('totalPurchases').textContent = '$' + filtered.reduce((sum, s) => sum + (s.totalPurchases || 0), 0).toFixed(2);
         document.getElementById('activeSuppliers').textContent = filtered.filter(s => s.status === 'active').length;
         
         // Pagination
@@ -525,74 +567,101 @@
         const start = (currentPage - 1) * itemsPerPage;
         const paginated = filtered.slice(start, start + itemsPerPage);
         
-        // Render grid
         const grid = document.getElementById('suppliersGrid');
-        grid.innerHTML = paginated.map(sup => {
-            const typeIcon = sup.type === 'pharmaceutical' ? 'fa-flask' : sup.type === 'distributor' ? 'fa-truck' : 'fa-warehouse';
-            const dueClass = sup.due > 1000 ? 'text-danger' : sup.due > 0 ? 'text-warning' : 'text-success';
-            
-            return `
-                <div class="col-md-6 col-lg-4">
-                    <div class="card supplier-card h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-start mb-3">
-                                <div class="supplier-logo me-3">
-                                    <i class="fas ${typeIcon}"></i>
+        if(paginated.length === 0) {
+            grid.innerHTML = '<div class="col-12 text-center py-5"><i class="fas fa-truck fa-4x text-muted mb-3"></i><h5 class="text-muted">No suppliers found</h5><p class="text-muted">Click "Add New Supplier" to add your first supplier</p></div>';
+        } else {
+            grid.innerHTML = paginated.map(sup => {
+                const typeIcon = sup.type === 'pharmaceutical' ? 'fa-flask' : sup.type === 'distributor' ? 'fa-truck' : 'fa-warehouse';
+                const dueClass = sup.due > 1000 ? 'text-danger' : sup.due > 0 ? 'text-warning' : 'text-success';
+                const statusClass = sup.status === 'active' ? 'status-active' : 'status-inactive';
+                const statusText = sup.status === 'active' ? 'ACTIVE' : 'INACTIVE';
+                
+                return `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card supplier-card h-100">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-start mb-3">
+                                    <div class="supplier-logo me-3">
+                                        <i class="fas ${typeIcon}"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold mb-1">${escapeHtml(sup.companyName)}</h6>
+                                        <p class="text-muted small mb-0">${escapeHtml(sup.contactPerson)}</p>
+                                        <span class="status-badge ${statusClass} mt-1 d-inline-block">${statusText}</span>
+                                    </div>
                                 </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="fw-bold mb-1">${sup.companyName}</h6>
-                                    <p class="text-muted small mb-0">${sup.contactPerson}</p>
+                                <div class="mb-3">
+                                    <p class="small mb-1"><i class="fas fa-phone me-2 text-primary"></i>${sup.phone}</p>
+                                    <p class="small mb-1"><i class="fas fa-envelope me-2 text-primary"></i>${sup.email || 'N/A'}</p>
+                                    <p class="small mb-0"><i class="fas fa-map-marker-alt me-2 text-primary"></i>${sup.address ? (sup.address.substring(0, 30) + (sup.address.length > 30 ? '...' : '')) : 'N/A'}</p>
                                 </div>
-                            </div>
-                            <div class="mb-3">
-                                <p class="small mb-1"><i class="fas fa-phone me-2 text-primary"></i>${sup.phone}</p>
-                                <p class="small mb-1"><i class="fas fa-envelope me-2 text-primary"></i>${sup.email}</p>
-                                <p class="small mb-0"><i class="fas fa-map-marker-alt me-2 text-primary"></i>${sup.address.substring(0, 30)}...</p>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                <div>
-                                    <small class="text-muted">Due Amount</small>
-                                    <br>
-                                    <span class="fw-bold ${dueClass}">$${sup.due.toFixed(2)}</span>
-                                </div>
-                                <div>
-                                    <small class="text-muted">Total Purchases</small>
-                                    <br>
-                                    <span class="fw-bold">$${sup.totalPurchases.toFixed(2)}</span>
-                                </div>
-                                <div class="btn-group">
-                                    <button class="btn btn-sm btn-outline-primary" onclick="viewSupplier(${sup.id})">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-secondary" onclick="editSupplier(${sup.id})">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteSupplier(${sup.id})">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                    <div>
+                                        <small class="text-muted">Due Amount</small>
+                                        <br>
+                                        <span class="fw-bold ${dueClass}">$${(sup.due || 0).toFixed(2)}</span>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">Total Purchases</small>
+                                        <br>
+                                        <span class="fw-bold">$${(sup.totalPurchases || 0).toFixed(2)}</span>
+                                    </div>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-sm btn-outline-primary rounded-3" onclick="editSupplier(${sup.id})" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger rounded-3" onclick="showDeleteConfirm(${sup.id}, '${escapeHtml(sup.companyName)}')" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
-        }).join('');
+                `;
+            }).join('');
+        }
         
         // Pagination controls
         const pagination = document.getElementById('pagination');
-        pagination.innerHTML = `
-            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Previous</a>
-            </li>
-            ${Array.from({length: totalPages}, (_, i) => `
-                <li class="page-item ${currentPage === i+1 ? 'active' : ''}">
-                    <a class="page-link" href="#" onclick="changePage(${i+1})">${i+1}</a>
+        if(totalPages <= 1) {
+            pagination.innerHTML = '';
+        } else {
+            let paginationHtml = `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link rounded-3" href="#" onclick="changePage(${currentPage - 1})">Previous</a>
                 </li>
-            `).join('')}
-            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-                <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Next</a>
-            </li>
-        `;
+            `;
+            for(let i = 1; i <= Math.min(totalPages, 5); i++) {
+                paginationHtml += `
+                    <li class="page-item ${currentPage === i ? 'active' : ''}">
+                        <a class="page-link rounded-3" href="#" onclick="changePage(${i})">${i}</a>
+                    </li>
+                `;
+            }
+            if(totalPages > 5) {
+                paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                paginationHtml += `
+                    <li class="page-item ${currentPage === totalPages ? 'active' : ''}">
+                        <a class="page-link rounded-3" href="#" onclick="changePage(${totalPages})">${totalPages}</a>
+                    </li>
+                `;
+            }
+            paginationHtml += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link rounded-3" href="#" onclick="changePage(${currentPage + 1})">Next</a>
+                </li>
+            `;
+            pagination.innerHTML = paginationHtml;
+        }
+    }
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
     
     function changePage(page) {
@@ -600,240 +669,178 @@
         displaySuppliers();
     }
     
-    // Save Supplier
+    // ============================================
+    // SHOW DELETE CONFIRMATION
+    // ============================================
+    function showDeleteConfirm(id, name) {
+        deleteSupplierId = id;
+        document.getElementById('deleteSupplierName').textContent = name;
+        new bootstrap.Modal(document.getElementById('deleteConfirmModal')).show();
+    }
+    
+    // ============================================
+    // DELETE SUPPLIER
+    // ============================================
+    function deleteSupplier() {
+        if (deleteSupplierId) {
+            suppliers = suppliers.filter(s => s.id !== deleteSupplierId);
+            saveSuppliersToStorage();
+            
+            bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
+            currentPage = 1;
+            displaySuppliers();
+            
+            showToast('Supplier deleted successfully!', 'success');
+            deleteSupplierId = null;
+        }
+    }
+    
+    // ============================================
+    // SAVE SUPPLIER (ADD/EDIT)
+    // ============================================
     function saveSupplier() {
-        const newSupplier = {
-            id: suppliers.length + 1,
-            companyName: document.getElementById('companyName').value,
-            contactPerson: document.getElementById('contactPerson').value,
-            phone: document.getElementById('supplierPhone').value,
-            email: document.getElementById('supplierEmail').value,
-            address: document.getElementById('supplierAddress').value,
+        const companyName = document.getElementById('companyName').value.trim();
+        const contactPerson = document.getElementById('contactPerson').value.trim();
+        const phone = document.getElementById('supplierPhone').value.trim();
+        
+        if(!companyName || !contactPerson || !phone) {
+            showToast('Please fill all required fields', 'warning');
+            return;
+        }
+        
+        const editId = document.getElementById('editSupplierId').value;
+        const supplierData = {
+            id: editId ? parseInt(editId) : Date.now(),
+            companyName: companyName,
+            contactPerson: contactPerson,
+            phone: phone,
+            email: document.getElementById('supplierEmail').value || '',
+            address: document.getElementById('supplierAddress').value || '',
             type: document.getElementById('supplierType').value,
-            taxNumber: document.getElementById('taxNumber').value,
-            due: parseFloat(document.getElementById('openingDue').value),
-            creditLimit: parseFloat(document.getElementById('creditLimit').value),
+            taxNumber: document.getElementById('taxNumber').value || '',
+            due: parseFloat(document.getElementById('openingDue').value) || 0,
+            creditLimit: parseFloat(document.getElementById('creditLimit').value) || 10000,
             paymentTerms: document.getElementById('paymentTerms').value,
             totalPurchases: 0,
             totalPayments: 0,
             status: 'active',
-            joinDate: new Date().toISOString().split('T')[0]
+            joinDate: new Date().toISOString().split('T')[0],
+            notes: document.getElementById('supplierNotes').value || ''
         };
         
-        suppliers.push(newSupplier);
+        if(editId) {
+            const index = suppliers.findIndex(s => s.id == editId);
+            if(index !== -1) {
+                supplierData.totalPurchases = suppliers[index].totalPurchases || 0;
+                supplierData.totalPayments = suppliers[index].totalPayments || 0;
+                suppliers[index] = supplierData;
+                showToast('Supplier updated successfully!', 'success');
+            }
+        } else {
+            suppliers.push(supplierData);
+            showToast('Supplier added successfully!', 'success');
+        }
+        
+        saveSuppliersToStorage();
+        resetSupplierForm();
+        currentPage = 1;
         displaySuppliers();
         bootstrap.Modal.getInstance(document.getElementById('addSupplierModal')).hide();
-        showToast('Supplier added successfully!', 'success');
     }
     
-    // View Supplier Details
-    function viewSupplier(id) {
-        currentSupplierId = id;
-        const supplier = suppliers.find(s => s.id === id);
-        
-        const detailsHtml = `
-            <div class="row">
-                <div class="col-md-3 text-center">
-                    <div class="supplier-logo mx-auto mb-3" style="width: 80px; height: 80px; font-size: 32px;">
-                        <i class="fas ${supplier.type === 'pharmaceutical' ? 'fa-flask' : supplier.type === 'distributor' ? 'fa-truck' : 'fa-warehouse'}"></i>
-                    </div>
-                    <h5>${supplier.companyName}</h5>
-                    <p class="text-muted">${supplier.contactPerson}</p>
-                </div>
-                <div class="col-md-9">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><i class="fas fa-phone me-2 text-primary"></i> ${supplier.phone}</p>
-                            <p><i class="fas fa-envelope me-2 text-primary"></i> ${supplier.email}</p>
-                            <p><i class="fas fa-map-marker-alt me-2 text-primary"></i> ${supplier.address}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><i class="fas fa-file-invoice me-2 text-primary"></i> Tax: ${supplier.taxNumber}</p>
-                            <p><i class="fas fa-calendar me-2 text-primary"></i> Joined: ${supplier.joinDate}</p>
-                            <p><i class="fas fa-clock me-2 text-primary"></i> Payment Terms: ${supplier.paymentTerms}</p>
-                        </div>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="col-4">
-                            <div class="border rounded p-2 text-center">
-                                <small class="text-muted">Total Purchases</small>
-                                <br>
-                                <strong>$${supplier.totalPurchases}</strong>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="border rounded p-2 text-center">
-                                <small class="text-muted">Total Payments</small>
-                                <br>
-                                <strong>$${supplier.totalPayments}</strong>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="border rounded p-2 text-center">
-                                <small class="text-muted">Current Due</small>
-                                <br>
-                                <strong class="${supplier.due > 0 ? 'text-danger' : 'text-success'}">$${supplier.due}</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.getElementById('supplierDetails').innerHTML = detailsHtml;
-        
-        // Load purchase history
-        const purchases = supplierPurchases[id] || [];
-        document.getElementById('supplierPurchaseHistory').innerHTML = purchases.map(p => `
-            <tr>
-                <td>${p.invoiceNo}</td>
-                <td>${p.date}</td>
-                <td>${p.items} items</td>
-                <td>$${p.total}</td>
-                <td>$${p.paid}</td>
-                <td class="${p.due > 0 ? 'text-danger' : 'text-success'}">$${p.due}</td>
-                <td><span class="badge ${p.status === 'Paid' ? 'bg-success' : 'bg-warning'}">${p.status}</span></td>
-            </tr>
-        `).join('');
-        
-        // Load ledger
-        const ledger = generateSupplierLedger(id);
-        document.getElementById('supplierLedgerBody').innerHTML = ledger.map(l => `
-            <tr>
-                <td>${l.date}</td>
-                <td>${l.description}</td>
-                <td class="text-danger">${l.debit > 0 ? '$' + l.debit : '-'}</td>
-                <td class="text-success">${l.credit > 0 ? '$' + l.credit : '-'}</td>
-                <td><strong>$${l.balance}</strong></td>
-            </tr>
-        `).join('');
-        
-        new bootstrap.Modal(document.getElementById('supplierDetailsModal')).show();
-    }
-    
-    // Generate Supplier Ledger
-    function generateSupplierLedger(supplierId) {
-        const purchases = supplierPurchases[supplierId] || [];
-        let balance = 0;
-        let ledger = [];
-        
-        purchases.forEach(p => {
-            ledger.push({
-                date: p.date,
-                description: `Purchase - ${p.invoiceNo}`,
-                debit: p.total,
-                credit: 0,
-                balance: balance + p.total
-            });
-            balance += p.total;
-            
-            if(p.paid > 0) {
-                ledger.push({
-                    date: p.date,
-                    description: `Payment - ${p.invoiceNo}`,
-                    debit: 0,
-                    credit: p.paid,
-                    balance: balance - p.paid
-                });
-                balance -= p.paid;
-            }
-        });
-        
-        return ledger;
-    }
-    
-    // Record Supplier Payment
-    function recordSupplierPayment() {
-        const amount = parseFloat(document.getElementById('supplierPaymentAmount').value);
-        const method = document.getElementById('supplierPaymentMethod').value;
-        const date = document.getElementById('paymentDate').value || new Date().toISOString().split('T')[0];
-        
-        if(amount && amount > 0) {
-            const supplier = suppliers.find(s => s.id === currentSupplierId);
-            supplier.due = Math.max(0, supplier.due - amount);
-            supplier.totalPayments += amount;
-            
-            showToast(`Payment of $${amount} recorded via ${method}`, 'success');
-            viewSupplier(currentSupplierId);
-            displaySuppliers();
-            
-            document.getElementById('supplierPaymentAmount').value = '';
-        } else {
-            showToast('Please enter a valid amount', 'danger');
-        }
-    }
-    
-    // Edit Supplier
+    // ============================================
+    // EDIT SUPPLIER
+    // ============================================
     function editSupplier(id) {
         const supplier = suppliers.find(s => s.id === id);
         if(supplier) {
+            document.getElementById('editSupplierId').value = supplier.id;
             document.getElementById('companyName').value = supplier.companyName;
             document.getElementById('contactPerson').value = supplier.contactPerson;
             document.getElementById('supplierPhone').value = supplier.phone;
-            document.getElementById('supplierEmail').value = supplier.email;
-            document.getElementById('supplierAddress').value = supplier.address;
+            document.getElementById('supplierEmail').value = supplier.email || '';
+            document.getElementById('supplierAddress').value = supplier.address || '';
             document.getElementById('supplierType').value = supplier.type;
-            document.getElementById('taxNumber').value = supplier.taxNumber;
+            document.getElementById('taxNumber').value = supplier.taxNumber || '';
             document.getElementById('openingDue').value = supplier.due;
             document.getElementById('creditLimit').value = supplier.creditLimit;
             document.getElementById('paymentTerms').value = supplier.paymentTerms;
+            document.getElementById('supplierNotes').value = supplier.notes || '';
             
             new bootstrap.Modal(document.getElementById('addSupplierModal')).show();
-            
-            // Remove and re-add with edit logic
-            suppliers = suppliers.filter(s => s.id !== id);
         }
     }
     
-    // Delete Supplier
-    function deleteSupplier(id) {
-        if(confirm('Are you sure you want to delete this supplier?')) {
-            suppliers = suppliers.filter(s => s.id !== id);
-            displaySuppliers();
-            showToast('Supplier deleted successfully!', 'success');
-        }
-    }
-    
-    // Send Email to Supplier
-    function sendSupplierEmail() {
-        const supplier = suppliers.find(s => s.id === currentSupplierId);
-        window.location.href = `mailto:${supplier.email}?subject=Payment Reminder&body=Dear ${supplier.contactPerson},%0D%0A%0D%0AYour current due amount is $${supplier.due}.%0D%0A%0D%0AThank you.`;
-    }
-    
-    // Send SMS to Supplier
-    function sendSupplierSMS() {
-        const supplier = suppliers.find(s => s.id === currentSupplierId);
-        showToast(`SMS sent to ${supplier.phone}`, 'success');
-    }
-    
-    // Export Suppliers
+    // ============================================
+    // EXPORT FUNCTIONS
+    // ============================================
     function exportSuppliers() {
-        let csv = "Company Name,Contact Person,Phone,Email,Address,Type,Tax Number,Due,Total Purchases,Status\n";
+        let csv = "Company Name,Contact Person,Phone,Email,Address,Type,Tax Number,Due,Total Purchases,Total Payments,Status,Join Date\n";
         suppliers.forEach(s => {
-            csv += `"${s.companyName}","${s.contactPerson}","${s.phone}","${s.email}","${s.address}","${s.type}","${s.taxNumber}",${s.due},${s.totalPurchases},"${s.status}"\n`;
+            csv += `"${s.companyName}","${s.contactPerson}","${s.phone}","${s.email || ''}","${s.address || ''}","${s.type}","${s.taxNumber || ''}",${s.due},${s.totalPurchases},${s.totalPayments},"${s.status}","${s.joinDate}"\n`;
         });
         
-        const blob = new Blob([csv], { type: 'text/csv' });
+        const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'suppliers_export.csv';
+        a.download = `suppliers_export_${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
         URL.revokeObjectURL(url);
+        showToast("Suppliers exported successfully!", "success");
     }
     
-    // Show Toast
+    // ============================================
+    // TOAST MESSAGE
+    // ============================================
     function showToast(message, type) {
+        const container = document.getElementById('toast-container') || createToastContainer();
         const toast = document.createElement('div');
-        toast.className = `alert alert-${type} position-fixed bottom-0 end-0 m-3 shadow`;
-        toast.style.zIndex = '9999';
-        toast.style.minWidth = '250px';
-        toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>${message}`;
-        document.body.appendChild(toast);
+        toast.className = `alert alert-${type} alert-dismissible fade show toast-custom`;
+        toast.style.cssText = 'margin-bottom:10px;box-shadow:0 5px 20px rgba(0,0,0,0.15);border-radius:12px';
+        toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+        container.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
     
-    // Event Listeners
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;min-width:320px';
+        document.body.appendChild(container);
+        return container;
+    }
+    
+    // ============================================
+    // LOGOUT
+    // ============================================
+    function logout() {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+    }
+    
+    document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        logout();
+    });
+    
+    // Set up delete confirmation button
+    document.getElementById('confirmDeleteBtn')?.addEventListener('click', () => {
+        deleteSupplier();
+    });
+    
+    // ============================================
+    // AUTO REFRESH (30 seconds)
+    // ============================================
+    let refreshInterval = setInterval(() => {
+        suppliers = loadSuppliersFromStorage();
+        displaySuppliers();
+    }, 30000);
+    
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
     document.getElementById('searchSupplier').addEventListener('input', () => {
         currentPage = 1;
         displaySuppliers();
@@ -847,11 +854,18 @@
         displaySuppliers();
     });
     
-    // Initial Load
+    // ============================================
+    // INITIALIZE
+    // ============================================
+    checkAuth();
     displaySuppliers();
     
+    window.addEventListener('beforeunload', () => {
+        if(refreshInterval) clearInterval(refreshInterval);
+    });
+    
     // GSAP Animation
-    gsap.from(".supplier-card", {
+    gsap.from(".supplier-card, .card.border-0", {
         duration: 0.6,
         y: 30,
         opacity: 0,
