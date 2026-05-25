@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Management - MediCare Pharmacy</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        body {
+            background: #f5f7fb;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 280px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            z-index: 1000;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            padding: 20px;
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .customer-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .customer-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .customer-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #667eea;
+        }
+        
+        .due-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .due-high { background: #dc2626; color: white; }
+        .due-medium { background: #f59e0b; color: white; }
+        .due-low { background: #10b981; color: white; }
+        
+        .ledger-entry {
+            border-left: 3px solid;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .ledger-credit { border-left-color: #10b981; }
+        .ledger-debit { border-left-color: #ef4444; }
+        
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="p-4">
+        <div class="d-flex align-items-center gap-2 mb-4">
+            <i class="fas fa-hospital-user text-white fs-3"></i>
+            <span class="text-white fw-bold fs-5">MediCare</span>
+        </div>
+        
+        <nav class="nav flex-column">
+            <a href="dashboard.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+            </a>
+            <a href="medicines.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-capsules me-2"></i> Medicines
+            </a>
+            <a href="customers.html" class="nav-link text-white active bg-primary bg-opacity-25 rounded">
+                <i class="fas fa-users me-2"></i> Customers
+            </a>
+            <a href="sales.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-shopping-cart me-2"></i> POS Sales
+            </a>
+            <a href="purchases.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-truck me-2"></i> Purchases
+            </a>
+            <a href="suppliers.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-parachute-box me-2"></i> Suppliers
+            </a>
+            <a href="prescriptions.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-file-prescription me-2"></i> Prescriptions
+            </a>
+            <a href="reports.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-chart-line me-2"></i> Reports
+            </a>
+            <hr class="bg-secondary my-3">
+            <a href="login.html" class="nav-link text-white-50">
+                <i class="fas fa-sign-out-alt me-2"></i> Logout
+            </a>
+        </nav>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold gradient-text">Customer Management</h2>
+            <p class="text-muted">Manage customers, track purchases, and handle dues</p>
+        </div>
+        <button class="btn btn-gradient rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
+            <i class="fas fa-user-plus me-2"></i>Add New Customer
+        </button>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Total Customers</p>
+                            <h3 class="fw-bold" id="totalCustomers">0</h3>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Total Due</p>
+                            <h3 class="fw-bold text-warning" id="totalDue">$0</h3>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-dollar-sign fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Total Purchases</p>
+                            <h3 class="fw-bold text-success" id="totalPurchases">$0</h3>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-shopping-cart fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Avg. Purchase</p>
+                            <h3 class="fw-bold text-info" id="avgPurchase">$0</h3>
+                        </div>
+                        <div class="bg-info bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-chart-line fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Search and Filter -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="position-relative">
+                        <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                        <input type="text" class="form-control ps-5" id="searchCustomer" placeholder="Search by name, phone or email...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="customerTypeFilter">
+                        <option value="">All Customers</option>
+                        <option value="regular">Regular</option>
+                        <option value="vip">VIP</option>
+                        <option value="new">New</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="dueFilter">
+                        <option value="">All Due Status</option>
+                        <option value="high">High Due (>$500)</option>
+                        <option value="medium">Medium Due ($100-$500)</option>
+                        <option value="low">Low Due (<$100)</option>
+                        <option value="clear">Clear Due</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-primary w-100" onclick="exportCustomers()">
+                        <i class="fas fa-file-excel me-2"></i>Export
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Customers Grid -->
+    <div class="row g-4" id="customersGrid"></div>
+    
+    <!-- Pagination -->
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center" id="pagination"></ul>
+    </nav>
+</div>
+
+<!-- Add/Edit Customer Modal -->
+<div class="modal fade" id="addCustomerModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient text-white">
+                <h5 class="modal-title">Customer Information</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="customerForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Full Name *</label>
+                            <input type="text" class="form-control" id="custName" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Phone Number *</label>
+                            <input type="tel" class="form-control" id="custPhone" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Email</label>
+                            <input type="email" class="form-control" id="custEmail">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Date of Birth</label>
+                            <input type="date" class="form-control" id="custDob">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-semibold">Address</label>
+                            <textarea class="form-control" id="custAddress" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold">Customer Type</label>
+                            <select class="form-select" id="custType">
+                                <option value="regular">Regular</option>
+                                <option value="vip">VIP</option>
+                                <option value="new">New</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold">Opening Due</label>
+                            <input type="number" class="form-control" id="openingDue" value="0">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold">Credit Limit</label>
+                            <input type="number" class="form-control" id="creditLimit" value="1000">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-semibold">Profile Picture</label>
+                            <input type="file" class="form-control" id="custImage" accept="image/*">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-semibold">Notes</label>
+                            <textarea class="form-control" id="custNotes" rows="2"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-gradient" onclick="saveCustomer()">Save Customer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Customer Details Modal -->
+<div class="modal fade" id="customerDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient text-white">
+                <h5 class="modal-title">Customer Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="customerDetails"></div>
+                
+                <!-- Tabs -->
+                <ul class="nav nav-tabs mt-3" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#purchaseHistory">Purchase History</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#ledger">Ledger</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#prescriptions">Prescriptions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#duePayments">Due Payments</a>
+                    </li>
+                </ul>
+                
+                <div class="tab-content mt-3">
+                    <div class="tab-pane fade show active" id="purchaseHistory">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="purchaseHistoryTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Invoice No</th>
+                                        <th>Date</th>
+                                        <th>Total Amount</th>
+                                        <th>Paid</th>
+                                        <th>Due</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="purchaseHistoryBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="ledger">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="ledgerTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Description</th>
+                                        <th>Debit</th>
+                                        <th>Credit</th>
+                                        <th>Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ledgerBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="prescriptions">
+                        <div id="prescriptionsList"></div>
+                    </div>
+                    <div class="tab-pane fade" id="duePayments">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold">Make Payment</h6>
+                                        <input type="number" class="form-control mb-2" id="paymentAmount" placeholder="Enter amount">
+                                        <select class="form-select mb-2" id="paymentMethod">
+                                            <option>Cash</option>
+                                            <option>Card</option>
+                                            <option>Mobile Banking</option>
+                                        </select>
+                                        <button class="btn btn-success" onclick="makePayment()">Process Payment</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold">Payment History</h6>
+                                        <div id="paymentHistory"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="sendSMS()">
+                    <i class="fas fa-sms me-2"></i>Send SMS
+                </button>
+                <button type="button" class="btn btn-success" onclick="sendWhatsApp()">
+                    <i class="fab fa-whatsapp me-2"></i>WhatsApp
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+    // Sample Customer Data
+    let customers = [
+        {
+            id: 1,
+            name: "John Doe",
+            phone: "+1234567890",
+            email: "john@example.com",
+            address: "123 Main St, New York",
+            type: "vip",
+            due: 250.00,
+            totalPurchases: 1250.00,
+            joinDate: "2024-01-15",
+            avatar: "https://randomuser.me/api/portraits/men/1.jpg"
+        },
+        {
+            id: 2,
+            name: "Jane Smith",
+            phone: "+1234567891",
+            email: "jane@example.com",
+            address: "456 Oak Ave, Los Angeles",
+            type: "regular",
+            due: 75.50,
+            totalPurchases: 450.00,
+            joinDate: "2024-02-20",
+            avatar: "https://randomuser.me/api/portraits/women/2.jpg"
+        },
+        {
+            id: 3,
+            name: "Mike Johnson",
+            phone: "+1234567892",
+            email: "mike@example.com",
+            address: "789 Pine Rd, Chicago",
+            type: "regular",
+            due: 0,
+            totalPurchases: 890.00,
+            joinDate: "2024-03-10",
+            avatar: "https://randomuser.me/api/portraits/men/3.jpg"
+        },
+        {
+            id: 4,
+            name: "Sarah Wilson",
+            phone: "+1234567893",
+            email: "sarah@example.com",
+            address: "321 Elm St, Houston",
+            type: "vip",
+            due: 1200.00,
+            totalPurchases: 3450.00,
+            joinDate: "2023-11-05",
+            avatar: "https://randomuser.me/api/portraits/women/4.jpg"
+        }
+    ];
+    
+    // Purchase History Data
+    let purchaseHistory = {
+        1: [
+            { invoice: "INV-001", date: "2024-01-20", total: 150.00, paid: 100.00, due: 50.00, status: "Partial" },
+            { invoice: "INV-015", date: "2024-02-15", total: 200.00, paid: 200.00, due: 0, status: "Paid" }
+        ],
+        2: [
+            { invoice: "INV-005", date: "2024-02-01", total: 75.50, paid: 0, due: 75.50, status: "Unpaid" }
+        ],
+        3: [
+            { invoice: "INV-008", date: "2024-03-05", total: 90.00, paid: 90.00, due: 0, status: "Paid" }
+        ],
+        4: [
+            { invoice: "INV-002", date: "2023-12-10", total: 500.00, paid: 300.00, due: 200.00, status: "Partial" },
+            { invoice: "INV-020", date: "2024-01-25", total: 700.00, paid: 0, due: 700.00, status: "Unpaid" }
+        ]
+    };
+    
+    let currentPage = 1;
+    const itemsPerPage = 8;
+    let currentCustomerId = null;
+    
+    // Display Customers
+    function displayCustomers() {
+        const searchTerm = document.getElementById('searchCustomer').value.toLowerCase();
+        const typeFilter = document.getElementById('customerTypeFilter').value;
+        const dueFilter = document.getElementById('dueFilter').value;
+        
+        let filtered = customers.filter(cust => {
+            const matchesSearch = cust.name.toLowerCase().includes(searchTerm) ||
+                                 cust.phone.includes(searchTerm) ||
+                                 cust.email.toLowerCase().includes(searchTerm);
+            
+            const matchesType = !typeFilter || cust.type === typeFilter;
+            
+            let matchesDue = true;
+            if(dueFilter === 'high') matchesDue = cust.due > 500;
+            if(dueFilter === 'medium') matchesDue = cust.due >= 100 && cust.due <= 500;
+            if(dueFilter === 'low') matchesDue = cust.due > 0 && cust.due < 100;
+            if(dueFilter === 'clear') matchesDue = cust.due === 0;
+            
+            return matchesSearch && matchesType && matchesDue;
+        });
+        
+        // Update stats
+        document.getElementById('totalCustomers').textContent = filtered.length;
+        document.getElementById('totalDue').textContent = '$' + filtered.reduce((sum, c) => sum + c.due, 0).toFixed(2);
+        document.getElementById('totalPurchases').textContent = '$' + filtered.reduce((sum, c) => sum + c.totalPurchases, 0).toFixed(2);
+        document.getElementById('avgPurchase').textContent = '$' + (filtered.reduce((sum, c) => sum + c.totalPurchases, 0) / filtered.length || 0).toFixed(2);
+        
+        // Pagination
+        const totalPages = Math.ceil(filtered.length / itemsPerPage);
+        const start = (currentPage - 1) * itemsPerPage;
+        const paginated = filtered.slice(start, start + itemsPerPage);
+        
+        // Render grid
+        const grid = document.getElementById('customersGrid');
+        grid.innerHTML = paginated.map(cust => {
+            let dueClass = '';
+            if(cust.due > 500) dueClass = 'due-high';
+            else if(cust.due > 100) dueClass = 'due-medium';
+            else if(cust.due > 0) dueClass = 'due-low';
+            
+            const typeBadge = cust.type === 'vip' ? 'bg-warning' : cust.type === 'regular' ? 'bg-info' : 'bg-secondary';
+            
+            return `
+                <div class="col-md-6 col-lg-4 col-xl-3">
+                    <div class="card customer-card h-100">
+                        <div class="position-relative">
+                            ${cust.due > 0 ? `<span class="due-badge ${dueClass}">Due: $${cust.due}</span>` : ''}
+                            <div class="text-center pt-4">
+                                <img src="${cust.avatar}" class="customer-avatar" alt="${cust.name}">
+                            </div>
+                        </div>
+                        <div class="card-body text-center">
+                            <h5 class="fw-bold mb-1">${cust.name}</h5>
+                            <p class="text-muted small mb-2">${cust.phone}</p>
+                            <div class="mb-2">
+                                <span class="badge ${typeBadge}">${cust.type.toUpperCase()}</span>
+                                <span class="badge bg-secondary">Since ${cust.joinDate}</span>
+                            </div>
+                            <div class="d-flex justify-content-around mb-3">
+                                <div>
+                                    <small class="text-muted">Total Spent</small>
+                                    <br>
+                                    <strong>$${cust.totalPurchases}</strong>
+                                </div>
+                                <div>
+                                    <small class="text-muted">Due</small>
+                                    <br>
+                                    <strong class="${cust.due > 0 ? 'text-danger' : 'text-success'}">$${cust.due}</strong>
+                                </div>
+                            </div>
+                            <div class="btn-group w-100">
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewCustomer(${cust.id})">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="editCustomer(${cust.id})">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteCustomer(${cust.id})">
+                                    <i class="fas fa-trash me-1"></i>Del
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        // Pagination controls
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Previous</a>
+            </li>
+            ${Array.from({length: totalPages}, (_, i) => `
+                <li class="page-item ${currentPage === i+1 ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${i+1})">${i+1}</a>
+                </li>
+            `).join('')}
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Next</a>
+            </li>
+        `;
+    }
+    
+    function changePage(page) {
+        currentPage = page;
+        displayCustomers();
+    }
+    
+    // Save Customer
+    function saveCustomer() {
+        const newCustomer = {
+            id: customers.length + 1,
+            name: document.getElementById('custName').value,
+            phone: document.getElementById('custPhone').value,
+            email: document.getElementById('custEmail').value,
+            address: document.getElementById('custAddress').value,
+            type: document.getElementById('custType').value,
+            due: parseFloat(document.getElementById('openingDue').value),
+            totalPurchases: 0,
+            joinDate: new Date().toISOString().split('T')[0],
+            avatar: "https://randomuser.me/api/portraits/men/" + (customers.length + 5) + ".jpg"
+        };
+        
+        customers.push(newCustomer);
+        displayCustomers();
+        bootstrap.Modal.getInstance(document.getElementById('addCustomerModal')).hide();
+        showToast('Customer added successfully!', 'success');
+    }
+    
+    // View Customer Details
+    function viewCustomer(id) {
+        currentCustomerId = id;
+        const customer = customers.find(c => c.id === id);
+        
+        const detailsHtml = `
+            <div class="row">
+                <div class="col-md-3 text-center">
+                    <img src="${customer.avatar}" class="rounded-circle mb-3" width="120" height="120">
+                    <h5>${customer.name}</h5>
+                    <p class="text-muted">${customer.type.toUpperCase()} Customer</p>
+                </div>
+                <div class="col-md-9">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><i class="fas fa-phone me-2 text-primary"></i> ${customer.phone}</p>
+                            <p><i class="fas fa-envelope me-2 text-primary"></i> ${customer.email}</p>
+                            <p><i class="fas fa-map-marker-alt me-2 text-primary"></i> ${customer.address}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><i class="fas fa-calendar me-2 text-primary"></i> Joined: ${customer.joinDate}</p>
+                            <p><i class="fas fa-dollar-sign me-2 text-primary"></i> Total Spent: $${customer.totalPurchases}</p>
+                            <p><i class="fas fa-exclamation-triangle me-2 ${customer.due > 0 ? 'text-danger' : 'text-success'}"></i> 
+                                Current Due: $${customer.due}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('customerDetails').innerHTML = detailsHtml;
+        
+        // Load purchase history
+        const purchases = purchaseHistory[id] || [];
+        document.getElementById('purchaseHistoryBody').innerHTML = purchases.map(p => `
+            <tr>
+                <td>${p.invoice}</td>
+                <td>${p.date}</td>
+                <td>$${p.total}</td>
+                <td>$${p.paid}</td>
+                <td class="${p.due > 0 ? 'text-danger' : 'text-success'}">$${p.due}</td>
+                <td><span class="badge ${p.status === 'Paid' ? 'bg-success' : 'bg-warning'}">${p.status}</span></td>
+            </tr>
+        `).join('');
+        
+        // Load ledger
+        const ledgerEntries = generateLedger(id);
+        document.getElementById('ledgerBody').innerHTML = ledgerEntries.map(entry => `
+            <tr>
+                <td>${entry.date}</td>
+                <td>${entry.description}</td>
+                <td class="text-danger">${entry.debit > 0 ? '$' + entry.debit : '-'}</td>
+                <td class="text-success">${entry.credit > 0 ? '$' + entry.credit : '-'}</td>
+                <td><strong>$${entry.balance}</strong></td>
+            </tr>
+        `).join('');
+        
+        new bootstrap.Modal(document.getElementById('customerDetailsModal')).show();
+    }
+    
+    // Generate Ledger
+    function generateLedger(customerId) {
+        const purchases = purchaseHistory[customerId] || [];
+        let balance = 0;
+        let ledger = [];
+        
+        purchases.forEach(p => {
+            if(p.due > 0) {
+                ledger.push({
+                    date: p.date,
+                    description: `Purchase - ${p.invoice}`,
+                    debit: p.total,
+                    credit: 0,
+                    balance: balance + p.total
+                });
+                balance += p.total;
+                
+                if(p.paid > 0) {
+                    ledger.push({
+                        date: p.date,
+                        description: `Payment - ${p.invoice}`,
+                        debit: 0,
+                        credit: p.paid,
+                        balance: balance - p.paid
+                    });
+                    balance -= p.paid;
+                }
+            }
+        });
+        
+        return ledger;
+    }
+    
+    // Make Payment
+    function makePayment() {
+        const amount = parseFloat(document.getElementById('paymentAmount').value);
+        const method = document.getElementById('paymentMethod').value;
+        
+        if(amount && amount > 0) {
+            const customer = customers.find(c => c.id === currentCustomerId);
+            customer.due = Math.max(0, customer.due - amount);
+            
+            showToast(`Payment of $${amount} received via ${method}`, 'success');
+            viewCustomer(currentCustomerId);
+            displayCustomers();
+            
+            document.getElementById('paymentAmount').value = '';
+        } else {
+            showToast('Please enter a valid amount', 'danger');
+        }
+    }
+    
+    // Send SMS
+    function sendSMS() {
+        const customer = customers.find(c => c.id === currentCustomerId);
+        showToast(`SMS sent to ${customer.phone}`, 'success');
+    }
+    
+    // Send WhatsApp
+    function sendWhatsApp() {
+        const customer = customers.find(c => c.id === currentCustomerId);
+        window.open(`https://wa.me/${customer.phone}`, '_blank');
+    }
+    
+    // Edit Customer
+    function editCustomer(id) {
+        const customer = customers.find(c => c.id === id);
+        if(customer) {
+            document.getElementById('custName').value = customer.name;
+            document.getElementById('custPhone').value = customer.phone;
+            document.getElementById('custEmail').value = customer.email;
+            document.getElementById('custAddress').value = customer.address;
+            document.getElementById('custType').value = customer.type;
+            new bootstrap.Modal(document.getElementById('addCustomerModal')).show();
+            
+            // Remove and re-add with edit logic
+            customers = customers.filter(c => c.id !== id);
+        }
+    }
+    
+    // Delete Customer
+    function deleteCustomer(id) {
+        if(confirm('Are you sure you want to delete this customer?')) {
+            customers = customers.filter(c => c.id !== id);
+            displayCustomers();
+            showToast('Customer deleted successfully!', 'success');
+        }
+    }
+    
+    // Export Customers
+    function exportCustomers() {
+        let csv = "Name,Phone,Email,Address,Type,Total Purchases,Due\n";
+        customers.forEach(c => {
+            csv += `${c.name},${c.phone},${c.email},${c.address},${c.type},${c.totalPurchases},${c.due}\n`;
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'customers_export.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+    
+    // Show Toast
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type} position-fixed bottom-0 end-0 m-3 shadow`;
+        toast.style.zIndex = '9999';
+        toast.style.minWidth = '250px';
+        toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>${message}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    
+    // Event Listeners
+    document.getElementById('searchCustomer').addEventListener('input', () => {
+        currentPage = 1;
+        displayCustomers();
+    });
+    document.getElementById('customerTypeFilter').addEventListener('change', () => {
+        currentPage = 1;
+        displayCustomers();
+    });
+    document.getElementById('dueFilter').addEventListener('change', () => {
+        currentPage = 1;
+        displayCustomers();
+    });
+    
+    // Initial Load
+    displayCustomers();
+    
+    // GSAP Animations
+    gsap.from(".card", {
+        duration: 0.6,
+        y: 30,
+        opacity: 0,
+        stagger: 0.1,
+        ease: "back.out(1.2)"
+    });
+</script>
+</body>
+</html>

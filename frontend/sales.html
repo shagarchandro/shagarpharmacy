@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Billing - MediCare Pharmacy</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        body {
+            background: #f5f7fb;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 280px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            z-index: 1000;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            padding: 20px;
+        }
+        
+        .pos-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+        
+        .cart-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .cart-item:hover {
+            background: #e9ecef;
+        }
+        
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .quantity-btn:hover {
+            background: #764ba2;
+        }
+        
+        .payment-method {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .payment-method.active {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        @media (max-width: 992px) {
+            .pos-container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        .barcode-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .scan-mode {
+            animation: pulse 1s ease-in-out infinite;
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="p-4">
+        <div class="d-flex align-items-center gap-2 mb-4">
+            <i class="fas fa-hospital-user text-white fs-3"></i>
+            <span class="text-white fw-bold fs-5">MediCare</span>
+        </div>
+        
+        <nav class="nav flex-column">
+            <a href="dashboard.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+            </a>
+            <a href="medicines.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-capsules me-2"></i> Medicines
+            </a>
+            <a href="customers.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-users me-2"></i> Customers
+            </a>
+            <a href="sales.html" class="nav-link text-white active bg-primary bg-opacity-25 rounded">
+                <i class="fas fa-shopping-cart me-2"></i> POS Sales
+            </a>
+            <a href="purchases.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-truck me-2"></i> Purchases
+            </a>
+            <a href="suppliers.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-parachute-box me-2"></i> Suppliers
+            </a>
+            <a href="reports.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-chart-line me-2"></i> Reports
+            </a>
+            <hr class="bg-secondary my-3">
+            <a href="login.html" class="nav-link text-white-50">
+                <i class="fas fa-sign-out-alt me-2"></i> Logout
+            </a>
+        </nav>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold gradient-text">Point of Sale (POS)</h2>
+            <p class="text-muted">Fast & efficient billing system</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-primary me-2" onclick="toggleScanMode()">
+                <i class="fas fa-camera me-2"></i>Barcode Scanner
+            </button>
+            <button class="btn btn-outline-secondary" onclick="clearCart()">
+                <i class="fas fa-trash-alt me-2"></i>Clear Cart
+            </button>
+        </div>
+    </div>
+    
+    <!-- POS Container -->
+    <div class="pos-container">
+        <!-- Left Side - Products -->
+        <div>
+            <!-- Search Bar -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="fas fa-search text-primary"></i>
+                        </span>
+                        <input type="text" class="form-control" id="searchProduct" 
+                               placeholder="Search by name, generic name, or scan barcode..." autofocus>
+                        <button class="btn btn-primary" onclick="searchProducts()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="mt-2" id="scanModeIndicator" style="display: none;">
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-camera me-2"></i>
+                            Scanner Mode Active - Ready to scan barcodes
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Products Grid -->
+            <div class="product-grid" id="productsGrid"></div>
+        </div>
+        
+        <!-- Right Side - Cart -->
+        <div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pt-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-shopping-cart text-primary me-2"></i>
+                        Shopping Cart
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Customer Selection -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Select Customer</label>
+                        <select class="form-select" id="customerSelect">
+                            <option value="0">Walk-in Customer</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Cart Items -->
+                    <div id="cartItems" style="max-height: 300px; overflow-y: auto;"></div>
+                    
+                    <!-- Cart Summary -->
+                    <div class="mt-3 pt-3 border-top">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <span class="fw-bold" id="subtotal">$0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Discount (5%):</span>
+                            <span class="fw-bold text-danger" id="discount">-$0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tax (VAT 10%):</span>
+                            <span class="fw-bold" id="tax">$0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3 pt-2 border-top">
+                            <span class="fs-5 fw-bold">Total:</span>
+                            <span class="fs-4 fw-bold text-primary" id="total">$0.00</span>
+                        </div>
+                        
+                        <!-- Payment Methods -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Payment Method</label>
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <div class="payment-method text-center p-2 rounded active" data-method="cash">
+                                        <i class="fas fa-money-bill-wave fa-2x mb-1"></i>
+                                        <div class="small">Cash</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="payment-method text-center p-2 rounded" data-method="card">
+                                        <i class="fab fa-cc-visa fa-2x mb-1"></i>
+                                        <div class="small">Card</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="payment-method text-center p-2 rounded" data-method="mobile">
+                                        <i class="fas fa-mobile-alt fa-2x mb-1"></i>
+                                        <div class="small">Mobile Banking</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Cash Amount (for cash payment) -->
+                        <div class="mb-3" id="cashAmountDiv">
+                            <label class="form-label fw-semibold">Cash Amount</label>
+                            <input type="number" class="form-control" id="cashAmount" placeholder="Enter cash amount">
+                            <small class="text-muted" id="changeAmount"></small>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-gradient" onclick="processPayment()">
+                                <i class="fas fa-receipt me-2"></i>Process Payment
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="printInvoice()">
+                                <i class="fas fa-print me-2"></i>Print Invoice
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Invoice Modal -->
+<div class="modal fade" id="invoiceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient text-white">
+                <h5 class="modal-title">Invoice</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="invoiceContent"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="printInvoiceModal()">
+                    <i class="fas fa-print me-2"></i>Print
+                </button>
+                <button type="button" class="btn btn-success" onclick="downloadInvoicePDF()">
+                    <i class="fas fa-file-pdf me-2"></i>Download PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+    // Sample Products Data
+    let products = [
+        { id: 1, name: "Paracetamol 500mg", generic: "Acetaminophen", price: 5.00, stock: 150, image: "💊" },
+        { id: 2, name: "Amoxicillin 250mg", generic: "Amoxicillin", price: 10.00, stock: 8, image: "💊" },
+        { id: 3, name: "Vitamin C 1000mg", generic: "Ascorbic Acid", price: 15.00, stock: 45, image: "🍊" },
+        { id: 4, name: "Aspirin 100mg", generic: "Acetylsalicylic Acid", price: 8.00, stock: 120, image: "💊" },
+        { id: 5, name: "Omeprazole 20mg", generic: "Omeprazole", price: 12.00, stock: 60, image: "💊" },
+        { id: 6, name: "Loratadine 10mg", generic: "Loratadine", price: 7.00, stock: 35, image: "💊" },
+        { id: 7, name: "Ibuprofen 400mg", generic: "Ibuprofen", price: 6.00, stock: 90, image: "💊" },
+        { id: 8, name: "Cetirizine 10mg", generic: "Cetirizine", price: 9.00, stock: 55, image: "💊" }
+    ];
+    
+    // Sample Customers
+    let customers = [
+        { id: 1, name: "John Doe", phone: "+1234567890" },
+        { id: 2, name: "Jane Smith", phone: "+1234567891" },
+        { id: 3, name: "Mike Johnson", phone: "+1234567892" }
+    ];
+    
+    let cart = [];
+    let selectedPaymentMethod = 'cash';
+    let scanMode = false;
+    let barcodeBuffer = '';
+    let lastKeyTime = 0;
+    
+    // Load Customers
+    function loadCustomers() {
+        const select = document.getElementById('customerSelect');
+        customers.forEach(cust => {
+            const option = document.createElement('option');
+            option.value = cust.id;
+            option.textContent = `${cust.name} (${cust.phone})`;
+            select.appendChild(option);
+        });
+    }
+    
+    // Display Products
+    function displayProducts(searchTerm = '') {
+        const filtered = products.filter(p => 
+            p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.generic.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        
+        const grid = document.getElementById('productsGrid');
+        grid.innerHTML = filtered.map(p => `
+            <div class="product-card" onclick="addToCart(${p.id})">
+                <div class="fs-1">${p.image}</div>
+                <div class="fw-bold small">${p.name}</div>
+                <div class="text-primary fw-bold">$${p.price}</div>
+                <div class="text-muted small">Stock: ${p.stock}</div>
+            </div>
+        `).join('');
+    }
+    
+    // Add to Cart
+    function addToCart(productId) {
+        const product = products.find(p => p.id === productId);
+        if(!product) return;
+        
+        const existingItem = cart.find(item => item.id === productId);
+        if(existingItem) {
+            if(existingItem.quantity + 1 <= product.stock) {
+                existingItem.quantity++;
+                existingItem.total = existingItem.quantity * existingItem.price;
+            } else {
+                showToast('Not enough stock!', 'warning');
+            }
+        } else {
+            cart.push({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: 1,
+                total: product.price
+            });
+        }
+        
+        updateCart();
+    }
+    
+    // Update Cart Display
+    function updateCart() {
+        const cartContainer = document.getElementById('cartItems');
+        
+        if(cart.length === 0) {
+            cartContainer.innerHTML = '<div class="text-center text-muted py-5">Cart is empty</div>';
+        } else {
+            cartContainer.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">${item.name}</div>
+                            <div class="small text-muted">$${item.price} each</div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                            <span class="fw-bold mx-2">${item.quantity}</span>
+                            <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                            <button class="btn btn-sm btn-danger ms-2" onclick="removeFromCart(${item.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="text-end mt-1">
+                        <span class="fw-bold">$${item.total.toFixed(2)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        calculateTotals();
+    }
+    
+    // Update Quantity
+    function updateQuantity(productId, newQuantity) {
+        const product = products.find(p => p.id === productId);
+        const cartItem = cart.find(item => item.id === productId);
+        
+        if(newQuantity <= 0) {
+            removeFromCart(productId);
+        } else if(newQuantity <= product.stock) {
+            cartItem.quantity = newQuantity;
+            cartItem.total = cartItem.quantity * cartItem.price;
+            updateCart();
+        } else {
+            showToast('Not enough stock!', 'warning');
+        }
+    }
+    
+    // Remove from Cart
+    function removeFromCart(productId) {
+        cart = cart.filter(item => item.id !== productId);
+        updateCart();
+    }
+    
+    // Calculate Totals
+    function calculateTotals() {
+        const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
+        const discount = subtotal * 0.05; // 5% discount
+        const tax = (subtotal - discount) * 0.10; // 10% VAT
+        const total = subtotal - discount + tax;
+        
+        document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+        document.getElementById('discount').textContent = `-$${discount.toFixed(2)}`;
+        document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
+        document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+        
+        return { subtotal, discount, tax, total };
+    }
+    
+    // Clear Cart
+    function clearCart() {
+        if(confirm('Clear all items from cart?')) {
+            cart = [];
+            updateCart();
+        }
+    }
+    
+    // Process Payment
+    function processPayment() {
+        if(cart.length === 0) {
+            showToast('Cart is empty!', 'warning');
+            return;
+        }
+        
+        const { total } = calculateTotals();
+        const customerId = document.getElementById('customerSelect').value;
+        const paymentMethod = selectedPaymentMethod;
+        
+        let cashAmount = 0;
+        let change = 0;
+        
+        if(paymentMethod === 'cash') {
+            cashAmount = parseFloat(document.getElementById('cashAmount').value);
+            if(isNaN(cashAmount) || cashAmount < total) {
+                showToast('Insufficient cash amount!', 'danger');
+                return;
+            }
+            change = cashAmount - total;
+            document.getElementById('changeAmount').innerHTML = `Change: $${change.toFixed(2)}`;
+        }
+        
+        // Generate invoice
+        const invoice = {
+            invoiceNo: 'INV-' + Date.now(),
+            date: new Date().toLocaleString(),
+            customer: customerId === '0' ? 'Walk-in Customer' : customers.find(c => c.id == customerId).name,
+            items: [...cart],
+            subtotal: total / 1.05, // Approximate
+            discount: total * 0.0476,
+            tax: total * 0.0952,
+            total: total,
+            paymentMethod: paymentMethod,
+            cashAmount: cashAmount,
+            change: change
+        };
+        
+        // Show invoice
+        showInvoice(invoice);
+        
+        // Update stock (in real app, this would be done via API)
+        cart.forEach(item => {
+            const product = products.find(p => p.id === item.id);
+            if(product) product.stock -= item.quantity;
+        });
+        
+        // Clear cart
+        cart = [];
+        updateCart();
+        displayProducts();
+        
+        // Reset cash amount
+        document.getElementById('cashAmount').value = '';
+        document.getElementById('changeAmount').innerHTML = '';
+    }
+    
+    // Show Invoice
+    function showInvoice(invoice) {
+        const invoiceHtml = `
+            <div class="text-center mb-4">
+                <h3 class="fw-bold">MediCare Pharmacy</h3>
+                <p class="mb-0">123 Healthcare Street, Medical District</p>
+                <p>Phone: +1234567890 | Email: info@medicare.com</p>
+                <hr>
+                <h5>INVOICE</h5>
+                <p><strong>Invoice No:</strong> ${invoice.invoiceNo}<br>
+                <strong>Date:</strong> ${invoice.date}<br>
+                <strong>Customer:</strong> ${invoice.customer}</p>
+                <hr>
+            </div>
+            
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Item</th>
+                        <th>Price</th>
+                        <th>Qty</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${invoice.items.map(item => `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td>$${item.price.toFixed(2)}</td>
+                            <td>${item.quantity}</td>
+                            <td>$${item.total.toFixed(2)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end fw-bold">Subtotal:</td>
+                        <td>$${invoice.subtotal.toFixed(2)}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="text-end fw-bold">Discount (5%):</td>
+                        <td>$${invoice.discount.toFixed(2)}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="text-end fw-bold">Tax (10%):</td>
+                        <td>$${invoice.tax.toFixed(2)}</td>
+                    </tr>
+                    <tr class="table-primary">
+                        <td colspan="3" class="text-end fw-bold fs-5">Total:</td>
+                        <td class="fw-bold fs-5">$${invoice.total.toFixed(2)}</td>
+                    </tr>
+                    ${invoice.paymentMethod === 'cash' ? `
+                        <tr>
+                            <td colspan="3" class="text-end">Cash:</td>
+                            <td>$${invoice.cashAmount.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end">Change:</td>
+                            <td>$${invoice.change.toFixed(2)}</td>
+                        </tr>
+                    ` : ''}
+                </tfoot>
+            </table>
+            
+            <div class="text-center mt-4">
+                <p class="mb-0">Payment Method: ${invoice.paymentMethod.toUpperCase()}</p>
+                <p class="mb-0">Thank you for shopping with us!</p>
+                <div class="mt-3">
+                    <svg id="barcode-${invoice.invoiceNo}"></svg>
+                </div>
+                <small class="text-muted">** This is a computer generated invoice **</small>
+            </div>
+        `;
+        
+        document.getElementById('invoiceContent').innerHTML = invoiceHtml;
+        
+        // Generate barcode for invoice
+        JsBarcode(`#barcode-${invoice.invoiceNo}`, invoice.invoiceNo, {
+            format: "CODE128",
+            width: 2,
+            height: 40,
+            displayValue: true
+        });
+        
+        new bootstrap.Modal(document.getElementById('invoiceModal')).show();
+    }
+    
+    // Print Invoice
+    function printInvoiceModal() {
+        const printContent = document.getElementById('invoiceContent').innerHTML;
+        const originalContent = document.body.innerHTML;
+        
+        document.body.innerHTML = `
+            <div style="padding: 20px; max-width: 800px; margin: 0 auto;">
+                ${printContent}
+            </div>
+        `;
+        
+        window.print();
+        document.body.innerHTML = originalContent;
+        location.reload();
+    }
+    
+    function printInvoice() {
+        if(cart.length > 0) {
+            processPayment();
+        } else {
+            showToast('No invoice to print!', 'warning');
+        }
+    }
+    
+    function downloadInvoicePDF() {
+        const element = document.getElementById('invoiceContent');
+        html2pdf()
+            .set({ margin: 10, filename: 'invoice.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } })
+            .from(element)
+            .save();
+    }
+    
+    // Search Products
+    function searchProducts() {
+        const searchTerm = document.getElementById('searchProduct').value;
+        displayProducts(searchTerm);
+    }
+    
+    // Toggle Scan Mode
+    function toggleScanMode() {
+        scanMode = !scanMode;
+        const indicator = document.getElementById('scanModeIndicator');
+        const searchInput = document.getElementById('searchProduct');
+        
+        if(scanMode) {
+            indicator.style.display = 'block';
+            searchInput.placeholder = 'Scanner Mode - Scan barcode...';
+            searchInput.classList.add('scan-mode');
+            showToast('Scanner mode activated. Scan a barcode to add product.', 'success');
+        } else {
+            indicator.style.display = 'none';
+            searchInput.placeholder = 'Search by name, generic name, or scan barcode...';
+            searchInput.classList.remove('scan-mode');
+        }
+    }
+    
+    // Barcode Scanner Handler
+    document.getElementById('searchProduct').addEventListener('keypress', (e) => {
+        if(scanMode) {
+            const currentTime = new Date().getTime();
+            if(currentTime - lastKeyTime > 100) {
+                barcodeBuffer = '';
+            }
+            lastKeyTime = currentTime;
+            
+            if(e.key === 'Enter') {
+                e.preventDefault();
+                const barcode = barcodeBuffer;
+                barcodeBuffer = '';
+                
+                // Find product by barcode (simulated - in real app, you'd have barcode field)
+                const product = products.find(p => p.id.toString() === barcode);
+                if(product) {
+                    addToCart(product.id);
+                    showToast(`${product.name} added to cart!`, 'success');
+                } else {
+                    showToast('Product not found!', 'danger');
+                }
+                document.getElementById('searchProduct').value = '';
+            } else {
+                barcodeBuffer += e.key;
+            }
+        }
+    });
+    
+    // Payment Method Selection
+    document.querySelectorAll('.payment-method').forEach(method => {
+        method.addEventListener('click', () => {
+            document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
+            method.classList.add('active');
+            selectedPaymentMethod = method.dataset.method;
+            
+            const cashDiv = document.getElementById('cashAmountDiv');
+            if(selectedPaymentMethod === 'cash') {
+                cashDiv.style.display = 'block';
+            } else {
+                cashDiv.style.display = 'none';
+            }
+        });
+    });
+    
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+        if(e.ctrlKey && e.key === 'c') {
+            e.preventDefault();
+            clearCart();
+        }
+        if(e.ctrlKey && e.key === 'p') {
+            e.preventDefault();
+            printInvoice();
+        }
+        if(e.key === 'F2') {
+            e.preventDefault();
+            toggleScanMode();
+        }
+    });
+    
+    // Show Toast
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type} position-fixed bottom-0 end-0 m-3 shadow`;
+        toast.style.zIndex = '9999';
+        toast.style.minWidth = '250px';
+        toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle'} me-2"></i>${message}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    
+    // Initial Load
+    loadCustomers();
+    displayProducts();
+    
+    // GSAP Animation
+    gsap.from(".pos-container", {
+        duration: 0.8,
+        y: 50,
+        opacity: 0,
+        ease: "back.out(1.2)"
+    });
+</script>
+</body>
+</html>

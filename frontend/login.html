@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MediCare Pharmacy Management System</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: transform 0.3s ease;
+            color: white;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+        
+        .form-control {
+            border-radius: 10px;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .input-group-text {
+            border-radius: 10px 0 0 10px;
+            background: white;
+        }
+        
+        .role-badge {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .role-badge:hover, .role-badge.active {
+            border-color: #667eea;
+            transform: scale(1.05);
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+            20%, 40%, 60%, 80% { transform: translateX(2px); }
+        }
+        
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Demo credentials card */
+        .demo-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+        
+        .demo-card table {
+            width: 100%;
+            font-size: 12px;
+        }
+        
+        .demo-card td {
+            padding: 5px;
+        }
+        
+        .demo-card .badge {
+            font-size: 10px;
+            padding: 3px 8px;
+        }
+        
+        .badge-admin { background: #667eea; color: white; }
+        .badge-pharmacist { background: #10b981; color: white; }
+        .badge-staff { background: #f59e0b; color: white; }
+        
+        /* Staff access info */
+        .staff-access-info {
+            background: #fff3cd;
+            border-left: 4px solid #f59e0b;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .staff-access-info small {
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
+        <div class="row w-100">
+            <div class="col-lg-10 mx-auto">
+                <div class="glass-card overflow-hidden">
+                    <div class="row g-0">
+                        <!-- Left Side - Welcome Section -->
+                        <div class="col-lg-6 p-5 text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <div class="h-100 d-flex flex-column justify-content-center">
+                                <div class="mb-4 floating">
+                                    <i class="fas fa-hospital-user fa-4x"></i>
+                                </div>
+                                <h2 class="display-5 fw-bold mb-3">Welcome Back!</h2>
+                                <p class="lead mb-4">Login to access your pharmacy management dashboard and manage your business efficiently.</p>
+                                
+                                <div class="mt-4">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-check-circle me-3"></i>
+                                        <span>Inventory Management</span>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-check-circle me-3"></i>
+                                        <span>POS Billing System</span>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-check-circle me-3"></i>
+                                        <span>Real-time Analytics</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-5">
+                                    <p class="mb-0">Don't have an account?</p>
+                                    <a href="#" class="text-white fw-bold text-decoration-none">Contact Administrator</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Side - Login Form -->
+                        <div class="col-lg-6 p-5">
+                            <div class="text-center mb-4">
+                                <h3 class="fw-bold gradient-text">Sign In</h3>
+                                <p class="text-muted">Enter your credentials to access your account</p>
+                            </div>
+                            
+                            <div id="alertMessage" class="alert alert-danger d-none" role="alert"></div>
+                            
+                            <form id="loginForm">
+                                <!-- Role Selection -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">Select Role</label>
+                                    <div class="row g-2">
+                                        <div class="col-4">
+                                            <div class="role-badge text-center p-2 rounded" data-role="admin">
+                                                <i class="fas fa-user-shield fa-2x mb-2"></i>
+                                                <div class="small fw-semibold">Admin</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="role-badge text-center p-2 rounded" data-role="pharmacist">
+                                                <i class="fas fa-prescription-bottle fa-2x mb-2"></i>
+                                                <div class="small fw-semibold">Pharmacist</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="role-badge text-center p-2 rounded" data-role="staff">
+                                                <i class="fas fa-user fa-2x mb-2"></i>
+                                                <div class="small fw-semibold">Staff</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="role" name="role" value="admin">
+                                </div>
+                                
+                                <!-- Email Input -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Email Address</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-envelope"></i>
+                                        </span>
+                                        <input type="email" class="form-control" id="email" name="email" 
+                                               placeholder="Enter your email" required>
+                                    </div>
+                                </div>
+                                
+                                <!-- Password Input -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Password</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-lock"></i>
+                                        </span>
+                                        <input type="password" class="form-control" id="password" name="password" 
+                                               placeholder="••••••••" required>
+                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Remember Me & Forgot Password -->
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="rememberMe">
+                                        <label class="form-check-label" for="rememberMe">Remember me</label>
+                                    </div>
+                                    <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#forgotModal">
+                                        Forgot Password?
+                                    </a>
+                                </div>
+                                
+                                <!-- Login Button -->
+                                <button type="submit" class="btn btn-gradient w-100 py-2 mb-3" id="loginBtn">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                                </button>
+                            </form>
+                            
+                            <hr class="my-3">
+                            
+                            <!-- Demo Credentials Card -->
+                            <div class="demo-card">
+                                <div class="text-center mb-2">
+                                    <small class="text-muted fw-semibold">📋 Demo Credentials</small>
+                                </div>
+                                <table class="table table-sm table-borderless mb-0">
+                                    <tr>
+                                        <td><span class="badge badge-admin">Admin</span></td>
+                                        <td><code>admin@medicare.com</code></td>
+                                        <td><code>admin123</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-pharmacist">Pharmacist</span></td>
+                                        <td><code>pharmacist@medicare.com</code></td>
+                                        <td><code>pharm123</code></td>
+                                    </tr>
+                                    <tr style="background: #fff3cd;">
+                                        <td><span class="badge badge-staff">Staff</span></td>
+                                        <td><code>staff@medicare.com</code></td>
+                                        <td><code>staff123</code></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                            <!-- Staff Access Info -->
+                            <div class="staff-access-info">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle text-warning me-1"></i>
+                                    <strong>Staff Access:</strong> POS Billing, Medicines (View), Customers (View), Dashboard (Limited)
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Forgot Password Modal -->
+    <div class="modal fade" id="forgotModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reset Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Enter your email address and we'll send you a password reset link.</p>
+                    <input type="email" class="form-control" id="resetEmail" placeholder="Email address">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="sendResetLink">Send Reset Link</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // GSAP Animation
+        gsap.from(".glass-card", {
+            duration: 0.8,
+            scale: 0.9,
+            opacity: 0,
+            ease: "back.out(1.2)"
+        });
+        
+        // Role Selection
+        const roleBadges = document.querySelectorAll('.role-badge');
+        const roleInput = document.getElementById('role');
+        
+        roleBadges.forEach(badge => {
+            badge.addEventListener('click', () => {
+                roleBadges.forEach(b => b.classList.remove('active'));
+                badge.classList.add('active');
+                roleInput.value = badge.dataset.role;
+                
+                // Auto-fill email and password based on role
+                const emailInput = document.getElementById('email');
+                const passwordInput = document.getElementById('password');
+                const role = badge.dataset.role;
+                
+                if(role === 'admin') {
+                    emailInput.value = 'admin@medicare.com';
+                    passwordInput.value = 'admin123';
+                } else if(role === 'pharmacist') {
+                    emailInput.value = 'pharmacist@medicare.com';
+                    passwordInput.value = 'pharm123';
+                } else if(role === 'staff') {
+                    emailInput.value = 'staff@medicare.com';
+                    passwordInput.value = 'staff123';
+                }
+            });
+        });
+        
+        // Set default active role and auto-fill
+        document.querySelector('.role-badge[data-role="admin"]').classList.add('active');
+        document.getElementById('email').value = 'admin@medicare.com';
+        document.getElementById('password').value = 'admin123';
+        
+        // Toggle Password Visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const password = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if(password.type === 'password') {
+                password.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                password.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+        
+        // Login Form Submit - COMPLETE WITH STAFF ACCESS
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const role = document.getElementById('role').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            
+            // Show loading state
+            const loginBtn = document.getElementById('loginBtn');
+            const originalText = loginBtn.innerHTML;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Signing in...';
+            loginBtn.disabled = true;
+            
+            setTimeout(() => {
+                let loginSuccess = false;
+                let userData = null;
+                
+                // ============= ADMIN LOGIN =============
+                if(email === 'admin@medicare.com' && password === 'admin123' && role === 'admin') {
+                    loginSuccess = true;
+                    userData = {
+                        id: 1,
+                        name: 'Admin User',
+                        email: email,
+                        role: 'admin',
+                        access: {
+                            dashboard: true,
+                            medicines: true,
+                            customers: true,
+                            sales: true,
+                            purchases: true,
+                            suppliers: true,
+                            prescriptions: true,
+                            reports: true,
+                            settings: true
+                        },
+                        avatar: 'https://ui-avatars.com/api/?name=Admin&background=667eea&color=fff'
+                    };
+                    showAlert('Admin login successful! Redirecting...', 'success');
+                } 
+                // ============= PHARMACIST LOGIN =============
+                else if(email === 'pharmacist@medicare.com' && password === 'pharm123' && role === 'pharmacist') {
+                    loginSuccess = true;
+                    userData = {
+                        id: 2,
+                        name: 'John Pharmacist',
+                        email: email,
+                        role: 'pharmacist',
+                        access: {
+                            dashboard: true,
+                            medicines: true,
+                            customers: true,
+                            sales: true,
+                            purchases: false,
+                            suppliers: false,
+                            prescriptions: true,
+                            reports: true,
+                            settings: false
+                        },
+                        avatar: 'https://ui-avatars.com/api/?name=Pharmacist&background=10b981&color=fff'
+                    };
+                    showAlert('Pharmacist login successful! Redirecting...', 'success');
+                }
+                // ============= STAFF LOGIN - FIXED =============
+                else if(email === 'staff@medicare.com' && password === 'staff123' && role === 'staff') {
+                    loginSuccess = true;
+                    userData = {
+                        id: 3,
+                        name: 'Staff Member',
+                        email: email,
+                        role: 'staff',
+                        access: {
+                            dashboard: true,
+                            medicines: { view: true, edit: false, delete: false },
+                            customers: { view: true, edit: false, delete: false },
+                            sales: true,
+                            purchases: false,
+                            suppliers: false,
+                            prescriptions: { view: true, create: false },
+                            reports: false,
+                            settings: false
+                        },
+                        avatar: 'https://ui-avatars.com/api/?name=Staff&background=f59e0b&color=fff'
+                    };
+                    showAlert('Staff login successful! Redirecting...', 'success');
+                }
+                // ============= ROLE MISMATCH ERROR =============
+                else if((email === 'admin@medicare.com' || email === 'pharmacist@medicare.com' || email === 'staff@medicare.com') && 
+                        (password === 'admin123' || password === 'pharm123' || password === 'staff123')) {
+                    let expectedRole = '';
+                    if(email === 'admin@medicare.com') expectedRole = 'admin';
+                    else if(email === 'pharmacist@medicare.com') expectedRole = 'pharmacist';
+                    else if(email === 'staff@medicare.com') expectedRole = 'staff';
+                    showAlert(`⚠️ Role mismatch! You selected "${role}" but this account is for "${expectedRole}". Please select the correct role.`, 'danger');
+                }
+                // ============= INVALID CREDENTIALS =============
+                else {
+                    showAlert('❌ Invalid email or password! Please check your credentials.', 'danger');
+                    document.getElementById('password').classList.add('shake');
+                    setTimeout(() => {
+                        document.getElementById('password').classList.remove('shake');
+                    }, 500);
+                }
+                
+                if(loginSuccess && userData) {
+                    // Clear existing data
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    if(rememberMe) {
+                        localStorage.setItem('user', JSON.stringify(userData));
+                        localStorage.setItem('auth_token', `demo_token_${userData.role}`);
+                        localStorage.setItem('user_role', userData.role);
+                        localStorage.setItem('user_access', JSON.stringify(userData.access));
+                    } else {
+                        sessionStorage.setItem('user', JSON.stringify(userData));
+                        sessionStorage.setItem('auth_token', `demo_token_${userData.role}`);
+                        sessionStorage.setItem('user_role', userData.role);
+                        sessionStorage.setItem('user_access', JSON.stringify(userData.access));
+                    }
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                }
+                
+                loginBtn.innerHTML = originalText;
+                loginBtn.disabled = false;
+            }, 1000);
+        });
+        
+        // Forgot Password
+        document.getElementById('sendResetLink').addEventListener('click', () => {
+            const email = document.getElementById('resetEmail').value;
+            if(email) {
+                showAlert('Password reset link sent to your email!', 'success');
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('forgotModal')).hide();
+                }, 2000);
+            } else {
+                showAlert('Please enter your email address!', 'warning');
+            }
+        });
+        
+        // Show Alert Function
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('alertMessage');
+            alertDiv.textContent = message;
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.classList.remove('d-none');
+            
+            setTimeout(() => {
+                alertDiv.classList.add('d-none');
+            }, 3000);
+        }
+        
+        // Check if user is already logged in
+        const loggedInUser = localStorage.getItem('user') || sessionStorage.getItem('user');
+        if(loggedInUser) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports & Analytics - MediCare Pharmacy</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        body {
+            background: #f5f7fb;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 280px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            z-index: 1000;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            padding: 20px;
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .report-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 15px;
+        }
+        
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .filter-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="p-4">
+        <div class="d-flex align-items-center gap-2 mb-4">
+            <i class="fas fa-hospital-user text-white fs-3"></i>
+            <span class="text-white fw-bold fs-5">MediCare</span>
+        </div>
+        
+        <nav class="nav flex-column">
+            <a href="dashboard.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+            </a>
+            <a href="medicines.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-capsules me-2"></i> Medicines
+            </a>
+            <a href="customers.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-users me-2"></i> Customers
+            </a>
+            <a href="sales.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-shopping-cart me-2"></i> POS Sales
+            </a>
+            <a href="purchases.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-truck me-2"></i> Purchases
+            </a>
+            <a href="suppliers.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-parachute-box me-2"></i> Suppliers
+            </a>
+            <a href="prescriptions.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-file-prescription me-2"></i> Prescriptions
+            </a>
+            <a href="reports.html" class="nav-link text-white active bg-primary bg-opacity-25 rounded">
+                <i class="fas fa-chart-line me-2"></i> Reports
+            </a>
+            <hr class="bg-secondary my-3">
+            <a href="login.html" class="nav-link text-white-50">
+                <i class="fas fa-sign-out-alt me-2"></i> Logout
+            </a>
+        </nav>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold gradient-text">Reports & Analytics</h2>
+            <p class="text-muted">Comprehensive reports and business insights</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-primary rounded-pill px-4 me-2" onclick="exportAllReports()">
+                <i class="fas fa-file-excel me-2"></i>Export All
+            </button>
+            <button class="btn btn-gradient rounded-pill px-4" onclick="printReport()">
+                <i class="fas fa-print me-2"></i>Print Report
+            </button>
+        </div>
+    </div>
+    
+    <!-- Report Tabs -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#salesReport">
+                <i class="fas fa-chart-line me-2"></i>Sales Report
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#inventoryReport">
+                <i class="fas fa-boxes me-2"></i>Inventory Report
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#financialReport">
+                <i class="fas fa-dollar-sign me-2"></i>Financial Report
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#customerReport">
+                <i class="fas fa-users me-2"></i>Customer Report
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#expiryReport">
+                <i class="fas fa-clock me-2"></i>Expiry Report
+            </a>
+        </li>
+    </ul>
+    
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <!-- Sales Report Tab -->
+        <div class="tab-pane fade show active" id="salesReport">
+            <!-- Filters -->
+            <div class="filter-section">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Date Range</label>
+                        <select class="form-select" id="salesDateRange" onchange="updateSalesReport()">
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month" selected>This Month</option>
+                            <option value="year">This Year</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3" id="customDateRange" style="display: none;">
+                        <label class="form-label fw-semibold">From Date</label>
+                        <input type="date" class="form-control" id="fromDate">
+                    </div>
+                    <div class="col-md-3" id="customDateRangeTo" style="display: none;">
+                        <label class="form-label fw-semibold">To Date</label>
+                        <input type="date" class="form-control" id="toDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Report Type</label>
+                        <select class="form-select" id="salesReportType" onchange="updateSalesReport()">
+                            <option value="summary">Summary</option>
+                            <option value="detailed">Detailed</option>
+                            <option value="tax">Tax Report</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sales Stats -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="card report-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <p class="text-muted mb-1">Total Sales</p>
+                                    <h3 class="fw-bold text-primary" id="totalSalesAmount">$0</h3>
+                                </div>
+                                <i class="fas fa-chart-line fa-2x text-primary opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card report-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <p class="text-muted mb-1">Total Invoices</p>
+                                    <h3 class="fw-bold text-success" id="totalInvoices">0</h3>
+                                </div>
+                                <i class="fas fa-receipt fa-2x text-success opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card report-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <p class="text-muted mb-1">Average Order Value</p>
+                                    <h3 class="fw-bold text-info" id="avgOrderValue">$0</h3>
+                                </div>
+                                <i class="fas fa-calculator fa-2x text-info opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card report-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <p class="text-muted mb-1">Top Product</p>
+                                    <h6 class="fw-bold" id="topProduct">-</h6>
+                                </div>
+                                <i class="fas fa-trophy fa-2x text-warning opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sales Chart -->
+            <div class="card report-card mb-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Sales Trend</h5>
+                    <canvas id="salesTrendChart" height="300"></canvas>
+                </div>
+            </div>
+            
+            <!-- Sales Table -->
+            <div class="card report-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">Sales Details</h5>
+                        <button class="btn btn-sm btn-outline-primary" onclick="exportSalesTable()">
+                            <i class="fas fa-download me-1"></i>Export
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Invoice No</th>
+                                    <th>Customer</th>
+                                    <th>Items</th>
+                                    <th>Subtotal</th>
+                                    <th>Tax</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="salesTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Inventory Report Tab -->
+        <div class="tab-pane fade" id="inventoryReport">
+            <div class="filter-section">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Category</label>
+                        <select class="form-select" id="inventoryCategory" onchange="updateInventoryReport()">
+                            <option value="">All Categories</option>
+                            <option>Pain Relief</option>
+                            <option>Antibiotics</option>
+                            <option>Vitamins</option>
+                            <option>First Aid</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Stock Status</label>
+                        <select class="form-select" id="stockStatus" onchange="updateInventoryReport()">
+                            <option value="">All</option>
+                            <option value="low">Low Stock</option>
+                            <option value="normal">Normal Stock</option>
+                            <option value="expiring">Expiring Soon</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Sort By</label>
+                        <select class="form-select" id="inventorySort" onchange="updateInventoryReport()">
+                            <option value="name">Medicine Name</option>
+                            <option value="stock">Stock Quantity</option>
+                            <option value="expiry">Expiry Date</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="card report-card">
+                        <div class="card-body">
+                            <p class="text-muted mb-1">Total Medicines</p>
+                            <h3 class="fw-bold" id="inventoryTotalMedicines">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card report-card">
+                        <div class="card-body">
+                            <p class="text-muted mb-1">Low Stock Items</p>
+                            <h3 class="fw-bold text-warning" id="inventoryLowStock">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card report-card">
+                        <div class="card-body">
+                            <p class="text-muted mb-1">Total Stock Value</p>
+                            <h3 class="fw-bold text-success" id="inventoryTotalValue">$0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card report-card">
+                        <div class="card-body">
+                            <p class="text-muted mb-1">Expiring Within 30 Days</p>
+                            <h3 class="fw-bold text-danger" id="inventoryExpiring">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card report-card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="inventoryTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Medicine Name</th>
+                                    <th>Category</th>
+                                    <th>Stock</th>
+                                    <th>Purchase Price</th>
+                                    <th>Selling Price</th>
+                                    <th>Expiry Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Financial Report Tab -->
+        <div class="tab-pane fade" id="financialReport">
+            <div class="filter-section">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Year</label>
+                        <select class="form-select" id="financialYear" onchange="updateFinancialReport()">
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Report Type</label>
+                        <select class="form-select" id="financialType" onchange="updateFinancialReport()">
+                            <option value="profit_loss">Profit & Loss</option>
+                            <option value="balance_sheet">Balance Sheet</option>
+                            <option value="cash_flow">Cash Flow</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="card report-card">
+                        <div class="card-body">
+                            <h5 class="fw-bold mb-3">Revenue vs Expenses</h5>
+                            <canvas id="revenueExpenseChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card report-card">
+                        <div class="card-body">
+                            <h5 class="fw-bold mb-3">Monthly Profit Trend</h5>
+                            <canvas id="profitTrendChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card report-card">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Financial Summary</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 text-center">
+                                <p class="text-muted mb-1">Total Revenue</p>
+                                <h4 class="text-success" id="totalRevenue">$0</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 text-center">
+                                <p class="text-muted mb-1">Total Expenses</p>
+                                <h4 class="text-danger" id="totalExpenses">$0</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 text-center">
+                                <p class="text-muted mb-1">Net Profit</p>
+                                <h4 class="text-primary" id="netProfit">$0</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Customer Report Tab -->
+        <div class="tab-pane fade" id="customerReport">
+            <div class="filter-section">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Customer Type</label>
+                        <select class="form-select" id="customerType" onchange="updateCustomerReport()">
+                            <option value="">All</option>
+                            <option value="vip">VIP</option>
+                            <option value="regular">Regular</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Sort By</label>
+                        <select class="form-select" id="customerSort" onchange="updateCustomerReport()">
+                            <option value="purchases">Total Purchases</option>
+                            <option value="due">Due Amount</option>
+                            <option value="name">Customer Name</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card report-card">
+                <div class="card-body">
+                    <canvas id="customerChart" height="300" class="mb-4"></canvas>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Customer Name</th>
+                                    <th>Type</th>
+                                    <th>Total Purchases</th>
+                                    <th>Total Due</th>
+                                    <th>Last Purchase</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customerTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Expiry Report Tab -->
+        <div class="tab-pane fade" id="expiryReport">
+            <div class="filter-section">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Days to Expiry</label>
+                        <select class="form-select" id="expiryDays" onchange="updateExpiryReport()">
+                            <option value="30">30 Days</option>
+                            <option value="60">60 Days</option>
+                            <option value="90">90 Days</option>
+                            <option value="180">180 Days</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Category</label>
+                        <select class="form-select" id="expiryCategory" onchange="updateExpiryReport()">
+                            <option value="">All Categories</option>
+                            <option>Pain Relief</option>
+                            <option>Antibiotics</option>
+                            <option>Vitamins</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card report-card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Medicine Name</th>
+                                    <th>Batch No</th>
+                                    <th>Category</th>
+                                    <th>Stock</th>
+                                    <th>Expiry Date</th>
+                                    <th>Days Left</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expiryTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Sample Sales Data
+    let salesData = [
+        { date: "2024-01-01", invoiceNo: "INV-001", customer: "John Doe", items: 3, subtotal: 45.00, tax: 4.50, total: 49.50 },
+        { date: "2024-01-02", invoiceNo: "INV-002", customer: "Jane Smith", items: 2, subtotal: 30.00, tax: 3.00, total: 33.00 },
+        { date: "2024-01-03", invoiceNo: "INV-003", customer: "Mike Johnson", items: 5, subtotal: 75.00, tax: 7.50, total: 82.50 }
+    ];
+    
+    // Sample Inventory Data
+    let inventoryData = [
+        { name: "Paracetamol 500mg", category: "Pain Relief", stock: 150, purchasePrice: 2.50, sellingPrice: 5.00, expiryDate: "2025-12-31" },
+        { name: "Amoxicillin 250mg", category: "Antibiotics", stock: 8, purchasePrice: 5.00, sellingPrice: 10.00, expiryDate: "2025-06-30" },
+        { name: "Vitamin C 1000mg", category: "Vitamins", stock: 45, purchasePrice: 8.00, sellingPrice: 15.00, expiryDate: "2025-08-31" }
+    ];
+    
+    // Initialize Charts
+    let salesTrendChart, revenueExpenseChart, profitTrendChart, customerChart;
+    
+    function initCharts() {
+        // Sales Trend Chart
+        const ctx1 = document.getElementById('salesTrendChart').getContext('2d');
+        salesTrendChart = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Sales',
+                    data: [12500, 14200, 13800, 15600],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: true }
+        });
+        
+        // Revenue vs Expense Chart
+        const ctx2 = document.getElementById('revenueExpenseChart').getContext('2d');
+        revenueExpenseChart = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    { label: 'Revenue', data: [12500, 14200, 15800, 16400, 17200, 18500], backgroundColor: '#10b981' },
+                    { label: 'Expenses', data: [8500, 9200, 9800, 10200, 10800, 11500], backgroundColor: '#ef4444' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: true }
+        });
+        
+        // Profit Trend Chart
+        const ctx3 = document.getElementById('profitTrendChart').getContext('2d');
+        profitTrendChart = new Chart(ctx3, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Profit',
+                    data: [4000, 5000, 6000, 6200, 6400, 7000],
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    fill: true
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: true }
+        });
+        
+        // Customer Chart
+        const ctx4 = document.getElementById('customerChart').getContext('2d');
+        customerChart = new Chart(ctx4, {
+            type: 'doughnut',
+            data: {
+                labels: ['VIP Customers', 'Regular Customers', 'New Customers'],
+                datasets: [{
+                    data: [30, 45, 25],
+                    backgroundColor: ['#f59e0b', '#667eea', '#10b981']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: true }
+        });
+    }
+    
+    // Update Sales Report
+    function updateSalesReport() {
+        const range = document.getElementById('salesDateRange').value;
+        if(range === 'custom') {
+            document.getElementById('customDateRange').style.display = 'block';
+            document.getElementById('customDateRangeTo').style.display = 'block';
+        } else {
+            document.getElementById('customDateRange').style.display = 'none';
+            document.getElementById('customDateRangeTo').style.display = 'none';
+        }
+        
+        // Update stats
+        const totalSales = salesData.reduce((sum, s) => sum + s.total, 0);
+        document.getElementById('totalSalesAmount').textContent = `$${totalSales.toFixed(2)}`;
+        document.getElementById('totalInvoices').textContent = salesData.length;
+        document.getElementById('avgOrderValue').textContent = `$${(totalSales / salesData.length).toFixed(2)}`;
+        document.getElementById('topProduct').textContent = "Paracetamol 500mg";
+        
+        // Update table
+        const tbody = document.getElementById('salesTableBody');
+        tbody.innerHTML = salesData.map(s => `
+            <tr>
+                <td>${s.date}</td>
+                <td>${s.invoiceNo}</td>
+                <td>${s.customer}</td>
+                <td>${s.items} items</td>
+                <td>$${s.subtotal.toFixed(2)}</td>
+                <td>$${s.tax.toFixed(2)}</td>
+                <td><strong>$${s.total.toFixed(2)}</strong></td>
+            </tr>
+        `).join('');
+    }
+    
+    // Update Inventory Report
+    function updateInventoryReport() {
+        const category = document.getElementById('inventoryCategory').value;
+        const filtered = category ? inventoryData.filter(i => i.category === category) : inventoryData;
+        
+        document.getElementById('inventoryTotalMedicines').textContent = filtered.length;
+        document.getElementById('inventoryLowStock').textContent = filtered.filter(i => i.stock < 20).length;
+        document.getElementById('inventoryTotalValue').textContent = '$' + filtered.reduce((sum, i) => sum + (i.stock * i.purchasePrice), 0).toFixed(2);
+        document.getElementById('inventoryExpiring').textContent = filtered.filter(i => {
+            const days = Math.ceil((new Date(i.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+            return days <= 30 && days > 0;
+        }).length;
+        
+        const tbody = document.getElementById('inventoryTableBody');
+        tbody.innerHTML = filtered.map(i => {
+            const daysToExpiry = Math.ceil((new Date(i.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+            const status = i.stock < 20 ? 'Low Stock' : daysToExpiry < 30 ? 'Expiring Soon' : 'Normal';
+            const statusClass = i.stock < 20 ? 'text-warning' : daysToExpiry < 30 ? 'text-danger' : 'text-success';
+            return `
+                <tr>
+                    <td>${i.name}</td>
+                    <td>${i.category}</td>
+                    <td class="${i.stock < 20 ? 'text-warning fw-bold' : ''}">${i.stock} unit(s)</td>
+                    <td>$${i.purchasePrice.toFixed(2)}</td>
+                    <td>$${i.sellingPrice.toFixed(2)}</td>
+                    <td>${i.expiryDate}</td>
+                    <td class="${statusClass} fw-bold">${status}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+    
+    // Update Financial Report
+    function updateFinancialReport() {
+        const revenue = 185000;
+        const expenses = 115000;
+        const profit = revenue - expenses;
+        
+        document.getElementById('totalRevenue').textContent = `$${revenue.toFixed(2)}`;
+        document.getElementById('totalExpenses').textContent = `$${expenses.toFixed(2)}`;
+        document.getElementById('netProfit').textContent = `$${profit.toFixed(2)}`;
+        
+        // Update charts
+        revenueExpenseChart.data.datasets[0].data = [12500, 14200, 15800, 16400, 17200, 18500];
+        revenueExpenseChart.data.datasets[1].data = [8500, 9200, 9800, 10200, 10800, 11500];
+        revenueExpenseChart.update();
+        
+        profitTrendChart.data.datasets[0].data = [4000, 5000, 6000, 6200, 6400, 7000];
+        profitTrendChart.update();
+    }
+    
+    // Update Customer Report
+    function updateCustomerReport() {
+        const customers = [
+            { name: "John Doe", type: "regular", purchases: 1250, due: 250, lastPurchase: "2024-01-15" },
+            { name: "Jane Smith", type: "vip", purchases: 3450, due: 1200, lastPurchase: "2024-02-10" },
+            { name: "Mike Johnson", type: "regular", purchases: 890, due: 0, lastPurchase: "2024-02-05" }
+        ];
+        
+        const tbody = document.getElementById('customerTableBody');
+        tbody.innerHTML = customers.map(c => `
+            <tr>
+                <td>${c.name}</td>
+                <td><span class="badge ${c.type === 'vip' ? 'bg-warning' : 'bg-info'}">${c.type.toUpperCase()}</span></td>
+                <td>$${c.purchases.toFixed(2)}</td>
+                <td class="${c.due > 0 ? 'text-danger fw-bold' : 'text-success'}">$${c.due.toFixed(2)}</td>
+                <td>${c.lastPurchase}</td>
+            </tr>
+        `).join('');
+        
+        customerChart.data.datasets[0].data = [30, 45, 25];
+        customerChart.update();
+    }
+    
+    // Update Expiry Report
+    function updateExpiryReport() {
+        const daysLimit = parseInt(document.getElementById('expiryDays').value);
+        const expiringMedicines = inventoryData.filter(i => {
+            const days = Math.ceil((new Date(i.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+            return days <= daysLimit && days > 0;
+        });
+        
+        const tbody = document.getElementById('expiryTableBody');
+        tbody.innerHTML = expiringMedicines.map(i => {
+            const daysLeft = Math.ceil((new Date(i.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+            return `
+                <tr>
+                    <td>${i.name}</td>
+                    <td>BATCH001</td>
+                    <td>${i.category}</td>
+                    <td>${i.stock} unit(s)</td>
+                    <td>${i.expiryDate}</td>
+                    <td class="text-danger fw-bold">${daysLeft} days</td>
+                    <td><button class="btn btn-sm btn-warning" onclick="markForDiscount('${i.name}')">Mark for Discount</button></td>
+                </tr>
+            `;
+        }).join('');
+    }
+    
+    function markForDiscount(medicineName) {
+        showToast(`${medicineName} marked for discount sale`, "success");
+    }
+    
+    // Export Functions
+    function exportAllReports() {
+        showToast("Reports exported successfully!", "success");
+    }
+    
+    function exportSalesTable() {
+        showToast("Sales table exported!", "success");
+    }
+    
+    function printReport() {
+        window.print();
+    }
+    
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type} position-fixed bottom-0 end-0 m-3 shadow`;
+        toast.style.zIndex = '9999';
+        toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>${message}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    
+    // Initialize
+    initCharts();
+    updateSalesReport();
+    updateInventoryReport();
+    updateFinancialReport();
+    updateCustomerReport();
+    updateExpiryReport();
+    
+    // GSAP Animation
+    gsap.from(".report-card", {
+        duration: 0.6,
+        y: 30,
+        opacity: 0,
+        stagger: 0.1,
+        ease: "back.out(1.2)"
+    });
+</script>
+</body>
+</html>

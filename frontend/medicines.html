@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicines Management - MediCare Pharmacy</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        body {
+            background: #f5f7fb;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 280px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            z-index: 1000;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            padding: 20px;
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        .search-bar {
+            position: relative;
+        }
+        
+        .search-bar input {
+            padding-left: 40px;
+            border-radius: 25px;
+        }
+        
+        .search-bar i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+        }
+        
+        .filter-chip {
+            display: inline-block;
+            padding: 5px 15px;
+            margin: 5px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-chip.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .medicine-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .medicine-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stock-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .stock-low { background: #ff9800; color: white; }
+        .stock-out { background: #f44336; color: white; }
+        .stock-good { background: #4caf50; color: white; }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar (Same as dashboard) -->
+<div class="sidebar">
+    <div class="p-4">
+        <div class="d-flex align-items-center gap-2 mb-4">
+            <i class="fas fa-hospital-user text-white fs-3"></i>
+            <span class="text-white fw-bold fs-5">MediCare</span>
+        </div>
+        
+        <nav class="nav flex-column">
+            <a href="dashboard.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+            </a>
+            <a href="medicines.html" class="nav-link text-white active bg-primary bg-opacity-25 rounded">
+                <i class="fas fa-capsules me-2"></i> Medicines
+            </a>
+            <a href="customers.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-users me-2"></i> Customers
+            </a>
+            <a href="sales.html" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-shopping-cart me-2"></i> POS Sales
+            </a>
+            <a href="#" class="nav-link text-white-50 mb-2">
+                <i class="fas fa-sign-out-alt me-2"></i> Logout
+            </a>
+        </nav>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold gradient-text">Medicine Management</h2>
+            <p class="text-muted">Manage your pharmacy inventory efficiently</p>
+        </div>
+        <button class="btn btn-gradient rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
+            <i class="fas fa-plus me-2"></i>Add New Medicine
+        </button>
+    </div>
+    
+    <!-- Search and Filters -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" class="form-control" id="searchMedicine" placeholder="Search by name, generic name, brand or batch...">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex gap-2">
+                <select class="form-select" id="categoryFilter">
+                    <option value="">All Categories</option>
+                    <option>Pain Relief</option>
+                    <option>Antibiotics</option>
+                    <option>Vitamins</option>
+                    <option>First Aid</option>
+                </select>
+                <select class="form-select" id="stockFilter">
+                    <option value="">All Stock Status</option>
+                    <option value="low">Low Stock</option>
+                    <option value="expiring">Expiring Soon</option>
+                    <option value="expired">Expired</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card card-hover">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1">Total Medicines</p>
+                            <h3 class="fw-bold" id="totalMedicines">0</h3>
+                        </div>
+                        <i class="fas fa-capsules fs-1 text-primary opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-hover">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1">Low Stock Items</p>
+                            <h3 class="fw-bold text-warning" id="lowStockCount">0</h3>
+                        </div>
+                        <i class="fas fa-exclamation-triangle fs-1 text-warning opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-hover">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1">Expiring Soon</p>
+                            <h3 class="fw-bold text-danger" id="expiringCount">0</h3>
+                        </div>
+                        <i class="fas fa-clock fs-1 text-danger opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-hover">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1">Total Value</p>
+                            <h3 class="fw-bold text-success" id="totalValue">$0</h3>
+                        </div>
+                        <i class="fas fa-dollar-sign fs-1 text-success opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Medicines Grid -->
+    <div class="row g-4" id="medicinesGrid"></div>
+    
+    <!-- Pagination -->
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center" id="pagination"></ul>
+    </nav>
+</div>
+
+<!-- Add/Edit Medicine Modal -->
+<div class="modal fade" id="addMedicineModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient text-white">
+                <h5 class="modal-title">Add New Medicine</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="medicineForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Medicine Name *</label>
+                            <input type="text" class="form-control" id="medName" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Generic Name</label>
+                            <input type="text" class="form-control" id="genericName">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Brand Name</label>
+                            <input type="text" class="form-control" id="brandName">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Category *</label>
+                            <select class="form-select" id="category" required>
+                                <option>Pain Relief</option>
+                                <option>Antibiotics</option>
+                                <option>Vitamins</option>
+                                <option>First Aid</option>
+                                <option>Chronic Care</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Batch Number</label>
+                            <input type="text" class="form-control" id="batchNo">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Barcode</label>
+                            <input type="text" class="form-control" id="barcode">
+                            <button type="button" class="btn btn-sm btn-secondary mt-1" onclick="generateBarcode()">
+                                Generate Barcode
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-semibold">Purchase Price</label>
+                            <input type="number" class="form-control" id="purchasePrice">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-semibold">Selling Price *</label>
+                            <input type="number" class="form-control" id="sellingPrice" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-semibold">Wholesale Price</label>
+                            <input type="number" class="form-control" id="wholesalePrice">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-semibold">Stock Quantity *</label>
+                            <input type="number" class="form-control" id="stock" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Manufacturing Date</label>
+                            <input type="date" class="form-control" id="mfgDate">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Expiry Date *</label>
+                            <input type="date" class="form-control" id="expiryDate" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Minimum Stock Alert</label>
+                            <input type="number" class="form-control" id="minStock" value="10">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Rack Number</label>
+                            <input type="text" class="form-control" id="rackNo">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-semibold">Description</label>
+                            <textarea class="form-control" id="description" rows="3"></textarea>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-semibold">Medicine Image</label>
+                            <input type="file" class="form-control" id="medicineImage" accept="image/*">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-gradient" onclick="saveMedicine()">Save Medicine</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Medicine QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="qrCode"></div>
+                <button class="btn btn-primary mt-3" onclick="printQR()">Print QR</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Sample Medicine Data
+    let medicines = [
+        {
+            id: 1,
+            name: "Paracetamol 500mg",
+            genericName: "Acetaminophen",
+            brand: "Tylenol",
+            category: "Pain Relief",
+            batchNo: "BATCH001",
+            barcode: "8901234567890",
+            purchasePrice: 2.50,
+            sellingPrice: 5.00,
+            wholesalePrice: 3.50,
+            stock: 150,
+            minStock: 50,
+            mfgDate: "2024-01-01",
+            expiryDate: "2025-12-31",
+            rackNo: "A-12",
+            description: "Used for pain relief and fever reduction"
+        },
+        {
+            id: 2,
+            name: "Amoxicillin 250mg",
+            genericName: "Amoxicillin",
+            brand: "Amoxil",
+            category: "Antibiotics",
+            batchNo: "BATCH002",
+            barcode: "8901234567891",
+            purchasePrice: 5.00,
+            sellingPrice: 10.00,
+            wholesalePrice: 7.00,
+            stock: 8,
+            minStock: 30,
+            mfgDate: "2024-02-01",
+            expiryDate: "2025-01-31",
+            rackNo: "B-05",
+            description: "Antibiotic for bacterial infections"
+        },
+        {
+            id: 3,
+            name: "Vitamin C 1000mg",
+            genericName: "Ascorbic Acid",
+            brand: "Nature's Way",
+            category: "Vitamins",
+            batchNo: "BATCH003",
+            barcode: "8901234567892",
+            purchasePrice: 8.00,
+            sellingPrice: 15.00,
+            wholesalePrice: 11.00,
+            stock: 45,
+            minStock: 20,
+            mfgDate: "2024-03-01",
+            expiryDate: "2025-02-28",
+            rackNo: "C-08",
+            description: "Immune system support"
+        }
+    ];
+    
+    let currentPage = 1;
+    const itemsPerPage = 12;
+    
+    // Display Medicines
+    function displayMedicines() {
+        const searchTerm = document.getElementById('searchMedicine').value.toLowerCase();
+        const categoryFilter = document.getElementById('categoryFilter').value;
+        const stockFilter = document.getElementById('stockFilter').value;
+        
+        let filtered = medicines.filter(med => {
+            const matchesSearch = med.name.toLowerCase().includes(searchTerm) ||
+                                 med.genericName.toLowerCase().includes(searchTerm) ||
+                                 med.brand.toLowerCase().includes(searchTerm) ||
+                                 med.batchNo.toLowerCase().includes(searchTerm);
+            
+            const matchesCategory = !categoryFilter || med.category === categoryFilter;
+            
+            let matchesStock = true;
+            if(stockFilter === 'low') matchesStock = med.stock <= med.minStock;
+            if(stockFilter === 'expiring') {
+                const daysToExpiry = Math.ceil((new Date(med.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+                matchesStock = daysToExpiry <= 30 && daysToExpiry > 0;
+            }
+            if(stockFilter === 'expired') matchesStock = new Date(med.expiryDate) < new Date();
+            
+            return matchesSearch && matchesCategory && matchesStock;
+        });
+        
+        // Update stats
+        document.getElementById('totalMedicines').textContent = filtered.length;
+        document.getElementById('lowStockCount').textContent = filtered.filter(m => m.stock <= m.minStock).length;
+        document.getElementById('expiringCount').textContent = filtered.filter(m => {
+            const days = Math.ceil((new Date(m.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+            return days <= 30 && days > 0;
+        }).length;
+        document.getElementById('totalValue').textContent = '$' + filtered.reduce((sum, m) => sum + (m.stock * m.sellingPrice), 0).toFixed(2);
+        
+        // Pagination
+        const totalPages = Math.ceil(filtered.length / itemsPerPage);
+        const start = (currentPage - 1) * itemsPerPage;
+        const paginated = filtered.slice(start, start + itemsPerPage);
+        
+        // Render grid
+        const grid = document.getElementById('medicinesGrid');
+        grid.innerHTML = paginated.map(med => {
+            const daysToExpiry = Math.ceil((new Date(med.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+            let stockClass = 'stock-good';
+            if(med.stock <= med.minStock) stockClass = 'stock-low';
+            if(med.stock === 0) stockClass = 'stock-out';
+            
+            return `
+                <div class="col-md-6 col-lg-4 col-xl-3">
+                    <div class="card medicine-card h-100">
+                        <div class="position-relative">
+                            <span class="stock-badge ${stockClass}">
+                                ${med.stock === 0 ? 'Out of Stock' : med.stock <= med.minStock ? 'Low Stock' : `${med.stock} in stock`}
+                            </span>
+                            <img src="https://via.placeholder.com/300x200/667eea/ffffff?text=${med.name}" class="card-img-top" alt="${med.name}">
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title fw-bold">${med.name}</h6>
+                            <p class="text-muted small mb-2">${med.genericName} | ${med.brand}</p>
+                            <div class="mb-2">
+                                <span class="badge bg-info">${med.category}</span>
+                                <span class="badge ${daysToExpiry < 30 ? 'bg-danger' : 'bg-secondary'}">
+                                    Exp: ${med.expiryDate}
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-bold text-primary">$${med.sellingPrice}</span>
+                                    <small class="text-muted d-block">MRP</small>
+                                </div>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editMedicine(${med.id})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" onclick="showQR('${med.barcode}')">
+                                        <i class="fas fa-qrcode"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteMedicine(${med.id})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        // Pagination controls
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Previous</a>
+            </li>
+            ${Array.from({length: totalPages}, (_, i) => `
+                <li class="page-item ${currentPage === i+1 ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${i+1})">${i+1}</a>
+                </li>
+            `).join('')}
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Next</a>
+            </li>
+        `;
+    }
+    
+    function changePage(page) {
+        currentPage = page;
+        displayMedicines();
+    }
+    
+    function saveMedicine() {
+        const newMedicine = {
+            id: medicines.length + 1,
+            name: document.getElementById('medName').value,
+            genericName: document.getElementById('genericName').value,
+            brand: document.getElementById('brandName').value,
+            category: document.getElementById('category').value,
+            batchNo: document.getElementById('batchNo').value,
+            barcode: document.getElementById('barcode').value || Math.random().toString(36).substr(2, 10),
+            purchasePrice: parseFloat(document.getElementById('purchasePrice').value),
+            sellingPrice: parseFloat(document.getElementById('sellingPrice').value),
+            wholesalePrice: parseFloat(document.getElementById('wholesalePrice').value),
+            stock: parseInt(document.getElementById('stock').value),
+            minStock: parseInt(document.getElementById('minStock').value),
+            mfgDate: document.getElementById('mfgDate').value,
+            expiryDate: document.getElementById('expiryDate').value,
+            rackNo: document.getElementById('rackNo').value,
+            description: document.getElementById('description').value
+        };
+        
+        medicines.push(newMedicine);
+        displayMedicines();
+        bootstrap.Modal.getInstance(document.getElementById('addMedicineModal')).hide();
+        
+        // Show success message
+        showToast('Medicine added successfully!', 'success');
+    }
+    
+    function editMedicine(id) {
+        const med = medicines.find(m => m.id === id);
+        if(med) {
+            document.getElementById('medName').value = med.name;
+            document.getElementById('genericName').value = med.genericName;
+            document.getElementById('brandName').value = med.brand;
+            document.getElementById('category').value = med.category;
+            document.getElementById('batchNo').value = med.batchNo;
+            document.getElementById('barcode').value = med.barcode;
+            document.getElementById('purchasePrice').value = med.purchasePrice;
+            document.getElementById('sellingPrice').value = med.sellingPrice;
+            document.getElementById('wholesalePrice').value = med.wholesalePrice;
+            document.getElementById('stock').value = med.stock;
+            document.getElementById('minStock').value = med.minStock;
+            document.getElementById('mfgDate').value = med.mfgDate;
+            document.getElementById('expiryDate').value = med.expiryDate;
+            document.getElementById('rackNo').value = med.rackNo;
+            document.getElementById('description').value = med.description;
+            
+            new bootstrap.Modal(document.getElementById('addMedicineModal')).show();
+        }
+    }
+    
+    function deleteMedicine(id) {
+        if(confirm('Are you sure you want to delete this medicine?')) {
+            medicines = medicines.filter(m => m.id !== id);
+            displayMedicines();
+            showToast('Medicine deleted successfully!', 'success');
+        }
+    }
+    
+    function generateBarcode() {
+        const barcode = Math.random().toString(36).substr(2, 12).toUpperCase();
+        document.getElementById('barcode').value = barcode;
+    }
+    
+    function showQR(barcode) {
+        const qrModal = new bootstrap.Modal(document.getElementById('qrModal'));
+        document.getElementById('qrCode').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${barcode}" alt="QR Code">`;
+        qrModal.show();
+    }
+    
+    function printQR() {
+        window.print();
+    }
+    
+    function showToast(message, type) {
+        // Simple toast implementation
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type} position-fixed bottom-0 end-0 m-3`;
+        toast.style.zIndex = '9999';
+        toast.innerHTML = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    
+    // Event listeners
+    document.getElementById('searchMedicine').addEventListener('input', () => {
+        currentPage = 1;
+        displayMedicines();
+    });
+    document.getElementById('categoryFilter').addEventListener('change', () => {
+        currentPage = 1;
+        displayMedicines();
+    });
+    document.getElementById('stockFilter').addEventListener('change', () => {
+        currentPage = 1;
+        displayMedicines();
+    });
+    
+    // Initial load
+    displayMedicines();
+    
+    // GSAP Animations
+    gsap.from(".card-hover", {
+        duration: 0.6,
+        y: 30,
+        opacity: 0,
+        stagger: 0.1
+    });
+</script>
+</body>
+</html>

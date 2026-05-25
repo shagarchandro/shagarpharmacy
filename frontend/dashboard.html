@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - MediCare Pharmacy Management System</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: #f5f7fb;
+            overflow-x: hidden;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 280px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        
+        .sidebar.collapsed .sidebar-text,
+        .sidebar.collapsed .nav-label {
+            display: none;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            margin: 5px 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sidebar .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .sidebar .nav-link i {
+            width: 24px;
+            font-size: 1.2rem;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            transition: all 0.3s ease;
+            padding: 20px;
+        }
+        
+        .main-content.expanded {
+            margin-left: 80px;
+        }
+        
+        /* Cards */
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        /* Alert Cards */
+        .alert-card {
+            border-left: 4px solid;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .alert-card:hover {
+            transform: translateX(5px);
+        }
+        
+        .alert-expiry {
+            border-left-color: #ef4444;
+        }
+        
+        .alert-lowstock {
+            border-left-color: #f59e0b;
+        }
+        
+        /* Table Styles */
+        .table-custom {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .table-custom thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .table-custom th {
+            padding: 15px;
+            font-weight: 600;
+        }
+        
+        .table-custom td {
+            padding: 12px 15px;
+            vertical-align: middle;
+        }
+        
+        /* Search Bar Styles - Responsive */
+        .search-wrapper {
+            position: relative;
+            width: 300px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-wrapper .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 14px;
+            z-index: 1;
+        }
+        
+        .search-wrapper .search-input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border-radius: 50px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-wrapper .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            width: 100%;
+        }
+        
+        .search-wrapper .clear-search {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            cursor: pointer;
+            display: none;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-wrapper .clear-search:hover {
+            color: #ef4444;
+        }
+        
+        .search-wrapper .search-results-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            margin-top: 5px;
+            z-index: 1000;
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .search-wrapper .search-result-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .search-wrapper .search-result-item:hover {
+            background: #f8fafc;
+        }
+        
+        .search-wrapper .search-result-item .result-icon {
+            width: 32px;
+            height: 32px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+        }
+        
+        .search-wrapper .search-result-item .result-content {
+            flex: 1;
+        }
+        
+        .search-wrapper .search-result-item .result-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+        
+        .search-wrapper .search-result-item .result-subtitle {
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        /* Mobile Responsive Search */
+        @media (max-width: 768px) {
+            .search-wrapper {
+                width: 200px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .search-wrapper {
+                width: 150px;
+            }
+            
+            .search-wrapper .search-input {
+                font-size: 12px;
+                padding: 8px 12px 8px 35px;
+            }
+            
+            .search-wrapper .search-icon {
+                left: 12px;
+                font-size: 12px;
+            }
+        }
+        
+        /* Dark Mode */
+        body.dark-mode {
+            background: #1a1a2e;
+        }
+        
+        body.dark-mode .stat-card,
+        body.dark-mode .alert-card,
+        body.dark-mode .table-custom {
+            background: #16213e;
+            color: white;
+        }
+        
+        body.dark-mode .main-content {
+            background: #1a1a2e;
+        }
+        
+        body.dark-mode .search-wrapper .search-input {
+            background: #16213e;
+            border-color: #334155;
+            color: white;
+        }
+        
+        body.dark-mode .search-wrapper .search-results-dropdown {
+            background: #16213e;
+            border-color: #334155;
+        }
+        
+        body.dark-mode .search-wrapper .search-result-item {
+            border-bottom-color: #334155;
+        }
+        
+        body.dark-mode .search-wrapper .search-result-item:hover {
+            background: #1e293b;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .main-content.expanded {
+                margin-left: 0;
+            }
+        }
+        
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-slide-in {
+            animation: slideIn 0.5s ease forwards;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+        
+        /* Glass Morphism */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        /* Toast Message */
+        .toast-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 250px;
+            animation: slideInRight 0.3s ease;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Search highlight */
+        .search-highlight {
+            background-color: rgba(102, 126, 234, 0.2);
+            border-radius: 3px;
+            padding: 0 2px;
+        }
+        
+        /* Session expired overlay */
+        .session-expired-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="p-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div class="d-flex align-items-center gap-2">
+                <i class="fas fa-hospital-user text-white fs-3"></i>
+                <span class="text-white fw-bold fs-5 sidebar-text">MediCare</span>
+            </div>
+            <button class="btn btn-sm text-white" id="toggleSidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <div class="user-info text-center mb-4 sidebar-text">
+            <img src="https://ui-avatars.com/api/?name=User&background=667eea&color=fff" class="rounded-circle mb-2" width="80" height="80" id="userAvatar">
+            <h6 class="text-white mb-1" id="userName">Admin User</h6>
+            <small class="text-white-50" id="userRole">Super Admin</small>
+        </div>
+        
+        <nav class="nav flex-column" id="mainNav">
+            <a href="dashboard.html" class="nav-link active">
+                <i class="fas fa-tachometer-alt"></i>
+                <span class="sidebar-text">Dashboard</span>
+            </a>
+            <a href="medicines.html" class="nav-link" id="menuMedicines">
+                <i class="fas fa-capsules"></i>
+                <span class="sidebar-text">Medicines</span>
+            </a>
+            <a href="customers.html" class="nav-link" id="menuCustomers">
+                <i class="fas fa-users"></i>
+                <span class="sidebar-text">Customers</span>
+            </a>
+            <a href="sales.html" class="nav-link" id="menuSales">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="sidebar-text">POS Sales</span>
+            </a>
+            <a href="purchases.html" class="nav-link" id="menuPurchases">
+                <i class="fas fa-truck"></i>
+                <span class="sidebar-text">Purchases</span>
+            </a>
+            <a href="suppliers.html" class="nav-link" id="menuSuppliers">
+                <i class="fas fa-parachute-box"></i>
+                <span class="sidebar-text">Suppliers</span>
+            </a>
+            <a href="prescriptions.html" class="nav-link" id="menuPrescriptions">
+                <i class="fas fa-file-prescription"></i>
+                <span class="sidebar-text">Prescriptions</span>
+            </a>
+            <a href="reports.html" class="nav-link" id="menuReports">
+                <i class="fas fa-chart-line"></i>
+                <span class="sidebar-text">Reports</span>
+            </a>
+            <hr class="bg-secondary my-3">
+            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#settingsModal" id="menuSettings">
+                <i class="fas fa-cog"></i>
+                <span class="sidebar-text">Settings</span>
+            </a>
+            <a href="#" class="nav-link" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="sidebar-text">Logout</span>
+            </a>
+        </nav>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content" id="mainContent">
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg bg-white rounded-3 shadow-sm mb-4 p-3">
+        <div class="container-fluid">
+            <button class="btn btn-link d-md-none" id="mobileMenuToggle">
+                <i class="fas fa-bars fs-4"></i>
+            </button>
+            
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <!-- Search Bar - Fully Responsive -->
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" id="globalSearch" placeholder="Search medicines, customers, orders..." autocomplete="off">
+                    <i class="fas fa-times-circle clear-search" id="clearSearch"></i>
+                    <div class="search-results-dropdown" id="searchResults"></div>
+                </div>
+                
+                <!-- Dark Mode Toggle -->
+                <button class="btn btn-link" id="darkModeToggle">
+                    <i class="fas fa-moon fs-5"></i>
+                </button>
+                
+                <!-- Notifications -->
+                <div class="dropdown">
+                    <button class="btn btn-link position-relative" data-bs-toggle="dropdown">
+                        <i class="fas fa-bell fs-5"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationBadge">
+                            3
+                        </span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end p-0" style="width: 300px;">
+                        <div class="p-3 border-bottom">
+                            <h6 class="mb-0">Notifications</h6>
+                        </div>
+                        <div class="notification-list" id="notificationList">
+                            <a href="#" class="dropdown-item p-3 border-bottom">
+                                <small class="text-danger">⚠️ 5 medicines expiring soon</small>
+                            </a>
+                            <a href="#" class="dropdown-item p-3 border-bottom">
+                                <small class="text-warning">📦 Low stock alert: Paracetamol</small>
+                            </a>
+                            <a href="#" class="dropdown-item p-3">
+                                <small class="text-info">💰 New order received</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- User Dropdown -->
+                <div class="dropdown">
+                    <button class="btn btn-link dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown">
+                        <img src="https://ui-avatars.com/api/?name=User&background=667eea&color=fff" class="rounded-circle" width="40" height="40" id="navUserAvatar">
+                        <span class="d-none d-md-block" id="navUserName">Admin</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#" onclick="showProfile()"><i class="fas fa-user me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="changePassword()"><i class="fas fa-key me-2"></i>Change Password</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="show2FA()"><i class="fas fa-shield-alt me-2"></i>2FA Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="logoutDropdownBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Dashboard Content -->
+    <div class="container-fluid">
+        <!-- Welcome Section -->
+        <div class="glass-card p-4 mb-4 animate-slide-in">
+            <h2 class="display-6 fw-bold gradient-text" id="welcomeMessage">Welcome back, Admin!</h2>
+            <p class="text-muted">Here's what's happening with your pharmacy today.</p>
+        </div>
+        
+        <!-- Statistics Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card animate-slide-in">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1">Total Sales</p>
+                            <h3 class="fw-bold mb-0">$12,450</h3>
+                            <small class="text-success"><i class="fas fa-arrow-up"></i> +12.5%</small>
+                        </div>
+                        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card animate-slide-in">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1">Today's Sales</p>
+                            <h3 class="fw-bold mb-0">$1,245</h3>
+                            <small class="text-info">Today's revenue</small>
+                        </div>
+                        <div class="stat-icon bg-info bg-opacity-10 text-info">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card animate-slide-in">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1">Monthly Profit</p>
+                            <h3 class="fw-bold mb-0">$3,890</h3>
+                            <small class="text-success"><i class="fas fa-chart-line"></i> +8.2%</small>
+                        </div>
+                        <div class="stat-icon bg-success bg-opacity-10 text-success">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card animate-slide-in">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1">Total Medicines</p>
+                            <h3 class="fw-bold mb-0">1,234</h3>
+                            <small class="text-warning">In Stock: 980</small>
+                        </div>
+                        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                            <i class="fas fa-capsules"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Alerts Section -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="stat-card">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        Low Stock Alerts
+                    </h5>
+                    <div id="lowStockAlerts"></div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="stat-card">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-clock text-danger me-2"></i>
+                        Expiry Alerts
+                    </h5>
+                    <div id="expiryAlerts"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts Section -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-8">
+                <div class="stat-card">
+                    <h5 class="fw-bold mb-3">Sales Analytics</h5>
+                    <canvas id="salesChart" height="300"></canvas>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="stat-card">
+                    <h5 class="fw-bold mb-3">Top Selling Medicines</h5>
+                    <div id="topSellingList"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Orders -->
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">Recent Orders</h5>
+                <button class="btn btn-sm btn-primary" onclick="viewAllOrders()">View All</button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Medicine</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentOrdersTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient text-white">
+                <h5 class="modal-title">Settings</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#profile">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#security">Security</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#notifications">Notifications</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#backup">Backup</a>
+                    </li>
+                </ul>
+                
+                <div class="tab-content mt-3">
+                    <div class="tab-pane fade show active" id="profile">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="profileName" value="Admin User">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="profileEmail" value="admin@medicare.com">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="text" class="form-control" id="profilePhone" value="+1234567890">
+                        </div>
+                        <button class="btn btn-primary" onclick="updateProfile()">Update Profile</button>
+                    </div>
+                    
+                    <div class="tab-pane fade" id="security">
+                        <div class="mb-3">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" class="form-control" id="currentPassword">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="newPassword">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirmPassword">
+                        </div>
+                        <button class="btn btn-primary" onclick="updatePassword()">Change Password</button>
+                        <hr>
+                        <h6>Two-Factor Authentication</h6>
+                        <button class="btn btn-warning" onclick="enable2FA()">Enable 2FA</button>
+                    </div>
+                    
+                    <div class="tab-pane fade" id="notifications">
+                        <div class="form-check mb-2">
+                            <input type="checkbox" class="form-check-input" id="emailNotif" checked>
+                            <label>Email Notifications</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input type="checkbox" class="form-check-input" id="smsNotif" checked>
+                            <label>SMS Notifications</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input type="checkbox" class="form-check-input" id="whatsappNotif">
+                            <label>WhatsApp Notifications</label>
+                        </div>
+                        <button class="btn btn-primary mt-2" onclick="saveNotificationSettings()">Save Settings</button>
+                    </div>
+                    
+                    <div class="tab-pane fade" id="backup">
+                        <button class="btn btn-success mb-2" onclick="backupDatabase()">Backup Database</button>
+                        <button class="btn btn-warning" onclick="restoreDatabase()">Restore Database</button>
+                        <p class="text-muted mt-2">Last backup: Today at 10:00 AM</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveAllSettings()">Save All Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ============================================
+    // ENHANCED SECURITY - SESSION MANAGEMENT
+    // ============================================
+    
+    // Check authentication with enhanced security
+    function checkAuth() {
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        const authToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        const loginTime = localStorage.getItem('login_time') || sessionStorage.getItem('login_time');
+        
+        // Check if user is logged in
+        if(!user || !authToken) {
+            redirectToLogin();
+            return false;
+        }
+        
+        // Check session timeout (8 hours max)
+        if(loginTime) {
+            const currentTime = new Date().getTime();
+            const timeDiff = currentTime - parseInt(loginTime);
+            const maxSessionTime = 8 * 60 * 60 * 1000; // 8 hours
+            
+            if(timeDiff > maxSessionTime) {
+                showToast('Session expired. Please login again.', 'warning');
+                logout();
+                return false;
+            }
+        }
+        
+        return JSON.parse(user);
+    }
+    
+    // Redirect to login with prevention of back button
+    function redirectToLogin() {
+        // Use replace to prevent back button
+        window.location.replace('login.html');
+    }
+    
+    // Enhanced logout function with complete cleanup
+    function logout() {
+        // Clear all storage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Clear cookies if any
+        document.cookie.split(";").forEach(function(c) { 
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+        });
+        
+        // Show logout message
+        showToast('Logging out... Redirecting to login page', 'success');
+        
+        // Use replace to prevent going back to dashboard
+        setTimeout(() => {
+            window.location.replace('login.html');
+        }, 1000);
+    }
+    
+    // ============================================
+    // SEARCH DATA
+    // ============================================
+    const searchData = {
+        medicines: [
+            { name: 'Paracetamol 500mg', category: 'Pain Relief', price: 5.00, stock: 150 },
+            { name: 'Amoxicillin 250mg', category: 'Antibiotics', price: 10.00, stock: 8 },
+            { name: 'Vitamin C 1000mg', category: 'Vitamins', price: 15.00, stock: 45 },
+            { name: 'Aspirin 100mg', category: 'Pain Relief', price: 8.00, stock: 120 },
+            { name: 'Omeprazole 20mg', category: 'Gastric', price: 12.00, stock: 60 },
+            { name: 'Loratadine 10mg', category: 'Allergy', price: 7.00, stock: 35 }
+        ],
+        customers: [
+            { name: 'John Doe', phone: '+1234567890', email: 'john@example.com' },
+            { name: 'Jane Smith', phone: '+1234567891', email: 'jane@example.com' },
+            { name: 'Mike Johnson', phone: '+1234567892', email: 'mike@example.com' }
+        ],
+        orders: [
+            { id: '#INV-001', customer: 'John Doe', amount: 25.00, status: 'Completed' },
+            { id: '#INV-002', customer: 'Jane Smith', amount: 45.00, status: 'Pending' },
+            { id: '#INV-003', customer: 'Mike Johnson', amount: 15.00, status: 'Completed' }
+        ]
+    };
+    
+    // ============================================
+    // SEARCH FUNCTIONALITY
+    // ============================================
+    function performSearch(query) {
+        if(!query || query.length < 2) {
+            document.getElementById('searchResults').style.display = 'none';
+            return;
+        }
+        
+        const lowerQuery = query.toLowerCase();
+        const results = [];
+        
+        // Search medicines
+        searchData.medicines.forEach(med => {
+            if(med.name.toLowerCase().includes(lowerQuery) || med.category.toLowerCase().includes(lowerQuery)) {
+                results.push({
+                    type: 'medicine',
+                    title: med.name,
+                    subtitle: `${med.category} | $${med.price} | Stock: ${med.stock}`,
+                    icon: 'fa-capsules',
+                    link: 'medicines.html'
+                });
+            }
+        });
+        
+        // Search customers
+        searchData.customers.forEach(cust => {
+            if(cust.name.toLowerCase().includes(lowerQuery) || cust.phone.includes(lowerQuery) || cust.email.toLowerCase().includes(lowerQuery)) {
+                results.push({
+                    type: 'customer',
+                    title: cust.name,
+                    subtitle: `${cust.phone} | ${cust.email}`,
+                    icon: 'fa-user',
+                    link: 'customers.html'
+                });
+            }
+        });
+        
+        // Search orders
+        searchData.orders.forEach(order => {
+            if(order.id.toLowerCase().includes(lowerQuery) || order.customer.toLowerCase().includes(lowerQuery)) {
+                results.push({
+                    type: 'order',
+                    title: order.id,
+                    subtitle: `${order.customer} | $${order.amount} | ${order.status}`,
+                    icon: 'fa-receipt',
+                    link: 'sales.html'
+                });
+            }
+        });
+        
+        displaySearchResults(results, query);
+    }
+    
+    function displaySearchResults(results, query) {
+        const resultsContainer = document.getElementById('searchResults');
+        const clearBtn = document.getElementById('clearSearch');
+        
+        if(results.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="search-result-item">
+                    <div class="result-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="result-content">
+                        <div class="result-title">No results found</div>
+                        <div class="result-subtitle">Try a different search term</div>
+                    </div>
+                </div>
+            `;
+            resultsContainer.style.display = 'block';
+            return;
+        }
+        
+        function highlightText(text, query) {
+            if(!query) return text;
+            const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return text.replace(regex, '<span class="search-highlight">$1</span>');
+        }
+        
+        resultsContainer.innerHTML = results.slice(0, 10).map(result => `
+            <div class="search-result-item" onclick="navigateTo('${result.link}', '${result.title}')">
+                <div class="result-icon">
+                    <i class="fas ${result.icon}"></i>
+                </div>
+                <div class="result-content">
+                    <div class="result-title">${highlightText(result.title, query)}</div>
+                    <div class="result-subtitle">${highlightText(result.subtitle, query)}</div>
+                </div>
+                <i class="fas fa-arrow-right text-muted" style="font-size: 12px;"></i>
+            </div>
+        `).join('');
+        
+        resultsContainer.style.display = 'block';
+        
+        if(results.length > 0) {
+            clearBtn.style.display = 'block';
+        } else {
+            clearBtn.style.display = 'none';
+        }
+    }
+    
+    function navigateTo(link, searchTerm) {
+        showToast(`Navigating to ${searchTerm}...`, 'info');
+        setTimeout(() => {
+            window.location.href = link;
+        }, 500);
+    }
+    
+    // ============================================
+    // INITIALIZE - With Enhanced Security Check
+    // ============================================
+    const currentUser = checkAuth();
+    if(currentUser) {
+        const userName = currentUser.name;
+        const userRole = currentUser.role.toUpperCase();
+        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=667eea&color=fff`;
+        
+        document.getElementById('userName').textContent = userName;
+        document.getElementById('userRole').textContent = userRole;
+        document.getElementById('navUserName').textContent = userName.split(' ')[0];
+        document.getElementById('welcomeMessage').textContent = `Welcome back, ${userName.split(' ')[0]}!`;
+        
+        const avatars = document.querySelectorAll('#userAvatar, #navUserAvatar');
+        avatars.forEach(avatar => {
+            avatar.src = avatarUrl;
+        });
+        
+        applyRoleBasedAccess(currentUser.role);
+    }
+    
+    // ============================================
+    // ROLE BASED ACCESS CONTROL
+    // ============================================
+    function applyRoleBasedAccess(role) {
+        const menuItems = {
+            medicines: document.getElementById('menuMedicines'),
+            customers: document.getElementById('menuCustomers'),
+            purchases: document.getElementById('menuPurchases'),
+            suppliers: document.getElementById('menuSuppliers'),
+            prescriptions: document.getElementById('menuPrescriptions'),
+            reports: document.getElementById('menuReports'),
+            settings: document.getElementById('menuSettings')
+        };
+        
+        if(role === 'staff') {
+            if(menuItems.purchases) menuItems.purchases.style.display = 'none';
+            if(menuItems.suppliers) menuItems.suppliers.style.display = 'none';
+            if(menuItems.reports) menuItems.reports.style.display = 'none';
+            if(menuItems.settings) menuItems.settings.style.display = 'none';
+            showToast('Staff Mode: View only access', 'info');
+        }
+        else if(role === 'pharmacist') {
+            if(menuItems.purchases) menuItems.purchases.style.display = 'none';
+            if(menuItems.suppliers) menuItems.suppliers.style.display = 'none';
+            if(menuItems.settings) menuItems.settings.style.display = 'none';
+        }
+    }
+    
+    // ============================================
+    // UI FUNCTIONS
+    // ============================================
+    function showToast(message, type) {
+        const existingToast = document.querySelector('.toast-message');
+        if(existingToast) existingToast.remove();
+        
+        const toast = document.createElement('div');
+        toast.className = `toast-message alert alert-${type} shadow-lg`;
+        toast.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; min-width: 250px; animation: slideInRight 0.3s ease;';
+        toast.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle'} me-2 fs-5"></i>
+                <div class="flex-grow-1">${message}</div>
+                <button type="button" class="btn-close btn-sm" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            if(toast) toast.remove();
+        }, 3000);
+    }
+    
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
+    document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        logout();
+    });
+    
+    document.getElementById('logoutDropdownBtn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        logout();
+    });
+    
+    // Search Event Listeners
+    const searchInput = document.getElementById('globalSearch');
+    const clearSearch = document.getElementById('clearSearch');
+    const searchResults = document.getElementById('searchResults');
+    
+    let searchTimeout;
+    searchInput?.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        const query = e.target.value.trim();
+        
+        if(query.length > 0) {
+            clearSearch.style.display = 'block';
+            searchTimeout = setTimeout(() => performSearch(query), 300);
+        } else {
+            clearSearch.style.display = 'none';
+            searchResults.style.display = 'none';
+        }
+    });
+    
+    clearSearch?.addEventListener('click', () => {
+        searchInput.value = '';
+        clearSearch.style.display = 'none';
+        searchResults.style.display = 'none';
+        searchInput.focus();
+    });
+    
+    document.addEventListener('click', (e) => {
+        if(!searchInput?.contains(e.target) && !searchResults?.contains(e.target)) {
+            searchResults.style.display = 'none';
+        }
+    });
+    
+    // Toggle Sidebar
+    let sidebarCollapsed = false;
+    document.getElementById('toggleSidebar')?.addEventListener('click', () => {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('expanded');
+        sidebarCollapsed = !sidebarCollapsed;
+    });
+    
+    // Mobile Menu Toggle
+    document.getElementById('mobileMenuToggle')?.addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('mobile-open');
+    });
+    
+    // Dark Mode Toggle
+    let darkMode = false;
+    document.getElementById('darkModeToggle')?.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        darkMode = !darkMode;
+        const icon = document.querySelector('#darkModeToggle i');
+        if(darkMode) {
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+            localStorage.setItem('darkMode', 'enabled');
+        } else {
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+            localStorage.setItem('darkMode', 'disabled');
+        }
+    });
+    
+    if(localStorage.getItem('darkMode') === 'enabled') {
+        document.body.classList.add('dark-mode');
+        const icon = document.querySelector('#darkModeToggle i');
+        if(icon) {
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        }
+    }
+    
+    // ============================================
+    // DASHBOARD FUNCTIONS
+    // ============================================
+    const ctx = document.getElementById('salesChart')?.getContext('2d');
+    if(ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Sales Revenue',
+                    data: [8500, 9200, 10500, 11800, 12400, 13800, 14200, 15600, 16800, 17400, 18200, 19800],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: true }
+        });
+    }
+    
+    function loadLowStockAlerts() {
+        const alerts = [
+            { name: 'Paracetamol 500mg', stock: 15, minStock: 50 },
+            { name: 'Amoxicillin 250mg', stock: 8, minStock: 30 },
+            { name: 'Vitamin C Tablets', stock: 25, minStock: 40 }
+        ];
+        const container = document.getElementById('lowStockAlerts');
+        if(container) {
+            container.innerHTML = alerts.map(alert => `
+                <div class="alert-card alert-lowstock mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div><strong>${alert.name}</strong><br><small class="text-muted">Stock: ${alert.stock} / Min: ${alert.minStock}</small></div>
+                        <button class="btn btn-sm btn-warning" onclick="orderNow('${alert.name}')">Order Now</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+    
+    function loadExpiryAlerts() {
+        const alerts = [
+            { name: 'Aspirin 100mg', daysLeft: 10 },
+            { name: 'Omeprazole 20mg', daysLeft: 15 },
+            { name: 'Loratadine 10mg', daysLeft: 20 }
+        ];
+        const container = document.getElementById('expiryAlerts');
+        if(container) {
+            container.innerHTML = alerts.map(alert => `
+                <div class="alert-card alert-expiry mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div><strong>${alert.name}</strong><br><small class="text-muted">Expires in ${alert.daysLeft} days</small></div>
+                        <button class="btn btn-sm btn-danger" onclick="takeAction('${alert.name}')">Take Action</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+    
+    function loadTopSelling() {
+        const medicines = [
+            { name: 'Paracetamol 500mg', sales: 1250, percentage: 25 },
+            { name: 'Amoxicillin 250mg', sales: 980, percentage: 20 },
+            { name: 'Vitamin C', sales: 870, percentage: 18 },
+            { name: 'Aspirin 100mg', sales: 650, percentage: 15 }
+        ];
+        const container = document.getElementById('topSellingList');
+        if(container) {
+            container.innerHTML = medicines.map(med => `
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1"><span>${med.name}</span><span class="fw-bold">${med.sales} units</span></div>
+                    <div class="progress" style="height: 8px;"><div class="progress-bar bg-gradient" style="width: ${med.percentage}%"></div></div>
+                </div>
+            `).join('');
+        }
+    }
+    
+    function loadRecentOrders() {
+        const orders = [
+            { id: '#INV-001', customer: 'John Doe', medicine: 'Paracetamol 500mg', amount: '$25.00', status: 'Completed', date: '2024-01-15' },
+            { id: '#INV-002', customer: 'Jane Smith', medicine: 'Amoxicillin', amount: '$45.00', status: 'Pending', date: '2024-01-15' },
+            { id: '#INV-003', customer: 'Mike Johnson', medicine: 'Vitamin C', amount: '$15.00', status: 'Completed', date: '2024-01-14' },
+            { id: '#INV-004', customer: 'Sarah Wilson', medicine: 'Aspirin', amount: '$35.00', status: 'Processing', date: '2024-01-14' }
+        ];
+        const container = document.getElementById('recentOrdersTable');
+        if(container) {
+            container.innerHTML = orders.map(order => `
+                <tr>
+                    <td>${order.id}</td>
+                    <td>${order.customer}</td>
+                    <td>${order.medicine}</td>
+                    <td>${order.amount}</td>
+                    <td><span class="badge ${order.status === 'Completed' ? 'bg-success' : order.status === 'Pending' ? 'bg-warning' : 'bg-info'}">${order.status}</span></td>
+                    <td>${order.date}</td>
+                </tr>
+            `).join('');
+        }
+    }
+    
+    function orderNow(medicineName) { showToast(`Order placed for ${medicineName}`, 'success'); }
+    function takeAction(medicineName) { showToast(`Alert: ${medicineName} marked for action`, 'warning'); }
+    function viewAllOrders() { showToast('Viewing all orders', 'info'); }
+    function showProfile() { document.querySelector('[data-bs-target="#settingsModal"]').click(); document.querySelector('a[href="#profile"]').click(); }
+    function changePassword() { document.querySelector('[data-bs-target="#settingsModal"]').click(); document.querySelector('a[href="#security"]').click(); }
+    function show2FA() { document.querySelector('[data-bs-target="#settingsModal"]').click(); document.querySelector('a[href="#security"]').click(); }
+    
+    function updateProfile() {
+        const name = document.getElementById('profileName').value;
+        const userData = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user'));
+        if(userData) {
+            userData.name = name;
+            if(localStorage.getItem('user')) localStorage.setItem('user', JSON.stringify(userData));
+            if(sessionStorage.getItem('user')) sessionStorage.setItem('user', JSON.stringify(userData));
+        }
+        showToast('Profile updated successfully!', 'success');
+        setTimeout(() => location.reload(), 1500);
+    }
+    
+    function updatePassword() {
+        const newPwd = document.getElementById('newPassword').value;
+        const confirmPwd = document.getElementById('confirmPassword').value;
+        if(!newPwd || !confirmPwd) { showToast('Please fill all password fields', 'danger'); return; }
+        if(newPwd !== confirmPwd) { showToast('New passwords do not match', 'danger'); return; }
+        showToast('Password changed successfully!', 'success');
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+    }
+    
+    function enable2FA() { showToast('2FA setup initiated. Check your email.', 'info'); }
+    function saveNotificationSettings() { showToast('Notification settings saved!', 'success'); }
+    function backupDatabase() { showToast('Database backup completed!', 'success'); }
+    function restoreDatabase() { showToast('Database restore initiated', 'info'); }
+    function saveAllSettings() { showToast('All settings saved successfully!', 'success'); bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide(); }
+    
+    function initDashboard() {
+        loadLowStockAlerts();
+        loadExpiryAlerts();
+        loadTopSelling();
+        loadRecentOrders();
+        gsap.from(".stat-card", { duration: 0.8, y: 50, opacity: 0, stagger: 0.1, ease: "back.out(1.2)" });
+    }
+    
+    setInterval(() => {
+        if(document.visibilityState === 'visible') {
+            loadLowStockAlerts();
+            loadExpiryAlerts();
+            loadTopSelling();
+            loadRecentOrders();
+        }
+    }, 30000);
+    
+    initDashboard();
+    
+    // ============================================
+    // PREVENT BACK BUTTON AFTER LOGOUT
+    // ============================================
+    // This prevents going back to dashboard after logout
+    window.addEventListener('pageshow', function(event) {
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        const authToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        
+        if(!user || !authToken) {
+            // Use replace to clear history and prevent back button
+            window.location.replace('login.html');
+        }
+    });
+    
+    // Disable back button completely using history manipulation
+    (function() {
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        if(!user) {
+            window.location.replace('login.html');
+        }
+        
+        // Push a new state to prevent back button
+        history.pushState(null, null, location.href);
+        window.addEventListener('popstate', function() {
+            const checkUser = localStorage.getItem('user') || sessionStorage.getItem('user');
+            if(!checkUser) {
+                window.location.replace('login.html');
+            } else {
+                history.pushState(null, null, location.href);
+            }
+        });
+    })();
+</script>
+</body>
+</html>
