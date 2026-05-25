@@ -1299,5 +1299,69 @@
         ease: "back.out(1.2)"
     });
 </script>
+
+
+
+
+
+
+<script>
+    // ============================================
+    // SECURITY CHECK
+    // ============================================
+    function checkAuthentication() {
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        const authToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        
+        if (!user || !authToken) {
+            window.location.replace('login.html');
+            return false;
+        }
+        
+        try {
+            const userData = JSON.parse(user);
+            if (document.getElementById('userName')) {
+                document.getElementById('userName').textContent = userData.name;
+            }
+            if (document.getElementById('userRole')) {
+                document.getElementById('userRole').textContent = userData.role.toUpperCase();
+            }
+            return true;
+        } catch(e) {
+            window.location.replace('login.html');
+            return false;
+        }
+    }
+    
+    function preventBackButtonAccess() {
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        const authToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        
+        if (!user || !authToken) {
+            window.location.replace('login.html');
+        }
+    }
+    
+    function disableBackButton() {
+        history.pushState(null, null, location.href);
+        window.addEventListener('popstate', function() {
+            const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+            const authToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!user || !authToken) {
+                window.location.replace('login.html');
+            } else {
+                history.pushState(null, null, location.href);
+            }
+        });
+    }
+    
+    // Run security checks
+    checkAuthentication();
+    disableBackButton();
+    window.addEventListener('pageshow', preventBackButtonAccess);
+    
+    // ... rest of your existing code ...
+</script>
 </body>
 </html>

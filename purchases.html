@@ -351,7 +351,7 @@
             try {
                 const parsed = JSON.parse(stored);
                 if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-            } catch(e) {}
+            } catch(e) { console.log('Error parsing suppliers:', e); }
         }
         return [
             { id: 1, name: "MediSource Pharma", contact: "Ahmed Khan", phone: "+1234567890", email: "ahmed@medisource.com", address: "123 Pharma Street", due: 5000 },
@@ -366,7 +366,7 @@
             try {
                 const parsed = JSON.parse(stored);
                 if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-            } catch(e) {}
+            } catch(e) { console.log('Error parsing medicines:', e); }
         }
         return [
             { id: 1, name: "Paracetamol 500mg", purchasePrice: 2.50, stock: 150 },
@@ -382,43 +382,9 @@
             try {
                 const parsed = JSON.parse(stored);
                 if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-            } catch(e) {}
+            } catch(e) { console.log('Error parsing purchases:', e); }
         }
-        return [
-            {
-                id: 1,
-                invoiceNo: "PO-2024-001",
-                supplierId: 1,
-                supplierName: "MediSource Pharma",
-                date: "2024-01-15",
-                items: [
-                    { medicineId: 1, medicineName: "Paracetamol 500mg", batchNo: "BATCH001", expiryDate: "2025-12-31", qty: 100, unitPrice: 2.50, total: 250 },
-                    { medicineId: 2, medicineName: "Amoxicillin 250mg", batchNo: "BATCH002", expiryDate: "2025-06-30", qty: 50, unitPrice: 5.00, total: 250 }
-                ],
-                totalAmount: 500,
-                paid: 300,
-                due: 200,
-                status: "partial",
-                paymentMethod: "cash",
-                datePaid: "2024-01-15"
-            },
-            {
-                id: 2,
-                invoiceNo: "PO-2024-002",
-                supplierId: 2,
-                supplierName: "HealthCare Distributors",
-                date: "2024-02-10",
-                items: [
-                    { medicineId: 3, medicineName: "Vitamin C 1000mg", batchNo: "BATCH003", expiryDate: "2025-08-31", qty: 200, unitPrice: 8.00, total: 1600 }
-                ],
-                totalAmount: 1600,
-                paid: 1600,
-                due: 0,
-                status: "paid",
-                paymentMethod: "bank",
-                datePaid: "2024-02-10"
-            }
-        ];
+        return [];
     }
     
     function loadReturnsFromStorage() {
@@ -427,7 +393,7 @@
             try {
                 const parsed = JSON.parse(stored);
                 if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-            } catch(e) {}
+            } catch(e) { console.log('Error parsing returns:', e); }
         }
         return [];
     }
@@ -441,6 +407,8 @@
     
     function savePurchasesToStorage() { localStorage.setItem(PURCHASE_STORAGE_KEY, JSON.stringify(purchases)); }
     function saveReturnsToStorage() { localStorage.setItem(RETURN_STORAGE_KEY, JSON.stringify(returns)); }
+    function saveSuppliersToStorage() { localStorage.setItem(SUPPLIER_STORAGE_KEY, JSON.stringify(suppliers)); }
+    function saveMedicinesToStorage() { localStorage.setItem(MEDICINE_STORAGE_KEY, JSON.stringify(medicines)); }
     
     function checkAuth() {
         const user = localStorage.getItem('user') || sessionStorage.getItem('user');
@@ -613,7 +581,7 @@
         const supplierIndex = suppliers.findIndex(s => s.id == supplierId);
         if(supplierIndex !== -1 && suppliers[supplierIndex]) {
             suppliers[supplierIndex].due = (suppliers[supplierIndex].due || 0) + due;
-            localStorage.setItem(SUPPLIER_STORAGE_KEY, JSON.stringify(suppliers));
+            saveSuppliersToStorage();
         }
         
         // Update medicine stock
@@ -623,7 +591,7 @@
                 medicines[medicineIndex].stock = (medicines[medicineIndex].stock || 0) + item.qty;
             }
         });
-        localStorage.setItem(MEDICINE_STORAGE_KEY, JSON.stringify(medicines));
+        saveMedicinesToStorage();
         
         purchaseItems = [];
         updatePurchaseItemsTable();
@@ -701,7 +669,7 @@
                     </div>
                 </div>
                 <h6 class="fw-bold mb-3"><i class="fas fa-capsules me-2"></i>Items Purchased</h6>
-                <div class="table-responsive"><table class="table table-bordered"><thead class="table-light"><tr><th>Medicine</th><th>Batch</th><th>Expiry</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead><tbody>${itemsHtml}</tbody><tfoot><tr class="table-active"><td colspan="5" class="text-end fw-bold">Grand Total:</td><td class="fw-bold">$${(purchase.totalAmount || 0).toFixed(2)}</td></tr></tfoot></table></div>
+                <div class="table-responsive"><table class="table table-bordered"><thead class="table-light"><tr><th>Medicine</th><th>Batch</th><th>Expiry</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead><tbody>${itemsHtml}</tbody><tfoot><tr class="table-active"><td colspan="5" class="text-end fw-bold">Grand Total:</td><td class="fw-bold">$${(purchase.totalAmount || 0).toFixed(2)}</td></tr></tfoot></td></div>
             </div>`;
         currentPurchaseId = id;
         new bootstrap.Modal(document.getElementById('purchaseDetailsModal')).show();
@@ -713,6 +681,10 @@
         const returnAmount = prompt('Enter return amount:', '0');
         if(returnAmount && parseFloat(returnAmount) > 0) {
             const amount = parseFloat(returnAmount);
+            if(amount > purchase.due) {
+                showToast(`Return amount cannot exceed due amount of $${purchase.due}`, 'warning');
+                return;
+            }
             returns.unshift({ 
                 id: Date.now(), 
                 purchaseId: id, 
@@ -729,17 +701,27 @@
             if(purchase.due < 0) { purchase.paid += Math.abs(purchase.due); purchase.due = 0; }
             if(purchase.due === 0) purchase.status = 'paid';
             savePurchasesToStorage();
+            
+            // Update supplier due
+            const supplierIndex = suppliers.findIndex(s => s.id === purchase.supplierId);
+            if(supplierIndex !== -1) {
+                suppliers[supplierIndex].due = (suppliers[supplierIndex].due || 0) - amount;
+                if(suppliers[supplierIndex].due < 0) suppliers[supplierIndex].due = 0;
+                saveSuppliersToStorage();
+            }
+            
             showToast(`Return of $${amount} processed`, 'success');
             loadPurchases();
             loadReturns();
             updateStats();
+            loadSuppliersGrid();
         }
     }
     
     function loadReturns() {
         const tbody = document.getElementById('returnsTableBody');
         if(returns.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No returns found</td></tr>';
+            tbody.innerHTML = '<td><td colspan="7" class="text-center text-muted py-4">No returns found</td></tr>';
         } else {
             tbody.innerHTML = returns.map(r => `<tr>
                 <td>${r.id}</td>
@@ -804,6 +786,16 @@
                 purchase.due -= paymentAmount;
                 if(purchase.due <= 0) { purchase.due = 0; purchase.status = 'paid'; }
                 savePurchasesToStorage();
+                
+                // Update supplier due
+                const supplierIndex = suppliers.findIndex(s => s.id === purchase.supplierId);
+                if(supplierIndex !== -1) {
+                    suppliers[supplierIndex].due = (suppliers[supplierIndex].due || 0) - paymentAmount;
+                    if(suppliers[supplierIndex].due < 0) suppliers[supplierIndex].due = 0;
+                    saveSuppliersToStorage();
+                    loadSuppliersGrid();
+                }
+                
                 showToast(`Payment of $${paymentAmount} recorded`, 'success');
                 loadPurchases();
                 updateStats();
@@ -849,17 +841,33 @@
     function logout() { localStorage.clear(); sessionStorage.clear(); window.location.href = 'login.html'; }
     document.getElementById('logoutBtn')?.addEventListener('click', (e) => { e.preventDefault(); logout(); });
     
-    // Auto refresh interval
+    // Auto refresh every 10 seconds for real-time updates
     let refreshInterval = setInterval(() => {
-        suppliers = loadSuppliersFromStorage();
-        medicines = loadMedicinesFromStorage();
-        purchases = loadPurchasesFromStorage();
-        returns = loadReturnsFromStorage();
-        loadPurchases();
-        updateStats();
-        loadSuppliersGrid();
-        loadReturns();
-    }, 30000);
+        const newSuppliers = loadSuppliersFromStorage();
+        const newMedicines = loadMedicinesFromStorage();
+        const newPurchases = loadPurchasesFromStorage();
+        const newReturns = loadReturnsFromStorage();
+        
+        // Check if data has changed
+        if (JSON.stringify(suppliers) !== JSON.stringify(newSuppliers)) {
+            suppliers = newSuppliers;
+            loadSuppliers();
+            loadSuppliersGrid();
+        }
+        if (JSON.stringify(medicines) !== JSON.stringify(newMedicines)) {
+            medicines = newMedicines;
+            loadMedicines();
+        }
+        if (JSON.stringify(purchases) !== JSON.stringify(newPurchases)) {
+            purchases = newPurchases;
+            loadPurchases();
+            updateStats();
+        }
+        if (JSON.stringify(returns) !== JSON.stringify(newReturns)) {
+            returns = newReturns;
+            loadReturns();
+        }
+    }, 10000);
     
     // Event Listeners
     document.getElementById('searchPurchase')?.addEventListener('input', () => loadPurchases());
@@ -874,5 +882,72 @@
     window.addEventListener('beforeunload', () => { if(refreshInterval) clearInterval(refreshInterval); });
     gsap.from(".card", { duration: 0.6, y: 30, opacity: 0, stagger: 0.1, ease: "back.out(1.2)" });
 </script>
+
+
+<script>
+    // ============================================
+    // SECURITY CHECK
+    // ============================================
+    function checkAuthentication() {
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        const authToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        
+        if (!user || !authToken) {
+            window.location.replace('login.html');
+            return false;
+        }
+        
+        try {
+            const userData = JSON.parse(user);
+            if (document.getElementById('userName')) {
+                document.getElementById('userName').textContent = userData.name;
+            }
+            if (document.getElementById('userRole')) {
+                document.getElementById('userRole').textContent = userData.role.toUpperCase();
+            }
+            return true;
+        } catch(e) {
+            window.location.replace('login.html');
+            return false;
+        }
+    }
+    
+    function preventBackButtonAccess() {
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        const authToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        
+        if (!user || !authToken) {
+            window.location.replace('login.html');
+        }
+    }
+    
+    function disableBackButton() {
+        history.pushState(null, null, location.href);
+        window.addEventListener('popstate', function() {
+            const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+            const authToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            
+            if (!user || !authToken) {
+                window.location.replace('login.html');
+            } else {
+                history.pushState(null, null, location.href);
+            }
+        });
+    }
+    
+    // Run security checks
+    checkAuthentication();
+    disableBackButton();
+    window.addEventListener('pageshow', preventBackButtonAccess);
+    
+    // ... rest of your existing code ...
+</script>
+
+
+
+
+
+
+
 </body>
 </html>
