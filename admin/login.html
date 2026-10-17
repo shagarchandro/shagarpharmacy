@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b7a6b">
+<title>MediCare Operations Panel – Login</title>
+<link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body class="loginpage">
+<main class="logincard">
+  <h1>✚ MediCare Operations Panel</h1>
+  <p class="muted">Owner · Pharmacist · Cashier · Inventory Manager · Delivery Staff</p>
+  <form id="f" autocomplete="off">
+    <label>User / ইউজার
+      <select id="r" aria-label="User"></select>
+    </label>
+    <label>Demo code / ডেমো কোড
+      <input id="c" type="password" autocomplete="off" required placeholder="demo">
+    </label>
+    <small class="muted">Demo code: <b>demo</b> — শুধু ডেমো, আসল নিরাপত্তা নয়।</small>
+    <button class="btn">Log in / লগ ইন</button>
+  </form>
+  <div class="access" id="acc"></div>
+  <p class="row center"><a class="btn2" href="../shop.html">🛒 Customer shop</a><a class="btn2" href="../login.html">🧑‍⚕️ Management dashboard</a><a class="btn2" href="../LOGIN-GUIDE.html">📖 Guide</a><a class="btn2" href="../index.html">🏠 Home</a></p>
+</main>
+<script src="../assets/js/core.js"></script>
+<script>
+const WHAT={Owner:'সব ট্যাব: Dashboard, Products, Inventory, POS, Orders, Reports, Data (+Users, Settings ইত্যাদি)',Pharmacist:'Dashboard, Orders — প্রেসক্রিপশন অনুমোদন/প্রত্যাখ্যান',Cashier:'POS (বিক্রি) ও Orders',"Inventory Manager":'Dashboard, Products, Inventory — স্টক, ব্যাচ, মেয়াদ',"Delivery Staff":'শুধু Orders — ডেলিভারি আপডেট'};
+for(const u of db().users.filter(u=>u.active))r.append(h('option',{value:u.id},u.name+' ('+u.role+')'));
+function hint(){const u=db().users.find(x=>x.id===r.value);acc.textContent=u?(u.role+': '+(WHAT[u.role]||'')):''}
+r.onchange=hint;hint();
+f.onsubmit=e=>{e.preventDefault();if(c.value.trim().toLowerCase()!=='demo')return toast('Wrong demo code',1);const u=db().users.find(x=>x.id===r.value);if(!u||!u.active)return toast('User is inactive',1);sessionStorage.setItem('mc_role',u.role);location.href='index.html'};
+</script>
+</body>
+</html>

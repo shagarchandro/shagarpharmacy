@@ -1,0 +1,29 @@
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MediCare – লগইন গাইড</title>
+<style>body{font:16px/1.6 "Noto Sans Bengali",system-ui,sans-serif;margin:0;background:#f4faf8;color:#10302b}main{max-width:900px;margin:auto;padding:1rem}h1{color:#0b7a6b}section{background:#fff;border:1px solid #cfe5df;border-radius:14px;padding:1rem 1.2rem;margin:1rem 0}table{width:100%;border-collapse:collapse;display:block;overflow-x:auto}th,td{border-bottom:1px solid #cfe5df;padding:.45rem;text-align:left}code{background:#e8f5f1;padding:.1rem .35rem;border-radius:5px}a{color:#0b7a6b}</style></head><body><main>
+<h1>✚ MediCare – কে কীভাবে লগইন করবে</h1>
+<p>এটি ডেমো সিস্টেম; ডেটা ব্রাউজারের LocalStorage-এ থাকে। <a href="index.html">হোম</a></p>
+
+<section><h2>১) ক্রেতা (Customer) — <a href="shop.html">shop.html</a></h2>
+<p>পাসওয়ার্ড নেই। ওষুধ বেছে কার্টে দিন → চেকআউটে নাম/ফোন দিন (ফোন <code>01XXXXXXXXX</code>)। অর্ডার দিলে নামটাই আপনার "লগইন"; পরে <b>Orders</b> পেজে একই নাম দিলে অর্ডার ট্র্যাক, বাতিল, ফেরতের অনুরোধ করা যায়। কুপন: <code>SAVE10</code> (৳৫০০+)। প্রেসক্রিপশন-ওষুধে ডাক্তারের তথ্য লাগে।</p></section>
+
+<section><h2>২) ম্যানেজমেন্ট ড্যাশবোর্ড — <a href="login.html">login.html</a></h2>
+<p>ইমেইল + পাসওয়ার্ড। ভূমিকা-ব্যাজে ক্লিক করলে ফর্ম নিজে ভরে যায়।</p>
+<table><tr><th>ভূমিকা</th><th>ইমেইল</th><th>পাসওয়ার্ড</th><th>কী কী করতে পারবে</th></tr>
+<tr><td>Admin</td><td><code>admin@medicare.com</code></td><td><code>admin123</code></td><td>সব: ড্যাশবোর্ড, ওষুধ, কাস্টমার, বিক্রি, ক্রয়, সরবরাহকারী, প্রেসক্রিপশন, রিপোর্ট, সেটিংস</td></tr>
+<tr><td>Pharmacist</td><td><code>pharmacist@medicare.com</code></td><td><code>pharm123</code></td><td>ড্যাশবোর্ড, ওষুধ, কাস্টমার, বিক্রি, প্রেসক্রিপশন, রিপোর্ট (ক্রয়/সরবরাহকারী/সেটিংস বন্ধ)</td></tr>
+<tr><td>Staff</td><td><code>staff@medicare.com</code></td><td><code>staff123</code></td><td>ড্যাশবোর্ড, বিক্রি (POS), ওষুধ ও কাস্টমার <b>শুধু দেখা</b>, প্রেসক্রিপশন দেখা (নতুন তৈরি নয়); রিপোর্ট/ক্রয়/সরবরাহকারী/সেটিংস বন্ধ</td></tr></table></section>
+
+<section><h2>৩) Operations Panel (অনলাইন অর্ডার, ব্যাচ/মেয়াদ, POS) — <a href="admin/login.html">admin/login.html</a></h2>
+<p>তালিকা থেকে ইউজার বেছে ডেমো কোড <code>demo</code> দিন।</p>
+<table><tr><th>ইউজার</th><th>কোড</th><th>কী দেখবে</th></tr>
+<tr><td>Owner Demo</td><td><code>demo</code></td><td>সব ট্যাব + Users, Settings, Data (এক্সপোর্ট/ইমপোর্ট/রিসেট)</td></tr>
+<tr><td>Pharmacist Demo</td><td><code>demo</code></td><td>প্রেসক্রিপশন রিভিউ (অনুমোদন/প্রত্যাখ্যান), Alerts, Dashboard, Orders, Returns</td></tr>
+<tr><td>Cashier Demo</td><td><code>demo</code></td><td>POS, Orders, Expenses</td></tr>
+<tr><td>Inventory Demo</td><td><code>demo</code></td><td>Alerts, Dashboard, Products, Inventory, Purchases, Suppliers</td></tr>
+<tr><td>Delivery Demo</td><td><code>demo</code></td><td>Orders, Delivery queue</td></tr></table></section>
+
+<section><h2>পাসওয়ার্ড বদলানো (ড্যাশবোর্ড)</h2><p>Dashboard → Settings → Security থেকে পাসওয়ার্ড বদলানো যায় (কমপক্ষে ৬ অক্ষর)। নতুন পাসওয়ার্ড হ্যাশ হয়ে এই ব্রাউজারে থাকে। ভুলে গেলে Backup পেজ থেকে ডেটা মুছলে ডিফল্ট পাসওয়ার্ড ফিরে আসে।</p></section>
+
+<section><h2>লগআউট ও ডেটা</h2><p>লগআউট করলে এখন শুধু লগইন-তথ্য মোছে; ওষুধ/কাস্টমার/বিক্রির ডেটা থাকে। সম্পূর্ণ রিসেট: Operations Panel → Owner → Data → Reset।</p>
+<p><b>নোট:</b> এগুলো ডেমো ক্রেডেনশিয়াল, আসল নিরাপত্তা নয়। বাস্তবে ব্যবহারে ব্যাকএন্ড, হ্যাশড পাসওয়ার্ড ও সার্ভার-সাইড অনুমতি লাগবে।</p></section>
+</main></body></html>

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="assets/js/guard.js"></script>
+    <script src="assets/js/enhance.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medicines Management - MediCare Pharmacy</title>
@@ -283,7 +285,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <p class="text-muted mb-1">Total Value</p>
-                            <h3 class="fw-bold text-success" id="totalValue">$0</h3>
+                            <h3 class="fw-bold text-success" id="totalValue">৳0</h3>
                         </div>
                         <i class="fas fa-dollar-sign fs-1 text-success opacity-50"></i>
                     </div>
@@ -450,10 +452,10 @@
                     stock: 150,
                     minStock: 50,
                     mfgDate: "2024-01-01",
-                    expiryDate: "2025-12-31",
+                    expiryDate: "2027-12-31",
                     rackNo: "A-12",
                     description: "Used for pain relief and fever reduction",
-                    image: "https://via.placeholder.com/300x200/667eea/ffffff?text=Paracetamol"
+                    image: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20200%22%3E%3Crect%20width%3D%22300%22%20height%3D%22200%22%20fill%3D%22%23e0e7ff%22%2F%3E%3Cg%20transform%3D%22rotate%28-30%20150%20100%29%22%3E%3Crect%20x%3D%2295%22%20y%3D%2275%22%20width%3D%22110%22%20height%3D%2250%22%20rx%3D%2225%22%20fill%3D%22%23667eea%22%2F%3E%3Cpath%20d%3D%22M150%2075h30a25%2025%200%200%201%200%2050h-30z%22%20fill%3D%22%23c7d2fe%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"
                 },
                 {
                     id: 2,
@@ -469,10 +471,10 @@
                     stock: 8,
                     minStock: 30,
                     mfgDate: "2024-02-01",
-                    expiryDate: "2025-06-30",
+                    expiryDate: "2027-06-30",
                     rackNo: "B-05",
                     description: "Antibiotic for bacterial infections",
-                    image: "https://via.placeholder.com/300x200/10b981/ffffff?text=Amoxicillin"
+                    image: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20200%22%3E%3Crect%20width%3D%22300%22%20height%3D%22200%22%20fill%3D%22%23e0e7ff%22%2F%3E%3Cg%20transform%3D%22rotate%28-30%20150%20100%29%22%3E%3Crect%20x%3D%2295%22%20y%3D%2275%22%20width%3D%22110%22%20height%3D%2250%22%20rx%3D%2225%22%20fill%3D%22%23667eea%22%2F%3E%3Cpath%20d%3D%22M150%2075h30a25%2025%200%200%201%200%2050h-30z%22%20fill%3D%22%23c7d2fe%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"
                 },
                 {
                     id: 3,
@@ -488,10 +490,10 @@
                     stock: 45,
                     minStock: 20,
                     mfgDate: "2024-03-01",
-                    expiryDate: "2025-08-31",
+                    expiryDate: "2027-08-31",
                     rackNo: "C-08",
                     description: "Immune system support",
-                    image: "https://via.placeholder.com/300x200/f59e0b/ffffff?text=Vitamin+C"
+                    image: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20200%22%3E%3Crect%20width%3D%22300%22%20height%3D%22200%22%20fill%3D%22%23e0e7ff%22%2F%3E%3Cg%20transform%3D%22rotate%28-30%20150%20100%29%22%3E%3Crect%20x%3D%2295%22%20y%3D%2275%22%20width%3D%22110%22%20height%3D%2250%22%20rx%3D%2225%22%20fill%3D%22%23667eea%22%2F%3E%3Cpath%20d%3D%22M150%2075h30a25%2025%200%200%201%200%2050h-30z%22%20fill%3D%22%23c7d2fe%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"
                 }
             ];
             saveMedicinesToStorage(defaultMedicines);
@@ -578,7 +580,7 @@
             const days = Math.ceil((new Date(m.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
             return days <= 30 && days > 0;
         }).length;
-        document.getElementById('totalValue').textContent = '$' + filtered.reduce((sum, m) => sum + (m.stock * m.sellingPrice), 0).toFixed(2);
+        document.getElementById('totalValue').textContent = '৳' + filtered.reduce((sum, m) => sum + (m.stock * m.sellingPrice), 0).toFixed(2);
         
         // Pagination
         const totalPages = Math.ceil(filtered.length / itemsPerPage);
@@ -609,7 +611,7 @@
                     stockText = 'Out of Stock';
                 }
                 
-                const medImage = med.image || `https://via.placeholder.com/300x200/667eea/ffffff?text=${encodeURIComponent(med.name)}`;
+                const medImage = med.image || `data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20200%22%3E%3Crect%20width%3D%22300%22%20height%3D%22200%22%20fill%3D%22%23e0e7ff%22%2F%3E%3Cg%20transform%3D%22rotate%28-30%20150%20100%29%22%3E%3Crect%20x%3D%2295%22%20y%3D%2275%22%20width%3D%22110%22%20height%3D%2250%22%20rx%3D%2225%22%20fill%3D%22%23667eea%22%2F%3E%3Cpath%20d%3D%22M150%2075h30a25%2025%200%200%201%200%2050h-30z%22%20fill%3D%22%23c7d2fe%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E)}`;
                 
                 return `
                     <div class="col-md-6 col-lg-4 col-xl-3">
@@ -617,7 +619,7 @@
                             <div class="position-relative">
                                 <span class="stock-badge ${stockClass}">${stockText}</span>
                                 <img src="${medImage}" class="card-img-top medicine-image" alt="${med.name}" 
-                                     onerror="this.src='https://via.placeholder.com/300x200/667eea/ffffff?text=Medicine'">
+                                     onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20200%22%3E%3Crect%20width%3D%22300%22%20height%3D%22200%22%20fill%3D%22%23e0e7ff%22%2F%3E%3Cg%20transform%3D%22rotate%28-30%20150%20100%29%22%3E%3Crect%20x%3D%2295%22%20y%3D%2275%22%20width%3D%22110%22%20height%3D%2250%22%20rx%3D%2225%22%20fill%3D%22%23667eea%22%2F%3E%3Cpath%20d%3D%22M150%2075h30a25%2025%200%200%201%200%2050h-30z%22%20fill%3D%22%23c7d2fe%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E'">
                             </div>
                             <div class="card-body">
                                 <h6 class="card-title fw-bold">${med.name}</h6>
@@ -630,7 +632,7 @@
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <span class="fw-bold text-primary">$${med.sellingPrice}</span>
+                                        <span class="fw-bold text-primary">৳${med.sellingPrice}</span>
                                         <small class="text-muted d-block">MRP</small>
                                     </div>
                                     <div class="btn-group">
@@ -905,8 +907,8 @@
     // LOGOUT FUNCTION
     // ============================================
     function logout() {
-        localStorage.clear();
-        sessionStorage.clear();
+        authClear();
+
         window.location.href = 'login.html';
     }
     

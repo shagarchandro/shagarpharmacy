@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="assets/js/guard.js"></script>
+    <script src="assets/js/enhance.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Purchase Management - MediCare Pharmacy</title>
@@ -196,7 +198,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1">Total Purchases</p>
-                            <h3 class="fw-bold text-primary" id="totalPurchases">$0</h3>
+                            <h3 class="fw-bold text-primary" id="totalPurchases">৳0</h3>
                         </div>
                         <div class="bg-primary bg-opacity-10 p-3 rounded-3"><i class="fas fa-shopping-cart fa-2x text-primary"></i></div>
                     </div>
@@ -209,7 +211,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1">Total Due</p>
-                            <h3 class="fw-bold text-warning" id="totalDue">$0</h3>
+                            <h3 class="fw-bold text-warning" id="totalDue">৳0</h3>
                         </div>
                         <div class="bg-warning bg-opacity-10 p-3 rounded-3"><i class="fas fa-dollar-sign fa-2x text-warning"></i></div>
                     </div>
@@ -222,7 +224,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1">This Month</p>
-                            <h3 class="fw-bold text-success" id="monthlyPurchases">$0</h3>
+                            <h3 class="fw-bold text-success" id="monthlyPurchases">৳0</h3>
                         </div>
                         <div class="bg-success bg-opacity-10 p-3 rounded-3"><i class="fas fa-calendar-alt fa-2x text-success"></i></div>
                     </div>
@@ -331,7 +333,7 @@
                     <table class="table table-bordered">
                         <thead class="table-light"><tr><th>Medicine</th><th>Batch No</th><th>Expiry Date</th><th>Quantity</th><th>Unit Price</th><th>Total</th><th>Action</th></tr></thead>
                         <tbody id="purchaseItemsBody"></tbody>
-                        <tfoot><tr class="table-active"><td colspan="5" class="text-end fw-bold">Total Amount:</td><td class="fw-bold" id="purchaseTotalAmount">$0.00</td><td></td></tr></tfoot>
+                        <tfoot><tr class="table-active"><td colspan="5" class="text-end fw-bold">Total Amount:</td><td class="fw-bold" id="purchaseTotalAmount">৳0.00</td><td></td></tr></tfoot>
                     </table>
                 </div>
                 
@@ -524,7 +526,7 @@
         medicineSelect.innerHTML = '<option value="">Search Medicine...</option>';
         medicines.forEach(medicine => {
             if (medicine && medicine.id && medicine.name) {
-                medicineSelect.innerHTML += `<option value="${medicine.id}" data-price="${medicine.purchasePrice || 0}">${medicine.name} ($${medicine.purchasePrice || 0})</option>`;
+                medicineSelect.innerHTML += `<option value="${medicine.id}" data-price="${medicine.purchasePrice || 0}">${medicine.name} (৳${medicine.purchasePrice || 0})</option>`;
             }
         });
         medicineSelect.onchange = function() {
@@ -579,13 +581,13 @@
                     <td>${item.batchNo || '-'}</td>
                     <td>${item.expiryDate || '-'}</td>
                     <td>${item.qty}</td>
-                    <td>$${item.unitPrice.toFixed(2)}</td>
-                    <td>$${item.total.toFixed(2)}</td>
+                    <td>৳${item.unitPrice.toFixed(2)}</td>
+                    <td>৳${item.total.toFixed(2)}</td>
                     <td><button class="btn btn-sm btn-danger rounded-3" onclick="removePurchaseItem(${index})"><i class="fas fa-trash"></i></button></td>
                 </tr>`;
             }).join('');
         }
-        document.getElementById('purchaseTotalAmount').textContent = `$${total.toFixed(2)}`;
+        document.getElementById('purchaseTotalAmount').textContent = `৳${total.toFixed(2)}`;
     }
     
     function removePurchaseItem(index) { purchaseItems.splice(index, 1); updatePurchaseItemsTable(); }
@@ -595,7 +597,7 @@
         const date = document.getElementById('purchaseDate').value;
         const paymentMethod = document.getElementById('paymentMethod').value;
         let paidAmount = parseFloat(document.getElementById('paidAmount').value) || 0;
-        const totalAmount = parseFloat(document.getElementById('purchaseTotalAmount').textContent.replace('$', ''));
+        const totalAmount = parseFloat(document.getElementById('purchaseTotalAmount').textContent.replace('৳', ''));
         
         if(!supplierId || purchaseItems.length === 0) {
             showToast('Please select supplier and add items', 'warning');
@@ -739,9 +741,9 @@
                     <td>${p.supplierName || 'N/A'}</td>
                     <td>${p.date || 'N/A'}</td>
                     <td>${p.items ? p.items.length : 0} items</td>
-                    <td>$${(p.totalAmount || 0).toFixed(2)}</td>
-                    <td>$${(p.paid || 0).toFixed(2)}</td>
-                    <td class="${p.due > 0 ? 'text-danger fw-bold' : 'text-success'}">$${(p.due || 0).toFixed(2)}</td>
+                    <td>৳${(p.totalAmount || 0).toFixed(2)}</td>
+                    <td>৳${(p.paid || 0).toFixed(2)}</td>
+                    <td class="${p.due > 0 ? 'text-danger fw-bold' : 'text-success'}">৳${(p.due || 0).toFixed(2)}</td>
                     <td><span class="status-badge ${statusClass}">${(p.status || 'pending').toUpperCase()}</span></td>
                     <td>
                         <button class="btn btn-sm btn-info rounded-3 me-1" onclick="viewPurchase(${p.id})" title="View"><i class="fas fa-eye"></i></button>
@@ -756,7 +758,7 @@
         const purchase = purchases.find(p => p.id === id);
         if(!purchase) return;
         
-        const itemsHtml = (purchase.items || []).map(item => `<tr><td>${item.medicineName || 'N/A'}</td><td>${item.batchNo || '-'}</td><td>${item.expiryDate || '-'}</td><td class="text-center">${item.qty || 0}</td><td class="text-center">$${(item.unitPrice || 0).toFixed(2)}</td><td class="text-end">$${(item.total || 0).toFixed(2)}</td></tr>`).join('');
+        const itemsHtml = (purchase.items || []).map(item => `<tr><td>${item.medicineName || 'N/A'}</td><td>${item.batchNo || '-'}</td><td>${item.expiryDate || '-'}</td><td class="text-center">${item.qty || 0}</td><td class="text-center">৳${(item.unitPrice || 0).toFixed(2)}</td><td class="text-end">৳${(item.total || 0).toFixed(2)}</td></tr>`).join('');
         
         document.getElementById('purchaseDetailsContent').innerHTML = `
             <div class="container">
@@ -770,12 +772,12 @@
                     <div class="col-md-6">
                         <div class="bg-light p-3 rounded-3">
                             <h6 class="fw-bold text-primary mb-2"><i class="fas fa-dollar-sign me-2"></i>Payment Information</h6>
-                            <p><strong>Total:</strong> $${(purchase.totalAmount || 0).toFixed(2)}<br><strong>Paid:</strong> $${(purchase.paid || 0).toFixed(2)}<br><strong>Due:</strong> $${(purchase.due || 0).toFixed(2)}<br><strong>Method:</strong> ${(purchase.paymentMethod || 'N/A').toUpperCase()}</p>
+                            <p><strong>Total:</strong> ৳${(purchase.totalAmount || 0).toFixed(2)}<br><strong>Paid:</strong> ৳${(purchase.paid || 0).toFixed(2)}<br><strong>Due:</strong> ৳${(purchase.due || 0).toFixed(2)}<br><strong>Method:</strong> ${(purchase.paymentMethod || 'N/A').toUpperCase()}</p>
                         </div>
                     </div>
                 </div>
                 <h6 class="fw-bold mb-3"><i class="fas fa-capsules me-2"></i>Items Purchased</h6>
-                <div class="table-responsive"><table class="table table-bordered"><thead class="table-light"><tr><th>Medicine</th><th>Batch</th><th>Expiry</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead><tbody>${itemsHtml}</tbody><tfoot><tr class="table-active"><td colspan="5" class="text-end fw-bold">Grand Total:</td><td class="fw-bold">$${(purchase.totalAmount || 0).toFixed(2)}</td></tr></tfoot></table></div>
+                <div class="table-responsive"><table class="table table-bordered"><thead class="table-light"><tr><th>Medicine</th><th>Batch</th><th>Expiry</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead><tbody>${itemsHtml}</tbody><tfoot><tr class="table-active"><td colspan="5" class="text-end fw-bold">Grand Total:</td><td class="fw-bold">৳${(purchase.totalAmount || 0).toFixed(2)}</td></tr></tfoot></table></div>
             </div>`;
         currentPurchaseId = id;
         new bootstrap.Modal(document.getElementById('purchaseDetailsModal')).show();
@@ -788,7 +790,7 @@
         if(returnAmount && parseFloat(returnAmount) > 0) {
             const amount = parseFloat(returnAmount);
             if(amount > purchase.due) {
-                showToast(`Return amount cannot exceed due amount of $${purchase.due}`, 'warning');
+                showToast(`Return amount cannot exceed due amount of ৳${purchase.due}`, 'warning');
                 return;
             }
             returns.unshift({ 
@@ -817,7 +819,7 @@
             }
             
             refreshAllData();
-            showToast(`Return of $${amount} processed`, 'success');
+            showToast(`Return of ৳${amount} processed`, 'success');
         }
     }
     
@@ -830,7 +832,7 @@
                 <td>${r.id}</td>
                 <td>${r.invoiceNo || 'N/A'}</td>
                 <td>${r.supplierName || 'N/A'}</td>
-                <td>$${(r.amount || 0).toFixed(2)}</td>
+                <td>৳${(r.amount || 0).toFixed(2)}</td>
                 <td>${r.reason || '-'}</td>
                 <td>${r.date || 'N/A'}</td>
                 <td><span class="badge bg-success">${r.status || 'approved'}</span></td>
@@ -860,7 +862,7 @@
                             <p class="small mb-1"><i class="fas fa-envelope me-2 text-primary"></i> ${s.email || 'N/A'}</p>
                             <p class="small mb-3"><i class="fas fa-map-marker-alt me-2 text-primary"></i> ${s.address ? s.address.substring(0, 40) + (s.address.length > 40 ? '...' : '') : 'N/A'}</p>
                             <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                                <span class="fw-bold">Due: <span class="${s.due > 0 ? 'text-danger' : 'text-success'}">$${(s.due || 0).toFixed(2)}</span></span>
+                                <span class="fw-bold">Due: <span class="${s.due > 0 ? 'text-danger' : 'text-success'}">৳${(s.due || 0).toFixed(2)}</span></span>
                                 <button class="btn btn-sm btn-outline-primary rounded-3" onclick="viewSupplierPurchases(${s.id})">View Purchases</button>
                             </div>
                         </div>
@@ -882,7 +884,7 @@
             if(purchase) {
                 const paymentAmount = parseFloat(amount);
                 if(paymentAmount > purchase.due) {
-                    showToast(`Amount exceeds due amount of $${purchase.due}`, 'warning');
+                    showToast(`Amount exceeds due amount of ৳${purchase.due}`, 'warning');
                     return;
                 }
                 purchase.paid += paymentAmount;
@@ -900,7 +902,7 @@
                 }
                 
                 refreshAllData();
-                showToast(`Payment of $${paymentAmount} recorded`, 'success');
+                showToast(`Payment of ৳${paymentAmount} recorded`, 'success');
                 bootstrap.Modal.getInstance(document.getElementById('purchaseDetailsModal')).hide();
             }
         }
@@ -909,7 +911,8 @@
     function printPurchaseInvoice() {
         const content = document.getElementById('purchaseDetailsContent').innerHTML;
         const printWindow = window.open('', '_blank');
-        printWindow.document.write(`<html><head><title>Purchase Invoice</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"><style>body{padding:20px}</style></head><body><div class="container">${content}</div><script>window.onload=function(){window.print();setTimeout(()=>window.close(),500)}<\/script></body></html>`);
+        printWindow.document.write(`<html><head>
+    <title>Purchase Invoice</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"><style>body{padding:20px}</style></head><body><div class="container">${content}</div><script>window.onload=function(){window.print();setTimeout(()=>window.close(),500)}<\/script></body></html>`);
         printWindow.document.close();
     }
     
@@ -918,9 +921,9 @@
         const totalDue = purchases.reduce((sum, p) => sum + (p.due || 0), 0);
         const currentMonth = new Date().getMonth() + 1;
         const monthlyTotal = purchases.filter(p => p && p.date && new Date(p.date).getMonth() + 1 === currentMonth).reduce((sum, p) => sum + (p.totalAmount || 0), 0);
-        document.getElementById('totalPurchases').textContent = `$${total.toFixed(2)}`;
-        document.getElementById('totalDue').textContent = `$${totalDue.toFixed(2)}`;
-        document.getElementById('monthlyPurchases').textContent = `$${monthlyTotal.toFixed(2)}`;
+        document.getElementById('totalPurchases').textContent = `৳${total.toFixed(2)}`;
+        document.getElementById('totalDue').textContent = `৳${totalDue.toFixed(2)}`;
+        document.getElementById('monthlyPurchases').textContent = `৳${monthlyTotal.toFixed(2)}`;
         document.getElementById('totalSuppliers').textContent = suppliers.length;
     }
     
@@ -941,8 +944,8 @@
     }
     
     function logout() { 
-        localStorage.clear(); 
-        sessionStorage.clear(); 
+        authClear(); 
+
         window.location.href = 'login.html'; 
     }
     

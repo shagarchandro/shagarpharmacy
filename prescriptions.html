@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="assets/js/guard.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Prescription Management - MediCare Pharmacy</title>
@@ -1075,7 +1076,7 @@
         const suggestions = [
             { name: "Generic Alternative Available", suggestion: `Generic version available for ${prescription.medicines[0]?.name || 'prescribed medicines'}`, savings: "Save up to 40%" },
             { name: "Therapy Optimization", suggestion: "Consider combination therapy for better results", savings: "Fewer pills per day" },
-            { name: "Preventive Care", suggestion: "Add Calcium + Vitamin D supplement for bone health", cost: "$8.99" }
+            { name: "Preventive Care", suggestion: "Add Calcium + Vitamin D supplement for bone health", cost: "৳8.99" }
         ];
         
         const suggestionsHtml = suggestions.map(s => `
@@ -1231,8 +1232,8 @@
     // LOGOUT
     // ============================================
     function logout() {
-        localStorage.clear();
-        sessionStorage.clear();
+        authClear();
+
         window.location.href = 'login.html';
     }
     

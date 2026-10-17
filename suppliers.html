@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="assets/js/guard.js"></script>
+    <script src="assets/js/enhance.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Supplier Management - MediCare Pharmacy</title>
@@ -222,7 +224,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1">Total Due</p>
-                            <h3 class="fw-bold text-warning" id="totalDue">$0</h3>
+                            <h3 class="fw-bold text-warning" id="totalDue">৳0</h3>
                         </div>
                         <div class="bg-warning bg-opacity-10 p-3 rounded-3">
                             <i class="fas fa-dollar-sign fa-2x text-warning"></i>
@@ -237,7 +239,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1">Total Purchases</p>
-                            <h3 class="fw-bold text-success" id="totalPurchases">$0</h3>
+                            <h3 class="fw-bold text-success" id="totalPurchases">৳0</h3>
                         </div>
                         <div class="bg-success bg-opacity-10 p-3 rounded-3">
                             <i class="fas fa-shopping-cart fa-2x text-success"></i>
@@ -284,9 +286,9 @@
                 <div class="col-md-3">
                     <select class="form-select rounded-3" id="dueStatusFilter">
                         <option value="">All Due Status</option>
-                        <option value="high">High Due (>$1000)</option>
-                        <option value="medium">Medium Due ($500-$1000)</option>
-                        <option value="low">Low Due (<$500)</option>
+                        <option value="high">High Due (>৳1000)</option>
+                        <option value="medium">Medium Due (৳500-৳1000)</option>
+                        <option value="low">Low Due (<৳500)</option>
                         <option value="clear">Clear Due</option>
                     </select>
                 </div>
@@ -558,8 +560,8 @@
         
         // Update stats
         document.getElementById('totalSuppliers').textContent = filtered.length;
-        document.getElementById('totalDue').textContent = '$' + filtered.reduce((sum, s) => sum + (s.due || 0), 0).toFixed(2);
-        document.getElementById('totalPurchases').textContent = '$' + filtered.reduce((sum, s) => sum + (s.totalPurchases || 0), 0).toFixed(2);
+        document.getElementById('totalDue').textContent = '৳' + filtered.reduce((sum, s) => sum + (s.due || 0), 0).toFixed(2);
+        document.getElementById('totalPurchases').textContent = '৳' + filtered.reduce((sum, s) => sum + (s.totalPurchases || 0), 0).toFixed(2);
         document.getElementById('activeSuppliers').textContent = filtered.filter(s => s.status === 'active').length;
         
         // Pagination
@@ -600,12 +602,12 @@
                                     <div>
                                         <small class="text-muted">Due Amount</small>
                                         <br>
-                                        <span class="fw-bold ${dueClass}">$${(sup.due || 0).toFixed(2)}</span>
+                                        <span class="fw-bold ${dueClass}">৳${(sup.due || 0).toFixed(2)}</span>
                                     </div>
                                     <div>
                                         <small class="text-muted">Total Purchases</small>
                                         <br>
-                                        <span class="fw-bold">$${(sup.totalPurchases || 0).toFixed(2)}</span>
+                                        <span class="fw-bold">৳${(sup.totalPurchases || 0).toFixed(2)}</span>
                                     </div>
                                     <div class="action-buttons">
                                         <button class="btn btn-sm btn-outline-primary rounded-3" onclick="editSupplier(${sup.id})" title="Edit">
@@ -815,8 +817,8 @@
     // LOGOUT
     // ============================================
     function logout() {
-        localStorage.clear();
-        sessionStorage.clear();
+        authClear();
+
         window.location.href = 'login.html';
     }
     

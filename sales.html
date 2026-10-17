@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="assets/js/guard.js"></script>
+    <script src="assets/js/enhance.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>POS Billing - MediCare Pharmacy</title>
@@ -587,19 +589,19 @@
                     <div class="mt-3 pt-3 border-top">
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Subtotal:</span>
-                            <span class="fw-bold" id="subtotal">$0.00</span>
+                            <span class="fw-bold" id="subtotal">৳0.00</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Discount (<span id="discountPercent">0</span>%):</span>
-                            <span class="fw-bold text-danger" id="discount">-$0.00</span>
+                            <span class="fw-bold text-danger" id="discount">-৳0.00</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Tax (VAT 10%):</span>
-                            <span class="fw-bold" id="tax">$0.00</span>
+                            <span class="text-muted">Tax (VAT <span id="taxPctLbl">10</span>%):</span>
+                            <span class="fw-bold" id="tax">৳0.00</span>
                         </div>
                         <div class="d-flex justify-content-between pt-2 border-top mt-2">
                             <span class="fs-5 fw-bold">Total:</span>
-                            <span class="fs-3 fw-bold gradient-text" id="total">$0.00</span>
+                            <span class="fs-3 fw-bold gradient-text" id="total">৳0.00</span>
                         </div>
                         
                         <!-- Discount Slider -->
@@ -700,12 +702,17 @@
     // ============================================
     // LOAD PRODUCTS FROM LOCALSTORAGE
     // ============================================
+    function PSET() { try { return JSON.parse(localStorage.getItem('pharmacy_settings') || '{}'); } catch (e) { return {}; } }
+    function TAXR() { const t = parseFloat(PSET().taxPct); return (isNaN(t) ? 10 : Math.min(Math.max(t, 0), 50)) / 100; }
+    function esc(x) { return String(x == null ? '' : x).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    addEventListener('DOMContentLoaded', () => { const l = document.getElementById('taxPctLbl'); if (l) l.textContent = Math.round(TAXR()*1000)/10; });
     function loadProductsFromStorage() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             const medicines = JSON.parse(stored);
             return medicines.map(med => ({
                 id: med.id,
+                expiry: med.expiryDate || '',
                 name: med.name,
                 generic: med.genericName || '',
                 brand: med.brand || '',
@@ -802,7 +809,7 @@
             <div class="product-card" onclick="addToCart(${p.id})">
                 <div class="product-icon">${p.image}</div>
                 <div class="product-name">${p.name.length > 25 ? p.name.substring(0, 22) + '...' : p.name}</div>
-                <div class="product-price">$${p.price}</div>
+                <div class="product-price">৳${p.price}</div>
                 <div class="product-stock">📦 Stock: ${p.stock}</div>
                 ${p.stock <= 10 ? '<span class="badge bg-warning text-dark mt-1">⚠️ Low Stock</span>' : ''}
             </div>
@@ -838,7 +845,7 @@
                     <div class="suggestion-name">${p.name}</div>
                     <div class="suggestion-details">${p.generic || ''} ${p.brand ? '| ' + p.brand : ''} | Stock: ${p.stock}</div>
                 </div>
-                <div class="suggestion-price">$${p.price}</div>
+                <div class="suggestion-price">৳${p.price}</div>
             </div>
         `).join('');
         suggestionsDiv.style.display = 'block';
@@ -854,6 +861,7 @@
         const product = products.find(p => p.id === productId);
         if (!product) return;
         if (product.stock <= 0) { showToast('Product out of stock!', 'danger'); return; }
+        if (product.expiry && product.expiry < new Date().toISOString().slice(0,10)) { showToast('Expired medicine cannot be sold!', 'danger'); return; }
         
         const existingItem = cart.find(item => item.id === productId);
         if (existingItem) {
@@ -885,7 +893,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="flex-grow-1">
                             <div class="fw-bold">${item.name}</div>
-                            <div class="small text-muted">$${item.price} each</div>
+                            <div class="small text-muted">৳${item.price} each</div>
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
@@ -896,7 +904,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="text-end mt-1"><span class="fw-bold">$${item.total.toFixed(2)}</span></div>
+                    <div class="text-end mt-1"><span class="fw-bold">৳${item.total.toFixed(2)}</span></div>
                 </div>
             `).join('');
         }
@@ -921,13 +929,13 @@
         const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
         const discountPercent = parseFloat(document.getElementById('discountSlider')?.value || 0);
         const discount = subtotal * (discountPercent / 100);
-        const tax = (subtotal - discount) * 0.10;
+        const tax = (subtotal - discount) * TAXR();
         const total = subtotal - discount + tax;
         
-        document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
-        document.getElementById('discount').textContent = `-$${discount.toFixed(2)}`;
-        document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
-        document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+        document.getElementById('subtotal').textContent = `৳${subtotal.toFixed(2)}`;
+        document.getElementById('discount').textContent = `-৳${discount.toFixed(2)}`;
+        document.getElementById('tax').textContent = `৳${tax.toFixed(2)}`;
+        document.getElementById('total').textContent = `৳${total.toFixed(2)}`;
         document.getElementById('discountPercent').textContent = discountPercent;
         return { subtotal, discount, tax, total };
     }
@@ -945,7 +953,7 @@
     // ============================================
     function processPayment() {
         if (cart.length === 0) { showToast('Cart is empty!', 'warning'); return; }
-        const { total } = calculateTotals();
+        const { subtotal: _sub, discount: _disc, tax: _tax, total } = calculateTotals();
         const customerId = document.getElementById('customerSelect').value;
         const paymentMethod = selectedPaymentMethod;
         let cashAmount = 0, change = 0;
@@ -954,7 +962,7 @@
             cashAmount = parseFloat(document.getElementById('cashAmount').value);
             if (isNaN(cashAmount) || cashAmount < total) { showToast('Insufficient cash amount!', 'danger'); return; }
             change = cashAmount - total;
-            document.getElementById('changeAmount').innerHTML = `<span class="text-success">💰 Change: $${change.toFixed(2)}</span>`;
+            document.getElementById('changeAmount').innerHTML = `<span class="text-success">💰 Change: ৳${change.toFixed(2)}</span>`;
         }
         
         const invoice = {
@@ -962,9 +970,9 @@
             date: new Date().toLocaleString(),
             customer: customerId === '0' ? 'Walk-in Customer' : customers.find(c => c.id == customerId)?.name || 'Walk-in Customer',
             items: [...cart],
-            subtotal: total / 1.1,
-            discount: total - (total / 1.1),
-            tax: total / 11,
+            subtotal: _sub,
+            discount: _disc,
+            tax: _tax,
             total: total,
             paymentMethod: paymentMethod,
             cashAmount: cashAmount,
@@ -980,6 +988,17 @@
             if (product) product.stock -= item.quantity;
         });
         localStorage.setItem(STORAGE_KEY, JSON.stringify(allMedicines));
+        // Persist the sale so Dashboard / Reports / customer history use real data
+        try {
+            const SK = 'pharmacy_sales';
+            const hist = JSON.parse(localStorage.getItem(SK) || '[]');
+            const real = hist.filter(x => x && x.real);
+            real.push({ id: Date.now(), real: true, invoiceNo: invoice.invoiceNo, customer: invoice.customer,
+                total: +invoice.total.toFixed(2), subtotal: +invoice.subtotal.toFixed(2), discount: +invoice.discount.toFixed(2), tax: +invoice.tax.toFixed(2),
+                date: new Date().toISOString().split('T')[0], at: new Date().toISOString(), status: 'Completed',
+                paymentMethod: invoice.paymentMethod, items: invoice.items.map(i => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })) });
+            localStorage.setItem(SK, JSON.stringify(real)); window.dispatchEvent(new Event('mc-sale'));
+        } catch (e) { console.warn('Could not save sale', e); }
         products = loadProductsFromStorage();
         displayProducts();
         showInvoice(invoice);
@@ -995,9 +1014,9 @@
     function showInvoice(invoice) {
         const invoiceHtml = `
             <div class="text-center mb-4">
-                <h3 class="fw-bold" style="color: #3b82f6;">🏥 MediCare Pharmacy</h3>
-                <p class="mb-0">123 Healthcare Street, Medical District</p>
-                <p>📞 +1234567890 | ✉️ info@medicare.com</p>
+                <h3 class="fw-bold" style="color: #3b82f6;">🏥 ${esc(PSET().store || "MediCare Pharmacy")}</h3>
+                <p class="mb-0">${esc(PSET().address || "123 Healthcare Street, Medical District")}</p>
+                <p>📞 ${esc(PSET().phone || "+8801700000000")} | ✉️ ${esc(PSET().email || "info@medicare.com")}</p>
                 <hr>
                 <h5>🧾 INVOICE</h5>
                 <p><strong>Invoice No:</strong> ${invoice.invoiceNo}<br>
@@ -1006,13 +1025,13 @@
                 <hr>
             </div>
             <table class="table table-bordered"><thead class="table-light"><tr><th>Item</th><th>Price</th><th>Qty</th><th>Total</th></tr></thead>
-            <tbody>${invoice.items.map(item => `<td>${item.name}</td><td class="text-center">$${item.price.toFixed(2)}</td><td class="text-center">${item.quantity}</td><td class="text-end">$${item.total.toFixed(2)}</td>`).join('')}</tbody>
-            <tfoot><tr><td colspan="3" class="text-end fw-bold">Subtotal:</td><td class="text-end">$${invoice.subtotal.toFixed(2)}</td></tr>
-            <tr><td colspan="3" class="text-end fw-bold">Discount:</td><td class="text-end text-danger">-$${invoice.discount.toFixed(2)}</td></tr>
-            <tr><td colspan="3" class="text-end fw-bold">Tax (10%):</td><td class="text-end">$${invoice.tax.toFixed(2)}</td></tr>
-            <tr class="table-primary"><td colspan="3" class="text-end fw-bold fs-5">Total:</td><td class="text-end fw-bold fs-5" style="color: #3b82f6;">$${invoice.total.toFixed(2)}</td></tr>
-            ${invoice.paymentMethod === 'cash' ? `<tr><td colspan="3" class="text-end">Cash:</td><td class="text-end">$${invoice.cashAmount.toFixed(2)}</td></tr>
-            <tr><td colspan="3" class="text-end">Change:</td><td class="text-end text-success">$${invoice.change.toFixed(2)}</td></tr>` : ''}</tfoot>
+            <tbody>${invoice.items.map(item => `<td>${item.name}</td><td class="text-center">৳${item.price.toFixed(2)}</td><td class="text-center">${item.quantity}</td><td class="text-end">৳${item.total.toFixed(2)}</td>`).join('')}</tbody>
+            <tfoot><tr><td colspan="3" class="text-end fw-bold">Subtotal:</td><td class="text-end">৳${invoice.subtotal.toFixed(2)}</td></tr>
+            <tr><td colspan="3" class="text-end fw-bold">Discount:</td><td class="text-end text-danger">-৳${invoice.discount.toFixed(2)}</td></tr>
+            <tr><td colspan="3" class="text-end fw-bold">Tax (${Math.round(TAXR()*1000)/10}%):</td><td class="text-end">৳${invoice.tax.toFixed(2)}</td></tr>
+            <tr class="table-primary"><td colspan="3" class="text-end fw-bold fs-5">Total:</td><td class="text-end fw-bold fs-5" style="color: #3b82f6;">৳${invoice.total.toFixed(2)}</td></tr>
+            ${invoice.paymentMethod === 'cash' ? `<tr><td colspan="3" class="text-end">Cash:</td><td class="text-end">৳${invoice.cashAmount.toFixed(2)}</td></tr>
+            <tr><td colspan="3" class="text-end">Change:</td><td class="text-end text-success">৳${invoice.change.toFixed(2)}</td></tr>` : ''}</tfoot>
             </table>
             <div class="text-center mt-4"><p>Payment Method: ${invoice.paymentMethod.toUpperCase()}</p><p class="fw-bold">🙏 Thank you for shopping with us!</p>
             <div><svg id="barcode-${invoice.invoiceNo}"></svg></div><small class="text-muted">** This is a computer generated invoice **</small></div>
@@ -1025,7 +1044,8 @@
     function printInvoiceModal() {
         const printContent = document.getElementById('invoiceContent').innerHTML;
         const printWindow = window.open('', '_blank');
-        printWindow.document.write(`<html><head><title>Invoice</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"><style>body{padding:20px}</style></head><body><div class="container">${printContent}</div><script>window.onload=function(){window.print();setTimeout(()=>window.close(),500)}<\/script></body></html>`);
+        printWindow.document.write(`<html><head>
+    <title>Invoice</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"><style>body{padding:20px}</style></head><body><div class="container">${printContent}</div><script>window.onload=function(){window.print();setTimeout(()=>window.close(),500)}<\/script></body></html>`);
         printWindow.document.close();
     }
     
@@ -1097,10 +1117,10 @@
     });
     
     document.getElementById('cashAmount')?.addEventListener('input', () => {
-        const total = parseFloat(document.getElementById('total')?.textContent.replace('$', '') || 0);
+        const total = parseFloat(document.getElementById('total')?.textContent.replace('৳', '') || 0);
         const cash = parseFloat(document.getElementById('cashAmount').value) || 0;
         const change = cash - total;
-        document.getElementById('changeAmount').innerHTML = change >= 0 ? `<span class="text-success">💰 Change: $${change.toFixed(2)}</span>` : '<span class="text-danger">⚠️ Insufficient amount</span>';
+        document.getElementById('changeAmount').innerHTML = change >= 0 ? `<span class="text-success">💰 Change: ৳${change.toFixed(2)}</span>` : '<span class="text-danger">⚠️ Insufficient amount</span>';
     });
     
     // Keyboard Shortcuts
@@ -1128,7 +1148,7 @@
     function closeMobileMenu() { document.getElementById('sidebar').classList.remove('mobile-open'); document.getElementById('mobileOverlay').style.display = 'none'; }
     
     // Logout
-    function logout() { localStorage.clear(); sessionStorage.clear(); window.location.href = 'login.html'; }
+    function logout() { authClear(); window.location.href = 'login.html'; }
     document.getElementById('logoutBtn')?.addEventListener('click', (e) => { e.preventDefault(); logout(); });
     
     // Initial Load

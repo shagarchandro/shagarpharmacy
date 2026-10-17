@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MediCare – Backup & Restore</title>
+<link rel="stylesheet" href="assets/css/styles.css"></head>
+<body>
+<main>
+<h1>💾 ব্যাকআপ ও রিস্টোর / Backup & Restore</h1>
+<p class="muted">সব ডেটা এই ব্রাউজারে থাকে। ব্রাউজার ডেটা মুছলে হারিয়ে যাবে, তাই নিয়মিত ব্যাকআপ নিন। শুধু Admin / Owner ব্যবহার করতে পারবেন।</p>
+<div id="deny" class="card" hidden><p>এই পেজ শুধু <b>Admin</b> (<a href="login.html">Staff login</a>) অথবা <b>Owner</b> (<a href="admin/login.html">Operations login</a>) ব্যবহার করতে পারবেন।</p></div>
+<div id="box" hidden>
+  <div class="card"><h3 id="bk">সর্বশেষ ব্যাকআপ</h3><p id="last"></p></div>
+  <div class="card"><h3>বর্তমান ডেটা</h3><div class="scroll"><table id="t"></table></div></div>
+  <div class="row">
+    <button class="btn" id="exp">⬇️ ব্যাকআপ ডাউনলোড (JSON)</button>
+    <label class="btn2">⬆️ রিস্টোর (JSON ফাইল) <input id="imp" type="file" accept=".json,application/json" hidden></label>
+    <button id="rst" class="btn2" style="color:var(--bad)">🗑️ সব ডেটা মুছুন</button>
+  </div>
+  <p id="msg" class="muted" role="status"></p>
+</div>
+<p class="row"><a class="btn2" href="index.html">🏠 Home</a><a class="btn2" href="dashboard.html">Dashboard</a><a class="btn2" href="admin/index.html">Ops Panel</a><a class="btn2" href="shop.html">Shop</a></p>
+</main>
+<script>
+(function(){
+ var $=function(i){return document.getElementById(i)};
+ function legacyAdmin(){try{var u=JSON.parse(localStorage.getItem('user')||sessionStorage.getItem('user'));return u&&u.role==='admin'}catch(e){return false}}
+ var ok=legacyAdmin()||sessionStorage.getItem('mc_role')==='Owner';
+ if(!ok){$('deny').hidden=false;return}
+ $('box').hidden=false;
+ var AUTH=['user','auth_token','user_role','user_access'];
+ var LBL={mc_db:'শপ ও Operations Panel (পণ্য, ব্যাচ, অর্ডার, ইউজার)',pharmacy_medicines:'ওষুধ (ড্যাশবোর্ড)',pharmacy_customers:'কাস্টমার',pharmacy_suppliers:'সরবরাহকারী',pharmacy_purchases:'ক্রয়',pharmacy_purchase_returns:'ক্রয় ফেরত',pharmacy_sales:'POS বিক্রি',pharmacy_prescriptions:'প্রেসক্রিপশন',pharmacy_settings:'স্টোর সেটিংস',pharmacy_profile:'প্রোফাইল',pharmacy_creds:'পরিবর্তিত পাসওয়ার্ড (হ্যাশ)',mc_prof:'শপ: সংরক্ষিত ক্রেতার তথ্য',mc_cart:'শপ: কার্ট',mc_wish:'শপ: উইশলিস্ট'};
+ var SKIP={pharmacy_lastbackup:1,mc_lastbackup:1};
+ function keys(){var k=[];for(var i=0;i<localStorage.length;i++){var n=localStorage.key(i);if(/^(pharmacy_|mc_)/.test(n)&&!SKIP[n])k.push(n)}return k.sort()}
+ function count(k){try{var v=JSON.parse(localStorage.getItem(k));return Array.isArray(v)?v.length+' টি':(v&&typeof v==='object'?Object.keys(v).length+' ফিল্ড':'1')}catch(e){return '—'}}
+ function stamp(iso){localStorage.setItem('pharmacy_lastbackup',iso);localStorage.setItem('mc_lastbackup',iso);last()}
+ function last(){var l=localStorage.getItem('pharmacy_lastbackup')||localStorage.getItem('mc_lastbackup'),el=$('last');if(!l){el.innerHTML='<b style="color:var(--bad)">এখনো কোনো ব্যাকআপ নেওয়া হয়নি।</b>';return}var d=Math.floor((Date.now()-new Date(l))/864e5);el.innerHTML=new Date(l).toLocaleString('en-GB',{timeZone:'Asia/Dhaka'})+' ('+d+' দিন আগে)'+(d>7?' — <b style="color:var(--bad)">৭ দিনের বেশি, নতুন ব্যাকআপ নিন</b>':'')}
+ function show(){var t=$('t');t.innerHTML='<tr><th>ডেটা</th><th>পরিমাণ</th><th>সাইজ</th></tr>';keys().forEach(function(k){var r=t.insertRow();r.insertCell().textContent=(LBL[k]||k);r.insertCell().textContent=count(k);r.insertCell().textContent=(localStorage.getItem(k).length/1024).toFixed(1)+' KB'});if(!keys().length)t.insertRow().insertCell().textContent='কোনো ডেটা নেই'}
+ function say(m){$('msg').textContent=m}
+ show();last();
+ $('exp').onclick=function(){var o={app:'medicare',v:7,at:new Date().toISOString(),data:{}};keys().forEach(function(k){o.data[k]=localStorage.getItem(k)});
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o)],{type:'application/json'}));a.download='medicare-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();stamp(o.at);say('ব্যাকআপ ডাউনলোড হয়েছে।')};
+ $('imp').onchange=function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(o.app!=='medicare'||!o.data)throw 0;var ks=Object.keys(o.data).filter(function(k){return /^(pharmacy_|mc_)/.test(k)&&typeof o.data[k]==='string'});
+  if(!ks.length)throw 0;if(!confirm(ks.length+' টি ডেটা-কী রিস্টোর হবে এবং বর্তমান ডেটা বদলে যাবে। চালিয়ে যাবেন?'))return;ks.forEach(function(k){JSON.parse(o.data[k]);});keys().forEach(function(k){localStorage.removeItem(k)});ks.forEach(function(k){localStorage.setItem(k,o.data[k])});show();say('রিস্টোর সম্পন্ন।')}catch(x){say('ফাইলটি সঠিক MediCare ব্যাকআপ নয়।')}};r.readAsText(f)};
+ $('rst').onclick=function(){if(!confirm('সব ব্যবসায়িক ডেটা মুছে যাবে। আগে ব্যাকআপ নিয়েছেন?'))return;keys().forEach(function(k){localStorage.removeItem(k)});show();say('ডেটা মোছা হয়েছে। (পরের লোডে ডেমো ডেটা ফিরে আসতে পারে)')};
+})();
+</script></body></html>

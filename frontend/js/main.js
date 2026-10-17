@@ -301,7 +301,7 @@ function updateUserInterface() {
     
     userAvatarElements.forEach(el => {
         if (el.tagName === 'IMG') {
-            el.src = appState.user.avatar || 'https://via.placeholder.com/40';
+            el.src = appState.user.avatar || 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20200%22%3E%3Crect%20width%3D%22300%22%20height%3D%22200%22%20fill%3D%22%23e0e7ff%22%2F%3E%3Cg%20transform%3D%22rotate%28-30%20150%20100%29%22%3E%3Crect%20x%3D%2295%22%20y%3D%2275%22%20width%3D%22110%22%20height%3D%2250%22%20rx%3D%2225%22%20fill%3D%22%23667eea%22%2F%3E%3Cpath%20d%3D%22M150%2075h30a25%2025%200%200%201%200%2050h-30z%22%20fill%3D%22%23c7d2fe%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E';
         }
     });
     

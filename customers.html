@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="assets/js/guard.js"></script>
+    <script src="assets/js/enhance.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Customer Management - MediCare Pharmacy</title>
@@ -228,7 +230,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1">Total Due</p>
-                            <h3 class="fw-bold text-warning" id="totalDue">$0</h3>
+                            <h3 class="fw-bold text-warning" id="totalDue">৳0</h3>
                         </div>
                         <div class="bg-warning bg-opacity-10 p-3 rounded-3">
                             <i class="fas fa-dollar-sign fa-2x text-warning"></i>
@@ -243,7 +245,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1">Total Purchases</p>
-                            <h3 class="fw-bold text-success" id="totalPurchases">$0</h3>
+                            <h3 class="fw-bold text-success" id="totalPurchases">৳0</h3>
                         </div>
                         <div class="bg-success bg-opacity-10 p-3 rounded-3">
                             <i class="fas fa-shopping-cart fa-2x text-success"></i>
@@ -258,7 +260,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1">Avg. Purchase</p>
-                            <h3 class="fw-bold text-info" id="avgPurchase">$0</h3>
+                            <h3 class="fw-bold text-info" id="avgPurchase">৳0</h3>
                         </div>
                         <div class="bg-info bg-opacity-10 p-3 rounded-3">
                             <i class="fas fa-chart-line fa-2x text-info"></i>
@@ -290,9 +292,9 @@
                 <div class="col-md-3">
                     <select class="form-select rounded-3" id="dueFilter">
                         <option value="">All Due Status</option>
-                        <option value="high">High Due (>$500)</option>
-                        <option value="medium">Medium Due ($100-$500)</option>
-                        <option value="low">Low Due (<$100)</option>
+                        <option value="high">High Due (>৳500)</option>
+                        <option value="medium">Medium Due (৳100-৳500)</option>
+                        <option value="low">Low Due (<৳100)</option>
                         <option value="clear">Clear Due</option>
                     </select>
                 </div>
@@ -669,9 +671,9 @@
         });
         
         document.getElementById('totalCustomers').textContent = filtered.length;
-        document.getElementById('totalDue').textContent = '$' + filtered.reduce((sum, c) => sum + c.due, 0).toFixed(2);
-        document.getElementById('totalPurchases').textContent = '$' + filtered.reduce((sum, c) => sum + c.totalPurchases, 0).toFixed(2);
-        document.getElementById('avgPurchase').textContent = '$' + (filtered.reduce((sum, c) => sum + c.totalPurchases, 0) / (filtered.length || 1)).toFixed(2);
+        document.getElementById('totalDue').textContent = '৳' + filtered.reduce((sum, c) => sum + c.due, 0).toFixed(2);
+        document.getElementById('totalPurchases').textContent = '৳' + filtered.reduce((sum, c) => sum + c.totalPurchases, 0).toFixed(2);
+        document.getElementById('avgPurchase').textContent = '৳' + (filtered.reduce((sum, c) => sum + c.totalPurchases, 0) / (filtered.length || 1)).toFixed(2);
         
         const totalPages = Math.ceil(filtered.length / itemsPerPage);
         const start = (currentPage - 1) * itemsPerPage;
@@ -694,7 +696,7 @@
                     <div class="col-md-6 col-lg-4 col-xl-3">
                         <div class="card customer-card h-100">
                             <div class="position-relative">
-                                ${cust.due > 0 ? `<span class="due-badge ${dueClass}">Due: $${cust.due.toFixed(2)}</span>` : ''}
+                                ${cust.due > 0 ? `<span class="due-badge ${dueClass}">Due: ৳${cust.due.toFixed(2)}</span>` : ''}
                                 <div class="text-center pt-4">
                                     <img src="${avatarImg}" class="customer-avatar" alt="${cust.name}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(cust.name)}&background=3b82f6&color=fff'">
                                 </div>
@@ -710,12 +712,12 @@
                                     <div>
                                         <small class="text-muted">Total Spent</small>
                                         <br>
-                                        <strong>$${cust.totalPurchases.toFixed(2)}</strong>
+                                        <strong>৳${cust.totalPurchases.toFixed(2)}</strong>
                                     </div>
                                     <div>
                                         <small class="text-muted">Due</small>
                                         <br>
-                                        <strong class="${cust.due > 0 ? 'text-danger' : 'text-success'}">$${cust.due.toFixed(2)}</strong>
+                                        <strong class="${cust.due > 0 ? 'text-danger' : 'text-success'}">৳${cust.due.toFixed(2)}</strong>
                                     </div>
                                 </div>
                                 <div class="btn-group w-100">
@@ -856,7 +858,7 @@
                             <div class="bg-light rounded-3 p-3 mb-3">
                                 <h6 class="fw-bold text-primary mb-2"><i class="fas fa-info-circle me-2"></i>Details</h6>
                                 <p class="mb-1"><strong>Joined:</strong> ${customer.joinDate}</p>
-                                <p class="mb-1"><strong>Credit Limit:</strong> $${customer.creditLimit}</p>
+                                <p class="mb-1"><strong>Credit Limit:</strong> ৳${customer.creditLimit}</p>
                                 <p class="mb-0"><strong>Notes:</strong> ${customer.notes || 'No notes'}</p>
                             </div>
                         </div>
@@ -866,21 +868,21 @@
                             <div class="border rounded-3 p-2 text-center bg-white">
                                 <small class="text-muted">Total Spent</small>
                                 <br>
-                                <strong class="text-primary">$${customer.totalPurchases.toFixed(2)}</strong>
+                                <strong class="text-primary">৳${customer.totalPurchases.toFixed(2)}</strong>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="border rounded-3 p-2 text-center bg-white">
                                 <small class="text-muted">Total Due</small>
                                 <br>
-                                <strong class="${customer.due > 0 ? 'text-danger' : 'text-success'}">$${customer.due.toFixed(2)}</strong>
+                                <strong class="${customer.due > 0 ? 'text-danger' : 'text-success'}">৳${customer.due.toFixed(2)}</strong>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="border rounded-3 p-2 text-center bg-white">
                                 <small class="text-muted">Credit Available</small>
                                 <br>
-                                <strong>$${(customer.creditLimit - customer.due).toFixed(2)}</strong>
+                                <strong>৳${(customer.creditLimit - customer.due).toFixed(2)}</strong>
                             </div>
                         </div>
                     </div>
@@ -895,9 +897,9 @@
             <tr>
                 <td>${p.invoice}</td>
                 <td>${p.date}</td>
-                <td>$${p.total.toFixed(2)}</td>
-                <td>$${p.paid.toFixed(2)}</td>
-                <td class="${p.due > 0 ? 'text-danger fw-bold' : 'text-success'}">$${p.due.toFixed(2)}</td>
+                <td>৳${p.total.toFixed(2)}</td>
+                <td>৳${p.paid.toFixed(2)}</td>
+                <td class="${p.due > 0 ? 'text-danger fw-bold' : 'text-success'}">৳${p.due.toFixed(2)}</td>
                 <td><span class="badge ${p.status === 'Paid' ? 'bg-success' : p.status === 'Partial' ? 'bg-warning' : 'bg-danger'} rounded-pill">${p.status}</span></td>
             </tr>
         `).join('');
@@ -907,15 +909,15 @@
             <tr>
                 <td>${entry.date}</td>
                 <td>${entry.description}</td>
-                <td class="text-danger">${entry.debit > 0 ? '$' + entry.debit.toFixed(2) : '-'}</td>
-                <td class="text-success">${entry.credit > 0 ? '$' + entry.credit.toFixed(2) : '-'}</td>
-                <td><strong>$${entry.balance.toFixed(2)}</strong></td>
+                <td class="text-danger">${entry.debit > 0 ? '৳' + entry.debit.toFixed(2) : '-'}</td>
+                <td class="text-success">${entry.credit > 0 ? '৳' + entry.credit.toFixed(2) : '-'}</td>
+                <td><strong>৳${entry.balance.toFixed(2)}</strong></td>
             </tr>
         `).join('');
         
         const payments = paymentHistory[id] || [];
         document.getElementById('paymentHistory').innerHTML = payments.length > 0 ?
-            payments.map(p => `<div class="ledger-entry ledger-credit mb-2"><small>${p.date}</small><br><strong>$${p.amount}</strong> - ${p.method}</div>`).join('') :
+            payments.map(p => `<div class="ledger-entry ledger-credit mb-2"><small>${p.date}</small><br><strong>৳${p.amount}</strong> - ${p.method}</div>`).join('') :
             '<p class="text-muted text-center">No payment history</p>';
         
         new bootstrap.Modal(document.getElementById('customerDetailsModal')).show();
@@ -965,7 +967,7 @@
         const customer = customers.find(c => c.id === currentCustomerId);
         if(customer) {
             if(amount > customer.due) {
-                showToast(`Amount exceeds due amount of $${customer.due}`, 'warning');
+                showToast(`Amount exceeds due amount of ৳${customer.due}`, 'warning');
                 return;
             }
             
@@ -980,7 +982,7 @@
             
             saveCustomersToStorage();
             savePaymentsToStorage();
-            showToast(`Payment of $${amount} received via ${method}`, 'success');
+            showToast(`Payment of ৳${amount} received via ${method}`, 'success');
             viewCustomer(currentCustomerId);
             displayCustomers();
             document.getElementById('paymentAmount').value = '';
@@ -1068,8 +1070,8 @@
     // LOGOUT
     // ============================================
     function logout() {
-        localStorage.clear();
-        sessionStorage.clear();
+        authClear();
+
         window.location.href = 'login.html';
     }
     
