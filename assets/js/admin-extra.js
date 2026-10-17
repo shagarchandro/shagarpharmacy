@@ -46,3 +46,46 @@
   }
   go();
 })();
+
+/* ---- Pharmacist tools: richer prescription queue, counselling note, tab badges ---- */
+(function () {
+  'use strict';
+  function decide(o, ok) {
+    if (ok) {
+      if (!confirm('Approve ' + o.no + '? Confirm you have checked the prescription.')) return;
+      const c = prompt('Counselling note for the customer (optional, e.g. "take after meals")') || '';
+      o.status = 'Confirmed'; o.note = 'Prescription verified.' + (c.trim() ? ' Pharmacist advice: ' + c.trim().slice(0, 200) : ''); o.rxBy = R; o.rxAt = new Date().toISOString();
+      audit('Approved Rx ' + o.no); save(D); toast('Approved'); go();
+    } else {
+      const r = prompt('Reason for rejecting (shown to the customer)'); if (!r || r.trim().length < 3) return toast('A reason is required', 1);
+      o.items.forEach(i => put(D, i.pid, i.qty, o.no)); o.status = 'Cancelled'; o.note = 'Prescription rejected: ' + r.trim().slice(0, 200); o.rxBy = R; o.rxAt = new Date().toISOString();
+      audit('Rejected Rx ' + o.no); save(D); go();
+    }
+  }
+  V.rx = () => {
+    const L = D.orders.filter(o => o.status === 'Prescription Review'), done = D.orders.filter(o => o.rxBy).slice(-8).reverse();
+    const wrap = h('div', {});
+    wrap.append(L.length ? h('div', {}, L.map(o => h('article', { class: 'card' },
+      h('h3', {}, o.no + ' · ' + o.customer + ' · ' + o.phone), h('p', { class: 'muted' }, 'Ordered ' + dhaka(o.at) + ' · ' + o.addr),
+      tbl(['Medicine', 'Qty', 'Rx', 'Price'], o.items.map(i => h('tr', {}, h('td', {}, i.name), h('td', {}, i.qty), h('td', {}, i.rx ? '℞' : ''), h('td', {}, money(i.price * i.qty))))),
+      h('p', {}, 'Doctor / registration given by customer: ', h('b', {}, o.doc || '—')),
+      h('div', { class: 'row' }, h('button', { class: 'btn', onclick() { decide(o, true); } }, T('Approve')), h('button', { onclick() { decide(o, false); } }, T('Reject')), h('a', { class: 'btn2', href: 'tel:' + o.phone }, '📞 Call customer'))))) : h('p', { class: 'empty' }, 'No prescriptions waiting. New Rx orders appear here.'));
+    if (done.length) wrap.append(h('h2', {}, 'Recently reviewed'), tbl(['Order', 'Customer', 'Result', 'By', 'When', 'Note'], done.map(o => h('tr', {}, h('td', {}, o.no), h('td', {}, o.customer), h('td', {}, o.status === 'Cancelled' ? 'Rejected' : 'Approved'), h('td', {}, o.rxBy), h('td', {}, dhaka(o.rxAt)), h('td', {}, o.note || '')))));
+    return wrap;
+  };
+  if (V.notes) {
+    const N0 = V.notes;
+    V.notes = () => { const r = N0(); const q = D.notes.filter(n => n.kind === 'ask' && !n.read).length; if (q) r.prepend(h('p', { class: 'warn' }, '💊 ' + q + ' unanswered pharmacist question' + (q > 1 ? 's' : '') + ' (marked with 💊 below)')); return r; };
+  }
+  const badge = () => {
+    const nav = document.querySelector('header.bar nav'); if (!nav) return;
+    const open = D.orders.filter(o => ['Pending', 'Confirmed', 'Processing', 'Packed'].includes(o.status)).length;
+    const n = { rx: D.orders.filter(o => o.status === 'Prescription Review').length, notes: (D.notes || []).filter(x => !x.read).length, orders: open, delivery: D.orders.filter(o => ['Packed', 'Shipped'].includes(o.status)).length };
+    [...nav.querySelectorAll('button')].forEach(b => {
+      const base = b.dataset.base || (b.dataset.base = b.textContent), key = Object.keys(NAMES).find(k => T(NAMES[k]) === base);
+      b.textContent = (key && n[key] > 0) ? base + ' (' + n[key] + ')' : base;
+    });
+  };
+  const g0 = go; go = function () { g0(); badge(); };
+  go();
+})();

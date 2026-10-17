@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <script src="assets/js/guard.js"></script>
+    <script src="assets/js/enhance.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Prescription Management - MediCare Pharmacy</title>
@@ -1132,6 +1133,8 @@
             }));
             localStorage.setItem('prescription_to_fill', JSON.stringify(prescriptionItems));
             localStorage.setItem('prescription_patient', prescription.patientName);
+            localStorage.setItem('prescription_id', String(prescription.id));
+            localStorage.setItem('prescription_no', prescription.prescriptionNo || '');
             
             showToast(`Prescription added to cart. Redirecting to POS...`, "success");
             setTimeout(() => {
@@ -1150,6 +1153,8 @@
             }));
             localStorage.setItem('prescription_to_fill', JSON.stringify(prescriptionItems));
             localStorage.setItem('prescription_patient', prescription.patientName);
+            localStorage.setItem('prescription_id', String(prescription.id));
+            localStorage.setItem('prescription_no', prescription.prescriptionNo || '');
             
             showToast(`Prescription added to cart. Redirecting to POS...`, "success");
             setTimeout(() => {

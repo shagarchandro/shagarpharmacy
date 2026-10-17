@@ -5,8 +5,8 @@
 <body>
 <main>
 <h1>💾 ব্যাকআপ ও রিস্টোর / Backup & Restore</h1>
-<p class="muted">সব ডেটা এই ব্রাউজারে থাকে। ব্রাউজার ডেটা মুছলে হারিয়ে যাবে, তাই নিয়মিত ব্যাকআপ নিন। শুধু Admin / Owner ব্যবহার করতে পারবেন।</p>
-<div id="deny" class="card" hidden><p>এই পেজ শুধু <b>Admin</b> (<a href="login.html">Staff login</a>) অথবা <b>Owner</b> (<a href="admin/login.html">Operations login</a>) ব্যবহার করতে পারবেন।</p></div>
+<p class="muted">সব ডেটা এই ব্রাউজারে থাকে। ব্রাউজার ডেটা মুছলে হারিয়ে যাবে, তাই নিয়মিত ব্যাকআপ নিন। Admin / Owner সবকিছু করতে পারবেন; Pharmacist শুধু ব্যাকআপ ডাউনলোড করতে পারবেন।</p>
+<div id="deny" class="card" hidden><p>এই পেজ <b>Admin</b> (<a href="login.html">Staff login</a>) অথবা <b>Owner</b> (<a href="admin/login.html">Operations login</a>) ও <b>Pharmacist</b> (শুধু ডাউনলোড) ব্যবহার করতে পারবেন। <b>Staff / Cashier</b> এই পেজ ব্যবহার করতে পারবে না — ব্যাকআপের জন্য ম্যানেজারকে জানান।</p></div>
 <div id="box" hidden>
   <div class="card"><h3 id="bk">সর্বশেষ ব্যাকআপ</h3><p id="last"></p></div>
   <div class="card"><h3>বর্তমান ডেটা</h3><div class="scroll"><table id="t"></table></div></div>
@@ -23,9 +23,13 @@
 (function(){
  var $=function(i){return document.getElementById(i)};
  function legacyAdmin(){try{var u=JSON.parse(localStorage.getItem('user')||sessionStorage.getItem('user'));return u&&u.role==='admin'}catch(e){return false}}
- var ok=legacyAdmin()||sessionStorage.getItem('mc_role')==='Owner';
+ var lr='';try{lr=(JSON.parse(localStorage.getItem('user')||sessionStorage.getItem('user'))||{}).role||''}catch(e){}
+ var full=legacyAdmin()||sessionStorage.getItem('mc_role')==='Owner';
+ var exportOnly=!full&&(lr==='pharmacist'||sessionStorage.getItem('mc_role')==='Pharmacist');
+ var ok=full||exportOnly;
  if(!ok){$('deny').hidden=false;return}
  $('box').hidden=false;
+ if(exportOnly){$('imp').parentNode.hidden=true;$('rst').hidden=true;$('msg').textContent='ফার্মাসিস্ট হিসেবে আপনি শুধু ব্যাকআপ ডাউনলোড করতে পারবেন। রিস্টোর ও মোছা Admin/Owner করবেন।'}
  var AUTH=['user','auth_token','user_role','user_access'];
  var LBL={mc_db:'শপ ও Operations Panel (পণ্য, ব্যাচ, অর্ডার, ইউজার)',pharmacy_medicines:'ওষুধ (ড্যাশবোর্ড)',pharmacy_customers:'কাস্টমার',pharmacy_suppliers:'সরবরাহকারী',pharmacy_purchases:'ক্রয়',pharmacy_purchase_returns:'ক্রয় ফেরত',pharmacy_sales:'POS বিক্রি',pharmacy_prescriptions:'প্রেসক্রিপশন',pharmacy_settings:'স্টোর সেটিংস',pharmacy_profile:'প্রোফাইল',pharmacy_creds:'পরিবর্তিত পাসওয়ার্ড (হ্যাশ)',mc_prof:'শপ: সংরক্ষিত ক্রেতার তথ্য',mc_cart:'শপ: কার্ট',mc_wish:'শপ: উইশলিস্ট'};
  var SKIP={pharmacy_lastbackup:1,mc_lastbackup:1};

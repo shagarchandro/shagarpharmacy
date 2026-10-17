@@ -1133,10 +1133,10 @@ body.dark-mode .sidebar-overlay {
         const stored = localStorage.getItem(MEDICINE_STORAGE_KEY);
         if (stored) return JSON.parse(stored);
         return [
-            { id: 1, name: "Paracetamol 500mg", category: "Pain Relief", stock: 150, sellingPrice: 5.00, expiryDate: "2025-12-31", minStock: 50 },
-            { id: 2, name: "Amoxicillin 250mg", category: "Antibiotics", stock: 8, sellingPrice: 10.00, expiryDate: "2025-06-30", minStock: 30 },
-            { id: 3, name: "Vitamin C 1000mg", category: "Vitamins", stock: 45, sellingPrice: 15.00, expiryDate: "2025-08-31", minStock: 20 },
-            { id: 4, name: "Aspirin 100mg", category: "Pain Relief", stock: 120, sellingPrice: 8.00, expiryDate: "2025-11-30", minStock: 40 }
+            { id: 1, name: "Paracetamol 500mg", category: "Pain Relief", stock: 150, sellingPrice: 5.00, expiryDate: "2027-12-31", minStock: 50 },
+            { id: 2, name: "Amoxicillin 250mg", category: "Antibiotics", stock: 8, sellingPrice: 10.00, expiryDate: "2027-06-30", minStock: 30 },
+            { id: 3, name: "Vitamin C 1000mg", category: "Vitamins", stock: 45, sellingPrice: 15.00, expiryDate: "2027-08-31", minStock: 20 },
+            { id: 4, name: "Aspirin 100mg", category: "Pain Relief", stock: 120, sellingPrice: 8.00, expiryDate: "2027-11-30", minStock: 40 }
         ];
     }
     
@@ -1508,11 +1508,9 @@ body.dark-mode .sidebar-overlay {
             if (menuItems.purchases) menuItems.purchases.style.display = 'none';
             if (menuItems.suppliers) menuItems.suppliers.style.display = 'none';
             if (menuItems.reports) menuItems.reports.style.display = 'none';
-            if (menuItems.settings) menuItems.settings.style.display = 'none';
         } else if (role === 'pharmacist') {
             if (menuItems.purchases) menuItems.purchases.style.display = 'none';
             if (menuItems.suppliers) menuItems.suppliers.style.display = 'none';
-            if (menuItems.settings) menuItems.settings.style.display = 'none';
         }
     }
     

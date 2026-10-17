@@ -713,6 +713,7 @@
             return medicines.map(med => ({
                 id: med.id,
                 expiry: med.expiryDate || '',
+                rx: !!med.rxRequired,
                 name: med.name,
                 generic: med.genericName || '',
                 brand: med.brand || '',
@@ -811,7 +812,7 @@
                 <div class="product-name">${p.name.length > 25 ? p.name.substring(0, 22) + '...' : p.name}</div>
                 <div class="product-price">৳${p.price}</div>
                 <div class="product-stock">📦 Stock: ${p.stock}</div>
-                ${p.stock <= 10 ? '<span class="badge bg-warning text-dark mt-1">⚠️ Low Stock</span>' : ''}
+                ${p.rx ? '<span class="badge bg-danger mt-1">Rx</span> ' : ''}${p.stock <= 10 ? '<span class="badge bg-warning text-dark mt-1">⚠️ Low Stock</span>' : ''}
             </div>
         `).join('');
     }
@@ -863,6 +864,7 @@
         if (product.stock <= 0) { showToast('Product out of stock!', 'danger'); return; }
         if (product.expiry && product.expiry < new Date().toISOString().slice(0,10)) { showToast('Expired medicine cannot be sold!', 'danger'); return; }
         
+        if (product.rx && !rxGate()) return;
         const existingItem = cart.find(item => item.id === productId);
         if (existingItem) {
             if (existingItem.quantity + 1 <= product.stock) {
@@ -944,15 +946,63 @@
     const discountSlider = document.getElementById('discountSlider');
     const discountInput = document.getElementById('discountInput');
     discountSlider?.addEventListener('input', function() { discountInput.value = this.value; calculateTotals(); });
-    discountInput?.addEventListener('input', function() { let val = parseInt(this.value) || 0; if (val > 100) val = 100; if (val < 0) val = 0; discountSlider.value = val; calculateTotals(); });
+    const MAXD = (function () { try { return (JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')) || {}).role === 'staff' ? 10 : 100; } catch (e) { return 100; } })();
+    if (discountSlider) discountSlider.max = MAXD; if (discountInput) discountInput.max = MAXD;
+    discountInput?.addEventListener('input', function() { let val = parseInt(this.value) || 0; if (val > MAXD) { val = MAXD; showToast('Staff discount limit is ' + MAXD + '%. Ask a pharmacist or admin for more.', 'warning'); } if (val < 0) val = 0; this.value = val; discountSlider.value = val; calculateTotals(); });
     
-    function clearCart() { if (cart.length > 0 && confirm('Clear all items from cart?')) { cart = []; updateCart(); showToast('Cart cleared', 'info'); } }
+
+    // ===== Prescription (Rx) dispensing rules =====
+    let rxInfo = null; // { no, id, by, doctor } for the current cart
+    function curUser() { try { return JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')) || {}; } catch (e) { return {}; } }
+    function rxGate() {
+        const u = curUser();
+        if (u.role !== 'pharmacist' && u.role !== 'admin') { showToast('Prescription medicine: only a pharmacist can dispense. Ask the pharmacist.', 'danger'); return false; }
+        if (rxInfo) return true;
+        const ref = prompt('Prescription medicine.\nEnter the verified prescription no. or doctor name:');
+        if (!ref || ref.trim().length < 3) { showToast('Prescription reference is required', 'warning'); return false; }
+        rxInfo = { no: ref.trim().slice(0, 60), id: null, by: u.name || u.role, doctor: '' };
+        return true;
+    }
+    function prefillFromPrescription() {
+        let items; try { items = JSON.parse(localStorage.getItem('prescription_to_fill') || 'null'); } catch (e) { items = null; }
+        if (!items || !items.length) return;
+        const u = curUser(), patient = localStorage.getItem('prescription_patient') || '', rid = localStorage.getItem('prescription_id'), rno = localStorage.getItem('prescription_no') || '';
+        ['prescription_to_fill', 'prescription_patient', 'prescription_id', 'prescription_no'].forEach(k => localStorage.removeItem(k));
+        if (u.role !== 'pharmacist' && u.role !== 'admin') { showToast('Only a pharmacist can dispense a prescription.', 'danger'); return; }
+        rxInfo = { no: rno || 'Rx', id: rid, by: u.name || u.role, doctor: '' };
+        const missing = [];
+        items.forEach(it => {
+            const nm = String(it.name || '').toLowerCase();
+            const pr = products.find(p => p.name.toLowerCase() === nm) || products.find(p => p.name.toLowerCase().includes(nm) || nm.includes(p.name.toLowerCase()));
+            if (!pr || pr.stock <= 0 || (pr.expiry && pr.expiry < new Date().toISOString().slice(0, 10))) { missing.push(it.name); return; }
+            const ex = cart.find(c => c.id === pr.id);
+            if (!ex) cart.push({ id: pr.id, name: pr.name, price: pr.price, quantity: 1, total: pr.price });
+        });
+        updateCart();
+        const sel = document.getElementById('customerSelect');
+        if (sel && patient) { for (const o of sel.options) if (o.text.toLowerCase().startsWith(patient.toLowerCase())) { sel.value = o.value; break; } }
+        showToast(`Prescription ${rno} loaded: ${cart.length} item(s)` + (missing.length ? `. Not available: ${missing.join(', ')}` : ''), missing.length ? 'warning' : 'success');
+    }
+    function markPrescriptionFilled(soldItems) {
+        if (!rxInfo || !rxInfo.id) return;
+        try {
+            const K = 'pharmacy_prescriptions', list = JSON.parse(localStorage.getItem(K) || 'null'); if (!Array.isArray(list)) return;
+            const rx = list.find(r => String(r.id) === String(rxInfo.id)); if (!rx) return;
+            (rx.medicines || []).forEach(m => { if (soldItems.some(i => i.name.toLowerCase() === String(m.name).toLowerCase() || String(m.name).toLowerCase().includes(i.name.toLowerCase()))) m.status = 'filled'; });
+            const all = rx.medicines.every(m => m.status === 'filled'), any = rx.medicines.some(m => m.status === 'filled');
+            rx.status = all ? 'filled' : (any ? 'partial' : rx.status); if (all) rx.filledDate = new Date().toISOString().split('T')[0];
+            rx.dispensedBy = rxInfo.by; localStorage.setItem(K, JSON.stringify(list));
+        } catch (e) { console.warn(e); }
+    }
+    setTimeout(prefillFromPrescription, 0);
+    function clearCart() { if (cart.length > 0 && confirm('Clear all items from cart?')) { rxInfo = null; cart = []; updateCart(); showToast('Cart cleared', 'info'); } }
     
     // ============================================
     // PROCESS PAYMENT
     // ============================================
     function processPayment() {
         if (cart.length === 0) { showToast('Cart is empty!', 'warning'); return; }
+        if (parseFloat(document.getElementById('discountSlider')?.value || 0) > MAXD) { showToast('Discount above your limit (' + MAXD + '%)', 'danger'); return; }
         const { subtotal: _sub, discount: _disc, tax: _tax, total } = calculateTotals();
         const customerId = document.getElementById('customerSelect').value;
         const paymentMethod = selectedPaymentMethod;
@@ -967,6 +1017,7 @@
         
         const invoice = {
             invoiceNo: 'INV-' + Date.now(),
+            rx: rxInfo,
             date: new Date().toLocaleString(),
             customer: customerId === '0' ? 'Walk-in Customer' : customers.find(c => c.id == customerId)?.name || 'Walk-in Customer',
             items: [...cart],
@@ -996,9 +1047,11 @@
             real.push({ id: Date.now(), real: true, invoiceNo: invoice.invoiceNo, customer: invoice.customer,
                 total: +invoice.total.toFixed(2), subtotal: +invoice.subtotal.toFixed(2), discount: +invoice.discount.toFixed(2), tax: +invoice.tax.toFixed(2),
                 date: new Date().toISOString().split('T')[0], at: new Date().toISOString(), status: 'Completed',
+                rx: rxInfo ? { no: rxInfo.no, by: rxInfo.by } : null, cashier: curUser().name || curUser().role || '',
                 paymentMethod: invoice.paymentMethod, items: invoice.items.map(i => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })) });
             localStorage.setItem(SK, JSON.stringify(real)); window.dispatchEvent(new Event('mc-sale'));
         } catch (e) { console.warn('Could not save sale', e); }
+        markPrescriptionFilled(invoice.items); rxInfo = null;
         products = loadProductsFromStorage();
         displayProducts();
         showInvoice(invoice);
@@ -1021,7 +1074,7 @@
                 <h5>🧾 INVOICE</h5>
                 <p><strong>Invoice No:</strong> ${invoice.invoiceNo}<br>
                 <strong>Date:</strong> ${invoice.date}<br>
-                <strong>Customer:</strong> ${invoice.customer}</p>
+                <strong>Customer:</strong> ${esc(invoice.customer)}${invoice.rx ? `<br><strong>Rx:</strong> ${esc(invoice.rx.no)} (verified by ${esc(invoice.rx.by)})` : ''}</p>
                 <hr>
             </div>
             <table class="table table-bordered"><thead class="table-light"><tr><th>Item</th><th>Price</th><th>Qty</th><th>Total</th></tr></thead>

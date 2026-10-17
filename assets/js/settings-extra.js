@@ -90,6 +90,7 @@
 
   function init() {
     addStoreTab(); showLast();
+    var u0 = who(); if (u0 && u0.role === 'staff') { var bt = document.querySelector('#settingsModal a[href="#backup"]'); if (bt) bt.parentNode.style.display = 'none'; }
     var u = who(), p = u && (rd('pharmacy_profile', {})[u.role]);
     if (u) { $('profileName').value = (p && p.name) || u.name || ''; $('profileEmail').value = u.email || ''; $('profileEmail').readOnly = true; $('profilePhone').value = (p && p.phone) || ''; if (p && p.name) document.querySelectorAll('#userName').forEach(function (e) { e.textContent = p.name; }); }
     var n = (rd('pharmacy_settings', {}).notif) || { email: true, sms: true, whatsapp: false };

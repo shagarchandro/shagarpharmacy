@@ -40,6 +40,8 @@
   if (ro.edit === false) css += 'button[onclick^="edit"],button[onclick^="reset"],[data-bs-target^="#add"]{display:none!important}';
   if (ro.delete === false) css += 'button[onclick^="delete"]{display:none!important}';
   if (ro.create === false) css += '[data-bs-target="#addPrescriptionModal"]{display:none!important}';
+  if (user.role === 'staff') css += '#menuBackup{display:none!important}';
+  if (page === 'prescriptions' && ro.create === false) css += 'button[onclick*="fillPrescription"],button[onclick*="markMedicineFilled"]{display:none!important}';
   if (css) { var s = document.createElement('style'); s.textContent = css; document.head.appendChild(s); }
   addEventListener('load', function () {
     ['editMedicine', 'editCustomer', 'deleteMedicine', 'deleteCustomer', 'deletePrescription', 'deleteSupplier'].forEach(function (fn) {

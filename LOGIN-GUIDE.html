@@ -22,6 +22,18 @@
 <tr><td>Inventory Demo</td><td><code>demo</code></td><td>Alerts, Dashboard, Products, Inventory, Purchases, Suppliers</td></tr>
 <tr><td>Delivery Demo</td><td><code>demo</code></td><td>Orders, Delivery queue</td></tr></table></section>
 
+<section><h2>👩‍⚕️ ফার্মাসিস্টের কাজ (সংক্ষেপে)</h2><ul>
+<li><b>ড্যাশবোর্ড (pharmacist@medicare.com):</b> Dashboard-এ "Rx waiting" ও কাজের তালিকা; Medicines-এ মেয়াদ/কম-স্টকের "Needs attention" তালিকা; Prescriptions-এ পেন্ডিং/মেয়াদোত্তীর্ণ রিপোর্ট; Reports-এ Expiry ও Rx dispensing লগ (CSV)।</li>
+<li><b>Rx ওষুধ বিক্রি:</b> ওষুধে "Rx required" টিক দিলে শুধু Pharmacist/Admin POS-এ বিক্রি করতে পারবে (Staff আটকে যাবে)। Prescriptions পেজ থেকে "Fill" দিলে ওষুধগুলো নিজে POS কার্টে আসে, বিক্রির পর প্রেসক্রিপশন filled/partial হয়।</li>
+<li><b>Ops Panel (Pharmacist Demo, কোড demo):</b> Prescription review-এ অনুমোদনের সময় কাউন্সেলিং নোট দেওয়া যায়, ট্যাবে পেন্ডিং সংখ্যা দেখায়; শপের "Ask pharmacist" প্রশ্ন Notifications-এ আসে।</li>
+<li><b>Backup:</b> Pharmacist শুধু ব্যাকআপ ডাউনলোড করতে পারে; রিস্টোর/মোছা Admin/Owner-এর।</li></ul></section>
+
+<section><h2>🧑‍💼 স্টাফের কাজ (সংক্ষেপে)</h2><ul>
+<li><b>লগইন:</b> staff@medicare.com / staff123 (Ops Panel-এ "Cashier Demo", কোড demo)।</li>
+<li><b>POS:</b> বিল হোল্ড/রিজিউম, শিফট শেষে "Close my shift", ডিসকাউন্ট সর্বোচ্চ ১০%, Rx ওষুধ বিক্রি নিষেধ (ফার্মাসিস্টকে ডাকুন)।</li>
+<li><b>Medicines:</b> শুধু দেখা ও দ্রুত খোঁজা (র‍্যাক, স্টক, দাম)। <b>Prescriptions:</b> শুধু দেখা।</li>
+<li><b>Settings:</b> নিজের প্রোফাইল ও পাসওয়ার্ড। Backup/Reports/Purchases/Suppliers বন্ধ।</li></ul></section>
+
 <section><h2>পাসওয়ার্ড বদলানো (ড্যাশবোর্ড)</h2><p>Dashboard → Settings → Security থেকে পাসওয়ার্ড বদলানো যায় (কমপক্ষে ৬ অক্ষর)। নতুন পাসওয়ার্ড হ্যাশ হয়ে এই ব্রাউজারে থাকে। ভুলে গেলে Backup পেজ থেকে ডেটা মুছলে ডিফল্ট পাসওয়ার্ড ফিরে আসে।</p></section>
 
 <section><h2>লগআউট ও ডেটা</h2><p>লগআউট করলে এখন শুধু লগইন-তথ্য মোছে; ওষুধ/কাস্টমার/বিক্রির ডেটা থাকে। সম্পূর্ণ রিসেট: Operations Panel → Owner → Data → Reset।</p>

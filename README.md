@@ -60,3 +60,22 @@ Demo only; not secure for real pharmacy use. The storefront and admin are single
 - **Ops Panel → Settings:** shop profile & rules — open/closed switch, announcement banner, shop phone/address/hours, free-delivery threshold, minimum order. Ops **Data** tab shows backup status and quick export.
 - **Online Shop** (`assets/js/store-extra.js`): shows the announcement and a closed banner, blocks orders when closed or below the minimum, free delivery with "add ৳X more" hint, footer uses the shop details.
 - **Backup page:** friendly names and record counts per dataset, last-backup time with a 7-day warning (also on the dashboard strip).
+
+## Added in v11 (Pharmacist)
+- **Rx medicines:** new "Rx required" flag on medicines (badge on cards). In POS only Pharmacist/Admin can sell Rx items (a prescription ref is asked and stored on the sale and invoice); Staff are blocked.
+- **Prescription → POS hand-off now works** (it was never read before): "Fill" adds the matching in-stock, unexpired medicines to the cart and selects the patient; after payment the prescription becomes filled/partial with `dispensedBy`.
+- **Pharmacist panels** (`enhance.js`): Dashboard (Rx waiting, past validity, dispensed today, worklist), Medicines (needs-attention list: expired, expiring ≤60 days, low stock, with batch/rack + CSV), Prescriptions (pending/partial/past-validity/filled today + CSV), Reports (expiry & stock report, Rx dispensing log CSV), POS (Rx sales today).
+- Built-in demo data is now saved once on first visit so Dashboard, POS and Reports always agree.
+- **Settings** are available to every role for own profile/password (Store & Invoice tab stays Admin-only).
+- **Shop:** "Ask pharmacist" page (name, mobile, medicine, question) → Ops Panel Notifications.
+- **Ops Panel (Pharmacist):** richer prescription queue (items, address, call button), optional counselling note shown to the customer, reviewed-by history, pending counts on tabs.
+- **Backup:** Pharmacist (dashboard or Ops) can download a backup but not restore or wipe.
+
+## Added in v12 (Staff)
+- **Staff Dashboard:** only what a counter staff member needs — my sales today, my invoices, low stock, expired (do not sell), prescriptions waiting, held bills; no supplier payables, stock cost value or backup link.
+- **POS:** *Hold bill* / *Resume held* (up to 10), *Close my shift* (counts cash, difference, saved in `pharmacy_shifts`, printable), staff discount limit 10% (enforced again at payment), Rx badge on product cards (staff cannot sell Rx items), every sale records the cashier.
+- **Medicines (view only):** quick lookup by name/generic showing rack, stock, price, Rx/expired flags; no stock-cost value.
+- **Prescriptions (view only):** banner + fill/mark-filled buttons hidden for staff.
+- **Settings:** staff manage their own profile/password only (no Backup tab, no Store tab). **Backup page:** not available to staff/cashier.
+- **Online Shop:** a staff bar with shortcuts (Dashboard, POS, Medicines / Ops Panel) when someone is logged in. **Ops Panel (Cashier / Delivery):** open-order and delivery counts on tabs.
+- Dashboard demo medicines no longer start expired.
