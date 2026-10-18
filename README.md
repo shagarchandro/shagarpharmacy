@@ -130,3 +130,11 @@ Team Board tab for every Ops role (notices with read-receipts, shift-handover no
 
 ## v28 — Security hardening (see SECURITY.md)
 Salted PBKDF2 password hashes + password policy (also for custom accounts changing their own password), absolute session limit, default-password warnings, stored-XSS guard on all saved text, clickjacking guard, CSP meta on every page + `_headers` for real hosting, safer backup restore (security keys need explicit confirmation), password-change audit, Control Center → Security: session length.
+
+## v29 — Storefront + Ops Panel
+- Shop (`assets/js/store-more.js`): recently viewed strip, delivery ETA on product page, order tracking timeline + one-click Reorder on Orders, free-delivery progress bar in cart, sticky mobile cart bar, back-to-top button.
+- Ops Panel (`assets/js/admin-v29.js`): "Today" strip on Dashboard (revenue, POS sales, online orders, awaiting action); status counts and CSV export on Orders.
+
+## v30 — POS Sales + Shopping Cart
+- POS (`assets/js/pos-extra.js`, loaded by `sales.html`): hold/resume bills (F4), unsaved-cart autosave/restore, quick-cash buttons with live change/short display, cart unit summary, shortcuts F2 (search) / F9 (pay).
+- Shop cart (`assets/js/store-more.js`): +/− steppers, per-unit price and low-stock note, Save for later list, Clear cart, savings line, Rx notice, "You may also need" suggestions.
