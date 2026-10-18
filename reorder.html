@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="bn"><head><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
+<script src="assets/js/theme.js"></script><script src="assets/js/responsive.js"></script><script src="assets/js/prefs.js"></script><script src="assets/js/panel.js" defer></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MediCare – Reorder List</title>
+<style>
+:root{--bg:#f4f7fb;--fg:#12263a;--card:#fff;--br:#d6e0ea;--pri:#667eea;--mut:#5b6b7b;--bad:#b3261e;--ok:#146c43}
+@media(prefers-color-scheme:dark){:root{--bg:#10171f;--fg:#e6eef6;--card:#17212c;--br:#2b3a4a;--mut:#9fb0c0;--ok:#6fdc9d}}
+body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg)}main{max-width:1000px;margin:auto;padding:1rem 16px}
+.card{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:1rem;margin:.8rem 0}.row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+input,select{padding:.5rem;border:1px solid var(--br);border-radius:8px;background:var(--card);color:var(--fg);font:inherit}
+.btn{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:.5rem .9rem;cursor:pointer;font:inherit;text-decoration:none}
+.btn2{border:1px solid var(--br);background:var(--card);color:var(--fg);border-radius:8px;padding:.5rem .9rem;cursor:pointer;font:inherit;text-decoration:none}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:520px}th,td{border-bottom:1px solid var(--br);padding:.5rem;text-align:left}.muted{color:var(--mut)}.bad{color:var(--bad)}.ok{color:var(--ok)}
+.k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem}.k div{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:.7rem}.k b{display:block;font-size:1.25rem}
+@media print{.noprint{display:none!important}body{background:#fff;color:#000}}
+</style></head>
+<body><main>
+<h1>🛒 রিঅর্ডার তালিকা</h1>
+<p class="muted">স্টক কম এমন ওষুধ, কতটা কিনতে হবে ও আনুমানিক খরচ — প্রিন্ট বা CSV করে সাপ্লায়ারকে পাঠান।</p>
+<div id="deny" class="card" hidden>শুধু <b>Admin</b> ও <b>Pharmacist</b>। <a href="login.html">Login</a></div>
+<div id="box" hidden>
+ <div class="card row noprint"><label>টার্গেট স্টক (ন্যূনতমের গুণ) <input type="number" id="x" value="2" min="1" step="any" style="width:80px"></label><label>সাপ্লায়ার <select id="sup"><option value="">সব</option></select></label><button class="btn2" id="csv">⬇️ CSV</button><button class="btn2" id="pr">🖨 Print</button></div>
+ <div class="k" id="k"></div>
+ <div class="card scroll"><table><thead><tr><th>ওষুধ</th><th>সাপ্লায়ার</th><th>স্টক</th><th>ন্যূনতম</th><th>অর্ডার করুন</th><th>আনুমানিক খরচ</th></tr></thead><tbody id="tb"></tbody></table></div>
+</div>
+<p class="row noprint"><a class="btn2" href="dashboard.html">Dashboard</a><a class="btn2" href="purchases.html">Purchases</a></p>
+</main>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};function rj(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]})}
+var tk=function(n){return "৳"+(Math.round((+n||0)*100)/100).toLocaleString()};
+var u=null;try{u=JSON.parse(localStorage.getItem("user")||sessionStorage.getItem("user"))}catch(e){}
+var rl=u&&u.role||"";var ok=rl==="admin"||rl==="pharmacist"||sessionStorage.getItem("mc_role")==="Owner"||sessionStorage.getItem("mc_role")==="Pharmacist";
+var who=(u&&(u.name||u.role))||sessionStorage.getItem("mc_role")||"";
+if(!ok){$('deny').hidden=false;return}$('box').hidden=false;
+var meds=rj('pharmacy_medicines',[]);
+function low(){return meds.filter(function(m){var mn=+m.minStock||+(rj('pharmacy_settings',{}).lowDefault)||0;return (+m.stock||0)<=mn})}
+var sups={};low().forEach(function(m){var s=m.supplier||m.supplierName||'';if(s)sups[s]=1});Object.keys(sups).forEach(function(s){$('sup').add(new Option(s,s))});
+function rows(){var f=$('sup').value,x=+$('x').value||2;return low().filter(function(m){return !f||(m.supplier||m.supplierName)===f}).map(function(m){var mn=+m.minStock||+(rj('pharmacy_settings',{}).lowDefault)||0,need=Math.max(Math.ceil(mn*x-(+m.stock||0)),1);return {n:m.name,s:m.supplier||m.supplierName||'—',st:+m.stock||0,mn:mn,need:need,cost:need*(+m.purchasePrice||0)}})}
+function draw(){var R=rows(),t=R.reduce(function(a,r){return a+r.cost},0);
+ $('k').innerHTML='<div><b>'+R.length+'</b>আইটেম</div><div><b>'+R.reduce(function(a,r){return a+r.need},0)+'</b>মোট ইউনিট</div><div><b>'+tk(t)+'</b>আনুমানিক খরচ</div>';
+ $('tb').innerHTML=R.map(function(r){return '<tr><td>'+esc(r.n)+'</td><td>'+esc(r.s)+'</td><td class="'+(r.st===0?'bad':'')+'">'+r.st+'</td><td>'+r.mn+'</td><td><b>'+r.need+'</b></td><td>'+tk(r.cost)+'</td></tr>'}).join('')||'<tr><td colspan="6" class="ok">সব স্টক ঠিক আছে ✔</td></tr>'}
+['x','sup'].forEach(function(i){$(i).addEventListener('input',draw)});$('pr').onclick=function(){print()};
+$('csv').onclick=function(){var L=[['Medicine','Supplier','Stock','Min','Order','Est. cost']].concat(rows().map(function(r){return [r.n,r.s,r.st,r.mn,r.need,r.cost]}));
+ var c=L.map(function(r){return r.map(function(v){v=String(v==null?'':v);if(/^[=+\-@]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"'}).join(',')}).join('\n');
+ var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+c],{type:'text/csv'}));a.download='reorder.csv';a.click()};
+draw();
+})();
+</script></body></html>

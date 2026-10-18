@@ -1,7 +1,8 @@
 <!doctype html>
-<html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="bn"><head><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
+<script src="assets/js/theme.js"></script><script src="assets/js/responsive.js"></script><script src="assets/js/prefs.js"></script><script src="assets/js/panel.js" defer></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MediCare – Backup & Restore</title>
-<link rel="stylesheet" href="assets/css/styles.css"></head>
+</head>
 <body>
 <main>
 <h1>💾 ব্যাকআপ ও রিস্টোর / Backup & Restore</h1>
@@ -42,7 +43,7 @@
  show();last();
  $('exp').onclick=function(){var o={app:'medicare',v:7,at:new Date().toISOString(),data:{}};keys().forEach(function(k){o.data[k]=localStorage.getItem(k)});
   var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o)],{type:'application/json'}));a.download='medicare-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();stamp(o.at);say('ব্যাকআপ ডাউনলোড হয়েছে।')};
- $('imp').onchange=function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(o.app!=='medicare'||!o.data)throw 0;var ks=Object.keys(o.data).filter(function(k){return /^(pharmacy_|mc_)/.test(k)&&typeof o.data[k]==='string'});
+ $('imp').onchange=function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(o.app!=='medicare'||!o.data)throw 0;var SEC={pharmacy_creds:1,pharmacy_accounts:1,pharmacy_roles:1,mc_acc:1,pharmacy_loginlog:1,mc_lock:1};var ks=Object.keys(o.data).filter(function(k){return /^(pharmacy_|mc_)/.test(k)&&typeof o.data[k]==='string'&&o.data[k].length<8e6});var sk=ks.filter(function(k){return SEC[k]});if(sk.length){if(confirm('⚠️ এই ফাইলে পাসওয়ার্ড/রোল/অ্যাকাউন্টের তথ্য আছে ('+sk.join(', ')+').\nশুধু নিজের তৈরি ব্যাকআপ হলে OK দিন। অন্যথায় Cancel — নিরাপত্তা তথ্য বাদ দিয়ে রিস্টোর হবে।')===false)ks=ks.filter(function(k){return !SEC[k]})}
   if(!ks.length)throw 0;if(!confirm(ks.length+' টি ডেটা-কী রিস্টোর হবে এবং বর্তমান ডেটা বদলে যাবে। চালিয়ে যাবেন?'))return;ks.forEach(function(k){JSON.parse(o.data[k]);});keys().forEach(function(k){localStorage.removeItem(k)});ks.forEach(function(k){localStorage.setItem(k,o.data[k])});show();say('রিস্টোর সম্পন্ন।')}catch(x){say('ফাইলটি সঠিক MediCare ব্যাকআপ নয়।')}};r.readAsText(f)};
  $('rst').onclick=function(){if(!confirm('সব ব্যবসায়িক ডেটা মুছে যাবে। আগে ব্যাকআপ নিয়েছেন?'))return;keys().forEach(function(k){localStorage.removeItem(k)});show();say('ডেটা মোছা হয়েছে। (পরের লোডে ডেমো ডেটা ফিরে আসতে পারে)')};
 })();

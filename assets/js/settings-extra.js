@@ -59,15 +59,20 @@
     var u = who(); if (!u) return;
     var cur = $('currentPassword').value, nw = $('newPassword').value, cf = $('confirmPassword').value;
     if (!cur || !nw || !cf) return msg('Please fill all password fields', 'danger');
-    if (nw.length < 6) return msg('New password must be at least 6 characters', 'danger');
+    var pe = MCPW.policy(nw, u.email); if (pe) return msg(pe, 'danger');
     if (nw !== cf) return msg('New passwords do not match', 'danger');
     if (nw === cur) return msg('Choose a different password', 'danger');
-    var creds = rd('pharmacy_creds', {}); var email = u.email;
-    if (!DEF[email]) return msg('Unknown account', 'danger');
-    sha(cur).then(function (h) {
-      var ok = creds[email] ? creds[email] === h : cur === DEF[email];
+    var email = String(u.email || '').toLowerCase(), creds = rd('pharmacy_creds', {}), accts = rd('pharmacy_accounts', []);
+    var ca = accts.filter(function (x) { return String(x.email).toLowerCase() === email; })[0];
+    if (!ca && !DEF[email]) return msg('Unknown account', 'danger');
+    var check = ca ? MCPW.verify(cur, ca.hash) : (creds[email] ? MCPW.verify(cur, creds[email]) : Promise.resolve(cur === DEF[email]));
+    check.then(function (ok) {
       if (!ok) return msg('Current password is incorrect', 'danger');
-      return sha(nw).then(function (nh) { creds[email] = nh; wr('pharmacy_creds', creds); ['currentPassword', 'newPassword', 'confirmPassword'].forEach(function (i) { $(i).value = ''; }); msg('Password changed. Use it next time you log in.'); });
+      return MCPW.hash(nw).then(function (nh) {
+        if (ca) { ca.hash = nh; wr('pharmacy_accounts', accts); } else { creds[email] = nh; wr('pharmacy_creds', creds); }
+        try { var a = rd('pharmacy_audit', []); a.push({ at: new Date().toISOString(), by: u.name || email, msg: 'Password changed: ' + email }); wr('pharmacy_audit', a.slice(-300)); } catch (e) {}
+        ['currentPassword', 'newPassword', 'confirmPassword'].forEach(function (i) { $(i).value = ''; }); msg('Password changed. Use it next time you log in.');
+      });
     });
   };
 

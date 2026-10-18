@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="bn"><head><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
+<script src="assets/js/theme.js"></script><script src="assets/js/responsive.js"></script><script src="assets/js/prefs.js"></script><script src="assets/js/panel.js" defer></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MediCare – Daily Closing</title>
+<style>
+:root{--bg:#f4f7fb;--fg:#12263a;--card:#fff;--br:#d6e0ea;--pri:#667eea;--mut:#5b6b7b;--bad:#b3261e;--ok:#146c43}
+@media(prefers-color-scheme:dark){:root{--bg:#10171f;--fg:#e6eef6;--card:#17212c;--br:#2b3a4a;--mut:#9fb0c0;--ok:#6fdc9d}}
+body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg)}main{max-width:1000px;margin:auto;padding:1rem 16px}
+.card{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:1rem;margin:.8rem 0}.row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+input,select{padding:.5rem;border:1px solid var(--br);border-radius:8px;background:var(--card);color:var(--fg);font:inherit}
+.btn{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:.5rem .9rem;cursor:pointer;font:inherit;text-decoration:none}
+.btn2{border:1px solid var(--br);background:var(--card);color:var(--fg);border-radius:8px;padding:.5rem .9rem;cursor:pointer;font:inherit;text-decoration:none}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:520px}th,td{border-bottom:1px solid var(--br);padding:.5rem;text-align:left}.muted{color:var(--mut)}.bad{color:var(--bad)}.ok{color:var(--ok)}
+.k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem}.k div{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:.7rem}.k b{display:block;font-size:1.25rem}
+@media print{.noprint{display:none!important}body{background:#fff;color:#000}}
+</style></head>
+<body><main>
+<h1>🧮 দৈনিক ক্যাশ ক্লোজিং</h1>
+<p class="muted">দিন শেষে বিক্রি, ফেরত ও ক্যাশ মিলিয়ে নিন; রিপোর্ট সংরক্ষণ ও প্রিন্ট করুন।</p>
+<div id="deny" class="card" hidden>শুধু <b>Admin</b> ও <b>Pharmacist</b>। <a href="login.html">Login</a></div>
+<div id="box" hidden>
+ <div class="card row noprint"><label>তারিখ <input type="date" id="d"></label><button class="btn2" id="pr">🖨 Print</button></div>
+ <div class="k" id="k"></div>
+ <div class="card"><h3>পেমেন্ট মেথড অনুযায়ী</h3><div class="scroll"><table><thead><tr><th>মেথড</th><th>ইনভয়েস</th><th>মোট</th></tr></thead><tbody id="m"></tbody></table></div></div>
+ <div class="card"><h3>ক্যাশ মিলান</h3>
+  <div class="row"><label>শুরুর ক্যাশ (ড্রয়ার) <input type="number" id="open" value="0" min="0" step="any"></label><label>গুণে পাওয়া ক্যাশ <input type="number" id="cnt" min="0" step="any"></label></div>
+  <p id="diff" style="font-size:1.1rem"></p><div class="row noprint"><input id="note" placeholder="নোট (ঐচ্ছিক)" style="flex:1;min-width:180px"><button class="btn" id="save">✔ ক্লোজ করে সংরক্ষণ</button></div></div>
+ <div class="card"><h3>পূর্বের ক্লোজিং</h3><div class="scroll"><table><thead><tr><th>তারিখ</th><th>নিট বিক্রি</th><th>প্রত্যাশিত ক্যাশ</th><th>গণনা</th><th>পার্থক্য</th><th>কে</th></tr></thead><tbody id="h"></tbody></table></div></div>
+</div>
+<p class="row noprint"><a class="btn2" href="dashboard.html">Dashboard</a><a class="btn2" href="reports.html">Reports</a></p>
+</main>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};function rj(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]})}
+var tk=function(n){return "৳"+(Math.round((+n||0)*100)/100).toLocaleString()};
+var u=null;try{u=JSON.parse(localStorage.getItem("user")||sessionStorage.getItem("user"))}catch(e){}
+var rl=u&&u.role||"";var ok=rl==="admin"||rl==="pharmacist"||sessionStorage.getItem("mc_role")==="Owner"||sessionStorage.getItem("mc_role")==="Pharmacist";
+var who=(u&&(u.name||u.role))||sessionStorage.getItem("mc_role")||"";
+if(!ok){$('deny').hidden=false;return}$('box').hidden=false;
+$('d').value=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Dhaka'});
+var cash=0,net=0;
+function calc(){var d=$('d').value,S=rj('pharmacy_sales',[]).filter(function(s){return s&&s.real&&s.date===d&&s.status!=='Voided'}),R=rj('pharmacy_refunds',[]).filter(function(r){return r.date===d});
+ var by={},tot=0;S.forEach(function(s){var m=(s.paymentMethod||'cash').toLowerCase();by[m]=by[m]||{n:0,t:0};by[m].n++;by[m].t+=+s.total||0;tot+=+s.total||0});
+ var ref=R.reduce(function(a,r){return a+(+r.amount||0)},0);net=tot-ref;cash=(by.cash?by.cash.t:0)-ref;
+ $('k').innerHTML='<div><b>'+S.length+'</b>ইনভয়েস</div><div><b>'+tk(tot)+'</b>মোট বিক্রি</div><div><b class="bad">'+tk(ref)+'</b>রিফান্ড</div><div><b>'+tk(net)+'</b>নিট বিক্রি</div><div><b>'+tk(cash)+'</b>ক্যাশ বিক্রি (রিফান্ড বাদে)</div>';
+ $('m').innerHTML=Object.keys(by).map(function(m){return '<tr><td>'+esc(m)+'</td><td>'+by[m].n+'</td><td>'+tk(by[m].t)+'</td></tr>'}).join('')||'<tr><td colspan="3" class="muted">বিক্রি নেই</td></tr>';diff()}
+function diff(){var exp=(+$('open').value||0)+cash,c=$('cnt').value;$('diff').innerHTML='প্রত্যাশিত ক্যাশ: <b>'+tk(exp)+'</b>'+(c===''?'':' · পার্থক্য: <b class="'+(Math.abs(c-exp)<0.01?'ok':'bad')+'">'+tk(c-exp)+'</b>')}
+['d'].forEach(function(i){$(i).addEventListener('input',calc)});['open','cnt'].forEach(function(i){$(i).addEventListener('input',diff)});
+$('pr').onclick=function(){print()};
+$('save').onclick=function(){var c=$('cnt').value;if(c===''){alert('গণনা করা ক্যাশ দিন');return}var exp=(+$('open').value||0)+cash,L=rj('pharmacy_closings',[]);
+ L=L.filter(function(x){return x.date!==$('d').value});L.push({date:$('d').value,net:net,expected:exp,counted:+c,diff:+c-exp,open:+$('open').value||0,note:$('note').value.slice(0,200),by:who,at:new Date().toISOString()});
+ localStorage.setItem('pharmacy_closings',JSON.stringify(L.slice(-400)));try{var a=rj('pharmacy_audit',[]);a.push({at:new Date().toISOString(),by:who,msg:'Day closed '+$('d').value});localStorage.setItem('pharmacy_audit',JSON.stringify(a.slice(-300)))}catch(e){}hist()};
+function hist(){$('h').innerHTML=rj('pharmacy_closings',[]).slice().reverse().map(function(x){return '<tr><td>'+esc(x.date)+'</td><td>'+tk(x.net)+'</td><td>'+tk(x.expected)+'</td><td>'+tk(x.counted)+'</td><td class="'+(Math.abs(x.diff)<0.01?'ok':'bad')+'">'+tk(x.diff)+'</td><td>'+esc(x.by)+'</td></tr>'}).join('')||'<tr><td colspan="6" class="muted">এখনও নেই</td></tr>'}
+calc();hist();
+})();
+</script></body></html>

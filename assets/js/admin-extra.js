@@ -89,3 +89,10 @@
   const g0 = go; go = function () { g0(); badge(); };
   go();
 })();
+
+/* Owner shortcut to the Control Center */
+(function () {
+  if (R !== 'Owner') return;
+  const t = document.querySelector('header.bar .tools');
+  if (t && !t.querySelector('a[href="../admin-center.html"]')) t.prepend(h('a', { href: '../admin-center.html' }, '🎛 Control Center'));
+})();

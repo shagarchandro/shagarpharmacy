@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
     <script src="assets/js/guard.js"></script>
+    <script src="assets/js/theme.js"></script><script src="assets/js/responsive.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - MediCare Pharmacy Management System</title>
@@ -287,6 +288,7 @@
                                 <div class="d-grid gap-2">
                                     <a class="btn btn-outline-primary btn-sm" href="shop.html"><i class="fas fa-store me-1"></i> Customer Online Shop (ক্রেতা — লগইন লাগে না / নাম দিয়ে)</a>
                                     <a class="btn btn-outline-secondary btn-sm" href="admin/login.html"><i class="fas fa-user-gear me-1"></i> Operations Panel — Owner / Pharmacist / Cashier / Inventory / Delivery (code: <b>demo</b>)</a>
+                                    <a class="btn btn-link btn-sm" href="admin-center.html">🎛 Control Center (Admin)</a>
                                     <a class="btn btn-link btn-sm" href="backup.html">💾 Backup & Restore (Admin)</a>
                                     <a class="btn btn-link btn-sm" href="LOGIN-GUIDE.html">📖 লগইন গাইড (কে কীভাবে ঢুকবে)</a>
                                 </div>
@@ -400,11 +402,21 @@
                 const creds = JSON.parse(localStorage.getItem('pharmacy_creds') || '{}');
                 const DEF = { 'admin@medicare.com': 'admin123', 'pharmacist@medicare.com': 'pharm123', 'staff@medicare.com': 'staff123' };
                 if (creds[email] && DEF[email]) {
-                    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
-                    const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-                    password = (hex === creds[email]) ? DEF[email] : '\u0000wrong';
+                    password = (await MCPW.verify(password, creds[email])) ? DEF[email] : '\u0000wrong';
                 }
             } catch (err) { /* crypto unavailable: fall back to default passwords */ }
+            // Custom accounts created in the Control Center, and default accounts switched off there
+            let customUser = null;
+            try {
+                const accts = JSON.parse(localStorage.getItem('pharmacy_accounts') || '[]');
+                const cu = accts.find(u => String(u.email).toLowerCase() === email.toLowerCase());
+                const sets = JSON.parse(localStorage.getItem('pharmacy_settings') || '{}');
+                if (cu) {
+                    if (cu.active !== false && await MCPW.verify(password, cu.hash)) customUser = cu; else password = '\u0000wrong';
+                } else if ((sets.disabled || []).map(x => String(x).toLowerCase()).includes(email.toLowerCase()) && email.toLowerCase() !== 'admin@medicare.com') {
+                    password = '\u0000disabled';
+                }
+            } catch (err) { /* ignore */ }
             // Show loading state
             const loginBtn = document.getElementById('loginBtn');
             const originalText = loginBtn.innerHTML;
@@ -416,7 +428,19 @@
                 let userData = null;
                 
                 // ============= ADMIN LOGIN =============
-                if(email === 'admin@medicare.com' && password === 'admin123' && role === 'admin') {
+                if (customUser) {
+                    loginSuccess = true;
+                    const RL = (JSON.parse(localStorage.getItem('pharmacy_roles') || '{}')[customUser.role] || {}).level || {};
+                    const acc = {};
+                    ['dashboard','medicines','customers','sales','purchases','suppliers','prescriptions','reports','settings'].forEach(k => {
+                        const lv = RL[k]; acc[k] = lv === 'full' ? true : lv === 'edit' ? { view: true, edit: true, delete: false, create: true } : lv === 'view' ? { view: true, edit: false, delete: false, create: false } : false;
+                    });
+                    acc.dashboard = true;
+                    userData = { id: customUser.id, name: customUser.name, email: customUser.email, role: customUser.role, access: acc,
+                        avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(customUser.name) + '&background=667eea&color=fff' };
+                    showAlert('Login successful! Redirecting...', 'success');
+                }
+                else if(email === 'admin@medicare.com' && password === 'admin123' && role === 'admin') {
                     loginSuccess = true;
                     userData = {
                         id: 1,
@@ -560,5 +584,7 @@
             window.location.href = 'dashboard.html';
         }
     </script>
+<script src="assets/js/pw.js"></script>
+<script src="assets/js/login-extra.js"></script>
 </body>
 </html>

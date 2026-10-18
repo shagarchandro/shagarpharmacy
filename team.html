@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="bn"><head><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
+<script src="assets/js/theme.js"></script><script src="assets/js/responsive.js"></script><script src="assets/js/prefs.js"></script><script src="assets/js/panel.js" defer></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MediCare – Team Board</title>
+<style>
+:root{--bg:#f4f7fb;--fg:#12263a;--card:#fff;--br:#d6e0ea;--pri:#667eea;--mut:#5b6b7b;--bad:#b3261e;--ok:#146c43;--warn:#8a5a00}
+@media(prefers-color-scheme:dark){:root{--bg:#10171f;--fg:#e6eef6;--card:#17212c;--br:#2b3a4a;--mut:#9fb0c0;--ok:#6fdc9d;--warn:#ffcc66}}
+body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg)}main{max-width:1000px;margin:auto;padding:1rem 16px}
+.card{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:1rem;margin:.8rem 0}.row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+input,select,textarea{padding:.5rem;border:1px solid var(--br);border-radius:8px;background:var(--card);color:var(--fg);font:inherit;max-width:100%;box-sizing:border-box}
+.btn{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:.5rem .9rem;cursor:pointer;font:inherit;text-decoration:none}
+.btn2{border:1px solid var(--br);background:var(--card);color:var(--fg);border-radius:8px;padding:.4rem .8rem;cursor:pointer;font:inherit;text-decoration:none}
+.muted{color:var(--mut)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}@media(max-width:800px){.grid{grid-template-columns:1fr}}
+.it{border-bottom:1px solid var(--br);padding:.7rem 0}.it:last-child{border:0}.it small{color:var(--mut)}
+.tag{display:inline-block;border-radius:99px;padding:0 .55rem;font-size:.75rem;font-weight:700;background:#eef0ff;color:#4c4fb0;margin-right:.3rem}.tag.hi{background:#fde8e6;color:#b3261e}.tag.ho{background:#e3f6ee;color:#146c43}
+.done{text-decoration:line-through;opacity:.6}
+</style></head><body><main>
+<h1>📌 টিম বোর্ড</h1>
+<p class="muted">নোটিশ, শিফট হ্যান্ডওভার নোট ও কাজের তালিকা — সবাই একই জায়গায়।</p>
+<div id="deny" class="card" hidden>আগে <a href="login.html">লগইন</a> করুন।</div>
+<div id="box" hidden class="grid">
+ <div>
+  <div class="card"><h3>📢 নোটিশ ও হ্যান্ডওভার</h3>
+   <form id="nf"><textarea id="nt" rows="2" placeholder="নোটিশ বা হ্যান্ডওভার নোট লিখুন…" style="width:100%" maxlength="400" required></textarea>
+   <div class="row" style="margin-top:.4rem"><select id="np"><option value="normal">সাধারণ</option><option value="high">জরুরি</option></select><label id="pinW"><input type="checkbox" id="npin"> পিন করুন</label><button class="btn">পোস্ট</button></div></form>
+   <div id="nl"></div></div>
+ </div>
+ <div>
+  <div class="card"><h3>✅ কাজের তালিকা</h3>
+   <form id="tf" hidden><input id="tt" placeholder="নতুন কাজ…" style="width:100%" maxlength="160" required>
+   <div class="row" style="margin-top:.4rem"><select id="to"><option value="all">সবাই</option><option value="staff">Staff</option><option value="pharmacist">Pharmacist</option></select><label>শেষ তারিখ <input type="date" id="td"></label><button class="btn">যোগ করুন</button></div></form>
+   <div class="row" style="margin:.5rem 0"><label><input type="checkbox" id="mine" checked> শুধু আমার কাজ</label><label><input type="checkbox" id="sd"> সম্পন্নগুলোও দেখান</label></div>
+   <div id="tl"></div></div>
+ </div>
+</div>
+<p class="row"><a class="btn2" href="dashboard.html">Dashboard</a></p>
+</main>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+function rj(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+var u=null;try{u=JSON.parse(localStorage.getItem('user')||sessionStorage.getItem('user'))}catch(e){}
+if(!u){$('deny').hidden=false;return}$('box').hidden=false;
+var role=u.role,em=String(u.email||'').toLowerCase(),lead=role==='admin'||role==='pharmacist',KEY='pharmacy_team';
+function db(){var d=rj(KEY,{notices:[],tasks:[]});d.notices=d.notices||[];d.tasks=d.tasks||[];return d}
+function save(d){d.notices=d.notices.slice(-200);d.tasks=d.tasks.slice(-300);localStorage.setItem(KEY,JSON.stringify(d));window.dispatchEvent(new Event('mc-team'));draw()}
+var fmt=function(i){return new Date(i).toLocaleString('bn-BD',{timeZone:'Asia/Dhaka',dateStyle:'medium',timeStyle:'short'})};
+if(lead)$('mine').checked=false;if(!lead){$('pinW').style.display='none';$('np').querySelector('[value=high]').remove()}else $('tf').hidden=false;
+$('nf').onsubmit=function(e){e.preventDefault();var d=db(),t=$('nt').value.trim();if(!t)return;
+ d.notices.push({id:Date.now(),at:new Date().toISOString(),by:u.name||role,email:em,role:role,text:t.slice(0,400),pri:lead?$('np').value:'normal',pinned:lead&&$('npin').checked,ho:!lead,ack:{}});$('nt').value='';$('npin').checked=false;save(d)};
+$('tf').onsubmit=function(e){e.preventDefault();var d=db(),t=$('tt').value.trim();if(!t)return;
+ d.tasks.push({id:Date.now(),at:new Date().toISOString(),by:u.name||role,text:t.slice(0,160),to:$('to').value,due:$('td').value||'',done:false});$('tt').value='';$('td').value='';save(d)};
+function mineT(t){return t.to==='all'||t.to===role||t.to===em}
+function draw(){var d=db();
+ var N=d.notices.slice().sort(function(a,b){return (b.pinned?1:0)-(a.pinned?1:0)||b.id-a.id});
+ $('nl').innerHTML=N.map(function(n){var ack=Object.keys(n.ack||{}).length,mine=n.ack&&n.ack[em];
+  return '<div class="it">'+(n.pinned?'<span class="tag">📌 পিন</span>':'')+(n.pri==='high'?'<span class="tag hi">জরুরি</span>':'')+(n.ho?'<span class="tag ho">হ্যান্ডওভার</span>':'')+esc(n.text)+'<br><small>'+esc(n.by)+' ('+esc(n.role)+') · '+fmt(n.at)+' · 👁 '+ack+'</small> '+
+   (mine?'':'<button class="btn2" data-ack="'+n.id+'">পড়েছি ✔</button> ')+((role==='admin'||n.email===em)?'<button class="btn2" data-dn="'+n.id+'">মুছুন</button>':'')+'</div>'}).join('')||'<p class="muted">কোনো নোটিশ নেই</p>';
+ var today=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Dhaka'});
+ var T=d.tasks.filter(function(t){return ($('sd').checked||!t.done)&&(!$('mine').checked||mineT(t))}).sort(function(a,b){return (a.done?1:0)-(b.done?1:0)||(a.due||'9')>(b.due||'9')?1:-1});
+ $('tl').innerHTML=T.map(function(t){var late=!t.done&&t.due&&t.due<today;
+  return '<div class="it"><label class="'+(t.done?'done':'')+'"><input type="checkbox" data-tk="'+t.id+'" '+(t.done?'checked':'')+(mineT(t)||lead?'':' disabled')+'> '+esc(t.text)+'</label><br><small>→ '+esc(t.to==='all'?'সবাই':t.to)+(t.due?' · শেষ: <b style="color:'+(late?'var(--bad)':'inherit')+'">'+esc(t.due)+'</b>':'')+' · '+esc(t.by)+(t.done?' · ✔ '+esc(t.doneBy||''):'')+'</small> '+(role==='admin'?'<button class="btn2" data-dt="'+t.id+'">মুছুন</button>':'')+'</div>'}).join('')||'<p class="muted">কোনো কাজ নেই ✔</p>'}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-ack],[data-dn],[data-dt]');if(!b)return;var d=db();
+ if(b.dataset.ack){var n=d.notices.find(function(x){return String(x.id)===b.dataset.ack});if(n){n.ack=n.ack||{};n.ack[em]=1;save(d)}}
+ else if(b.dataset.dn){d.notices=d.notices.filter(function(x){return String(x.id)!==b.dataset.dn});save(d)}
+ else{d.tasks=d.tasks.filter(function(x){return String(x.id)!==b.dataset.dt});save(d)}});
+document.addEventListener('change',function(e){var c=e.target;if(c.dataset&&c.dataset.tk){var d=db(),t=d.tasks.find(function(x){return String(x.id)===c.dataset.tk});if(t){t.done=c.checked;t.doneBy=c.checked?(u.name||role):'';t.doneAt=new Date().toISOString();save(d)}}else if(c.id==='mine'||c.id==='sd')draw()});
+draw();
+})();
+</script></body></html>

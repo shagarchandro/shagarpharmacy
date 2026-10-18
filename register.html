@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="bn"><head><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
+<script src="assets/js/theme.js"></script><script src="assets/js/responsive.js"></script><script src="assets/js/prefs.js"></script><script src="assets/js/panel.js" defer></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MediCare – Rx Dispensing Register</title>
+<style>
+:root{--bg:#f4f7fb;--fg:#12263a;--card:#fff;--br:#d6e0ea;--pri:#667eea;--mut:#5b6b7b;--bad:#b3261e}
+@media(prefers-color-scheme:dark){:root{--bg:#10171f;--fg:#e6eef6;--card:#17212c;--br:#2b3a4a;--mut:#9fb0c0}}
+body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+main{max-width:1100px;margin:auto;padding:1rem 16px}
+.card{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:1rem;margin:.8rem 0}
+.row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+input,select{padding:.5rem;border:1px solid var(--br);border-radius:8px;background:var(--card);color:var(--fg);font:inherit}
+.btn{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:.5rem .9rem;cursor:pointer;font:inherit;text-decoration:none}
+.btn2{border:1px solid var(--br);background:var(--card);color:var(--fg);border-radius:8px;padding:.5rem .9rem;cursor:pointer;font:inherit;text-decoration:none}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:640px}th,td{border-bottom:1px solid var(--br);padding:.5rem;text-align:left;vertical-align:top}
+.muted{color:var(--mut)}@media print{.noprint{display:none}body{background:#fff;color:#000}}
+</style></head><body><main>
+<h1>📒 Rx Dispensing Register</h1>
+<p class="muted">প্রেসক্রিপশন/Rx ওষুধ বিক্রির রেকর্ড — কে, কাকে, কোন প্রেসক্রিপশনে কী দিয়েছেন।</p>
+<div id="deny" class="card" hidden>এই পেজ শুধু <b>Admin</b> ও <b>Pharmacist</b>-এর জন্য। <a href="login.html">Login</a></div>
+<div id="box" hidden>
+ <div class="card noprint row">
+  <label>From <input type="date" id="f"></label><label>To <input type="date" id="t"></label>
+  <input id="q" placeholder="Search medicine / customer / Rx no" style="flex:1;min-width:180px">
+  <button class="btn" id="csv">⬇️ CSV</button><button class="btn2" id="pr">🖨 Print</button>
+ </div>
+ <div class="card" id="sum"></div>
+ <div class="card scroll"><table><thead><tr><th>Date</th><th>Invoice</th><th>Customer</th><th>Rx no</th><th>Medicines (qty)</th><th>Verified by</th><th>Cashier</th></tr></thead><tbody id="tb"></tbody></table></div>
+</div>
+<p class="row noprint"><a class="btn2" href="dashboard.html">Dashboard</a><a class="btn2" href="prescriptions.html">Prescriptions</a></p>
+</main>
+<script>
+(function(){
+ var $=function(i){return document.getElementById(i)};
+ function rj(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}}
+ var u=null;try{u=JSON.parse(localStorage.getItem('user')||sessionStorage.getItem('user'))}catch(e){}
+ var okRole=u&&(u.role==='admin'||u.role==='pharmacist')||sessionStorage.getItem('mc_role')==='Owner'||sessionStorage.getItem('mc_role')==='Pharmacist';
+ if(!okRole){$('deny').hidden=false;return}
+ $('box').hidden=false;
+ var meds=rj('pharmacy_medicines',[]),rxIds={};meds.forEach(function(m){if(m.rxRequired)rxIds[String(m.id)]=1});
+ var sales=rj('pharmacy_sales',[]).filter(function(s){return s&&s.real&&s.status!=='Voided'&&(s.rx||(s.items||[]).some(function(i){return rxIds[String(i.id)]}))});
+ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+ function rows(){var f=$('f').value,t=$('t').value,q=$('q').value.toLowerCase();
+  return sales.filter(function(s){var d=s.date||'';if(f&&d<f)return false;if(t&&d>t)return false;
+   var hay=[s.invoiceNo,s.customer,s.rx&&s.rx.no].concat((s.items||[]).map(function(i){return i.name})).join(' ').toLowerCase();return !q||hay.indexOf(q)>-1}).sort(function(a,b){return (b.at||'')>(a.at||'')?1:-1})}
+ function draw(){var R=rows();
+  $('tb').innerHTML=R.map(function(s){return '<tr><td>'+esc(s.date)+'</td><td>'+esc(s.invoiceNo)+'</td><td>'+esc(s.customer)+'</td><td>'+esc(s.rx?s.rx.no:'— (no Rx ref)')+'</td><td>'+(s.items||[]).map(function(i){return esc(i.name)+' ×'+esc(i.quantity)}).join('<br>')+'</td><td>'+esc(s.rx?s.rx.by:'—')+'</td><td>'+esc(s.cashier)+'</td></tr>'}).join('')||'<tr><td colspan="7" class="muted">কোনো রেকর্ড নেই</td></tr>';
+  var noRef=R.filter(function(s){return !s.rx}).length;
+  $('sum').innerHTML='<b>'+R.length+'</b> Rx sales · Rx reference ছাড়া: <b style="color:'+(noRef?'var(--bad)':'inherit')+'">'+noRef+'</b>';}
+ ['f','t','q'].forEach(function(i){$(i).addEventListener('input',draw)});
+ $('pr').onclick=function(){print()};
+ $('csv').onclick=function(){var R=rows(),L=[['Date','Invoice','Customer','Rx no','Medicines','Verified by','Cashier']];
+  R.forEach(function(s){L.push([s.date,s.invoiceNo,s.customer,s.rx?s.rx.no:'',(s.items||[]).map(function(i){return i.name+' x'+i.quantity}).join('; '),s.rx?s.rx.by:'',s.cashier])});
+  var c=L.map(function(r){return r.map(function(x){x=String(x==null?'':x);if(/^[=+\-@]/.test(x))x="'"+x;return '"'+x.replace(/"/g,'""')+'"'}).join(',')}).join('\n');
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+c],{type:'text/csv'}));a.download='rx-register.csv';a.click()};
+ draw();
+})();
+</script></body></html>

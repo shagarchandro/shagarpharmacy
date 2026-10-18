@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="bn"><head><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
+<script src="assets/js/theme.js"></script><script src="assets/js/responsive.js"></script><script src="assets/js/prefs.js"></script><script src="assets/js/panel.js" defer></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MediCare – Expiry Write-off</title>
+<style>
+:root{--bg:#f4f7fb;--fg:#12263a;--card:#fff;--br:#d6e0ea;--pri:#667eea;--mut:#5b6b7b;--bad:#b3261e;--warn:#8a5a00}
+@media(prefers-color-scheme:dark){:root{--bg:#10171f;--fg:#e6eef6;--card:#17212c;--br:#2b3a4a;--mut:#9fb0c0;--warn:#ffcc66}}
+body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg)}main{max-width:1100px;margin:auto;padding:1rem 16px}
+.card{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:1rem;margin:.8rem 0}.row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+input,select{padding:.5rem;border:1px solid var(--br);border-radius:8px;background:var(--card);color:var(--fg);font:inherit}
+.btn{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:.5rem .9rem;cursor:pointer;font:inherit;text-decoration:none}
+.btn2{border:1px solid var(--br);background:var(--card);color:var(--fg);border-radius:8px;padding:.5rem .9rem;cursor:pointer;font:inherit;text-decoration:none}
+.bad{color:var(--bad)}.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:620px}th,td{border-bottom:1px solid var(--br);padding:.5rem;text-align:left}.muted{color:var(--mut)}
+.k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem}.k div{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:.7rem}.k b{display:block;font-size:1.3rem}
+</style></head><body><main>
+<h1>🗑️ মেয়াদোত্তীর্ণ ওষুধ Write-off</h1>
+<p class="muted">মেয়াদ শেষ ওষুধ স্টক থেকে বাদ দিন; ক্ষতির পরিমাণ রেকর্ড থাকবে।</p>
+<div id="deny" class="card" hidden>শুধু <b>Admin</b> ও <b>Pharmacist</b>। <a href="login.html">Login</a></div>
+<div id="box" hidden>
+ <div class="k" id="k"></div>
+ <div class="card"><h3>মেয়াদোত্তীর্ণ / শীঘ্রই শেষ</h3>
+  <div class="row"><label>মেয়াদ সীমা (দিন) <input type="number" id="days" value="0" min="0" style="width:90px"></label><span class="muted">০ = শুধু মেয়াদোত্তীর্ণ</span>
+   <button class="btn" id="all">সব Write-off</button></div>
+  <div class="scroll"><table><thead><tr><th>ওষুধ</th><th>মেয়াদ</th><th>স্টক</th><th>ক্ষতি (ক্রয়মূল্য)</th><th></th></tr></thead><tbody id="tb"></tbody></table></div></div>
+ <div class="card"><h3>Write-off ইতিহাস</h3><div class="row"><button class="btn2" id="csv">⬇️ CSV</button></div>
+  <div class="scroll"><table><thead><tr><th>তারিখ</th><th>ওষুধ</th><th>পরিমাণ</th><th>ক্ষতি</th><th>কারণ</th><th>কে</th></tr></thead><tbody id="hs"></tbody></table></div></div>
+</div>
+<p class="row"><a class="btn2" href="dashboard.html">Dashboard</a><a class="btn2" href="medicines.html">Medicines</a></p>
+</main>
+<script>
+(function(){
+ var $=function(i){return document.getElementById(i)};
+ function rj(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}}
+ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+ var u=null;try{u=JSON.parse(localStorage.getItem('user')||sessionStorage.getItem('user'))}catch(e){}
+ var ok=u&&(u.role==='admin'||u.role==='pharmacist')||sessionStorage.getItem('mc_role')==='Owner'||sessionStorage.getItem('mc_role')==='Pharmacist';
+ if(!ok){$('deny').hidden=false;return}$('box').hidden=false;
+ var who=(u&&(u.name||u.role))||sessionStorage.getItem('mc_role')||'';
+ var KM='pharmacy_medicines',KW='pharmacy_writeoffs',tk=function(n){return '৳'+(Math.round(n*100)/100).toLocaleString()};
+ function due(){var meds=rj(KM,[]),lim=new Date();lim.setDate(lim.getDate()+(+$('days').value||0));var l=lim.toISOString().slice(0,10),t=new Date().toISOString().slice(0,10);
+  return meds.filter(function(m){var e=m.expiryDate;return e&&(+m.stock||0)>0&&(+$('days').value?e<=l:e<t)})}
+ function write(list,reason){if(!list.length)return;var meds=rj(KM,[]),log=rj(KW,[]),now=new Date();
+  list.forEach(function(x){var m=meds.find(function(y){return String(y.id)===String(x.id)});if(!m)return;var q=+m.stock||0;
+   log.push({at:now.toISOString(),date:now.toISOString().slice(0,10),id:m.id,name:m.name,qty:q,loss:q*(+m.purchasePrice||0),reason:reason,by:who});m.stock=0});
+  localStorage.setItem(KM,JSON.stringify(meds));localStorage.setItem(KW,JSON.stringify(log));
+  try{var a=rj('pharmacy_audit',[]);a.push({at:now.toISOString(),by:who,msg:'Write-off '+list.length+' item(s)'});localStorage.setItem('pharmacy_audit',JSON.stringify(a.slice(-300)))}catch(e){}
+  draw()}
+ function draw(){var L=due(),H=rj(KW,[]),loss=0;L.forEach(function(m){loss+=(+m.stock||0)*(+m.purchasePrice||0)});
+  var tot=H.reduce(function(a,x){return a+(+x.loss||0)},0);
+  $('k').innerHTML='<div><b>'+L.length+'</b>Write-off যোগ্য</div><div><b class="bad">'+tk(loss)+'</b>সম্ভাব্য ক্ষতি</div><div><b>'+H.length+'</b>মোট write-off</div><div><b>'+tk(tot)+'</b>মোট ক্ষতি (ইতিহাস)</div>';
+  $('tb').innerHTML=L.map(function(m){return '<tr><td>'+esc(m.name)+'</td><td>'+esc(m.expiryDate)+'</td><td>'+esc(m.stock)+'</td><td>'+tk((+m.stock||0)*(+m.purchasePrice||0))+'</td><td><button class="btn2 w" data-id="'+esc(m.id)+'">Write-off</button></td></tr>'}).join('')||'<tr><td colspan="5" class="muted">কিছু নেই ✔</td></tr>';
+  $('hs').innerHTML=H.slice().reverse().map(function(x){return '<tr><td>'+esc(x.date)+'</td><td>'+esc(x.name)+'</td><td>'+esc(x.qty)+'</td><td>'+tk(x.loss)+'</td><td>'+esc(x.reason)+'</td><td>'+esc(x.by)+'</td></tr>'}).join('')||'<tr><td colspan="6" class="muted">এখনও নেই</td></tr>'}
+ $('days').addEventListener('input',draw);
+ $('tb').addEventListener('click',function(e){var b=e.target.closest('.w');if(!b)return;var m=due().filter(function(x){return String(x.id)===b.dataset.id});if(m.length&&confirm('Write-off '+m[0].name+'?'))write(m,'Expired')});
+ $('all').onclick=function(){var L=due();if(L.length&&confirm(L.length+' টি আইটেম write-off করবেন?'))write(L,'Expired')};
+ $('csv').onclick=function(){var L=[['Date','Medicine','Qty','Loss','Reason','By']].concat(rj(KW,[]).map(function(x){return [x.date,x.name,x.qty,x.loss,x.reason,x.by]}));
+  var c=L.map(function(r){return r.map(function(v){v=String(v==null?'':v);if(/^[=+\-@]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"'}).join(',')}).join('\n');
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+c],{type:'text/csv'}));a.download='writeoffs.csv';a.click()};
+ draw();
+})();
+</script></body></html>

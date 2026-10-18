@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
     <script src="assets/js/guard.js"></script>
+    <script src="assets/js/theme.js"></script><script src="assets/js/responsive.js"></script><script src="assets/js/prefs.js"></script><script src="assets/js/avatar.js"></script><script src="assets/js/pw.js"></script><script src="assets/js/panel.js" defer></script><script src="assets/js/dash-extra.js" defer></script>
     <script src="assets/js/enhance.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
@@ -751,6 +752,13 @@ body.dark-mode .sidebar-overlay {
             <hr class="bg-secondary my-3">
             <a href="shop.html" class="nav-link" id="menuShop"><i class="fas fa-store"></i><span class="sidebar-text">Online Shop</span></a>
             <a href="admin/login.html" class="nav-link" id="menuOps"><i class="fas fa-truck-fast"></i><span class="sidebar-text">Ops Panel</span></a>
+            <a href="admin-center.html" class="nav-link" id="menuCenter"><i class="fas fa-sliders"></i><span class="sidebar-text">Control Center</span></a>
+            <a href="team.html" class="nav-link" id="menuTeam"><i class="fas fa-thumbtack"></i><span class="sidebar-text">Team Board</span></a>
+            <a href="closing.html" class="nav-link" id="menuClosing"><i class="fas fa-calculator"></i><span class="sidebar-text">Daily Closing</span></a>
+            <a href="reorder.html" class="nav-link" id="menuReorder"><i class="fas fa-cart-flatbed"></i><span class="sidebar-text">Reorder List</span></a>
+            <a href="refunds.html" class="nav-link" id="menuRefunds"><i class="fas fa-rotate-left"></i><span class="sidebar-text">Refunds</span></a>
+            <a href="writeoff.html" class="nav-link" id="menuWriteoff"><i class="fas fa-trash-can"></i><span class="sidebar-text">Write-off</span></a>
+            <a href="register.html" class="nav-link" id="menuRegister"><i class="fas fa-book-medical"></i><span class="sidebar-text">Rx Register</span></a>
             <a href="backup.html" class="nav-link" id="menuBackup"><i class="fas fa-database"></i><span class="sidebar-text">Backup</span></a>
             <hr class="bg-secondary my-3">
             <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#settingsModal" id="menuSettings">
@@ -1497,6 +1505,7 @@ body.dark-mode .sidebar-overlay {
     }
     
     function applyRoleBasedAccess(role) {
+        return; // menu visibility now comes from guard.js (role matrix in the Control Center)
         const menuItems = {
             purchases: document.getElementById('menuPurchases'),
             suppliers: document.getElementById('menuSuppliers'),

@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
     <script src="assets/js/guard.js"></script>
+    <script src="assets/js/theme.js"></script><script src="assets/js/responsive.js"></script><script src="assets/js/prefs.js"></script><script src="assets/js/panel.js" defer></script>
+    <script src="assets/js/sync.js"></script>
     <script src="assets/js/enhance.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
@@ -946,17 +948,29 @@
     const discountSlider = document.getElementById('discountSlider');
     const discountInput = document.getElementById('discountInput');
     discountSlider?.addEventListener('input', function() { discountInput.value = this.value; calculateTotals(); });
-    const MAXD = (function () { try { return (JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')) || {}).role === 'staff' ? 10 : 100; } catch (e) { return 100; } })();
+    const MAXD = (function () {
+        try {
+            const r = (JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')) || {}).role;
+            const cfg = (JSON.parse(localStorage.getItem('pharmacy_roles') || '{}')[r]) || {};
+            const v = parseFloat(cfg.maxDisc);
+            return !isNaN(v) ? Math.min(Math.max(v, 0), 100) : (r === 'staff' ? 10 : 100);
+        } catch (e) { return 100; }
+    })();
     if (discountSlider) discountSlider.max = MAXD; if (discountInput) discountInput.max = MAXD;
-    discountInput?.addEventListener('input', function() { let val = parseInt(this.value) || 0; if (val > MAXD) { val = MAXD; showToast('Staff discount limit is ' + MAXD + '%. Ask a pharmacist or admin for more.', 'warning'); } if (val < 0) val = 0; this.value = val; discountSlider.value = val; calculateTotals(); });
+    discountInput?.addEventListener('input', function() { let val = parseInt(this.value) || 0; if (val > MAXD) { val = MAXD; showToast('Your discount limit is ' + MAXD + '%. Ask a manager for more.', 'warning'); } if (val < 0) val = 0; this.value = val; discountSlider.value = val; calculateTotals(); });
     
 
     // ===== Prescription (Rx) dispensing rules =====
     let rxInfo = null; // { no, id, by, doctor } for the current cart
     function curUser() { try { return JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')) || {}; } catch (e) { return {}; } }
+    function canRx(u) {
+        try { const c = JSON.parse(localStorage.getItem('pharmacy_roles') || '{}')[u.role]; if (c && typeof c.rx === 'boolean') return c.rx; } catch (e) {}
+        return u.role === 'pharmacist' || u.role === 'admin';
+    }
     function rxGate() {
         const u = curUser();
-        if (u.role !== 'pharmacist' && u.role !== 'admin') { showToast('Prescription medicine: only a pharmacist can dispense. Ask the pharmacist.', 'danger'); return false; }
+        if (PSET().rxEnforce === false) return true;
+        if (!canRx(u)) { showToast('Prescription medicine: only a pharmacist can dispense. Ask the pharmacist.', 'danger'); return false; }
         if (rxInfo) return true;
         const ref = prompt('Prescription medicine.\nEnter the verified prescription no. or doctor name:');
         if (!ref || ref.trim().length < 3) { showToast('Prescription reference is required', 'warning'); return false; }
@@ -968,7 +982,7 @@
         if (!items || !items.length) return;
         const u = curUser(), patient = localStorage.getItem('prescription_patient') || '', rid = localStorage.getItem('prescription_id'), rno = localStorage.getItem('prescription_no') || '';
         ['prescription_to_fill', 'prescription_patient', 'prescription_id', 'prescription_no'].forEach(k => localStorage.removeItem(k));
-        if (u.role !== 'pharmacist' && u.role !== 'admin') { showToast('Only a pharmacist can dispense a prescription.', 'danger'); return; }
+        if (!canRx(u)) { showToast('Only a pharmacist can dispense a prescription.', 'danger'); return; }
         rxInfo = { no: rno || 'Rx', id: rid, by: u.name || u.role, doctor: '' };
         const missing = [];
         items.forEach(it => {
@@ -1086,7 +1100,7 @@
             ${invoice.paymentMethod === 'cash' ? `<tr><td colspan="3" class="text-end">Cash:</td><td class="text-end">৳${invoice.cashAmount.toFixed(2)}</td></tr>
             <tr><td colspan="3" class="text-end">Change:</td><td class="text-end text-success">৳${invoice.change.toFixed(2)}</td></tr>` : ''}</tfoot>
             </table>
-            <div class="text-center mt-4"><p>Payment Method: ${invoice.paymentMethod.toUpperCase()}</p><p class="fw-bold">🙏 Thank you for shopping with us!</p>
+            <div class="text-center mt-4"><p>Payment Method: ${invoice.paymentMethod.toUpperCase()}</p><p class="fw-bold">${esc(PSET().receiptNote || "🙏 Thank you for shopping with us!")}</p>
             <div><svg id="barcode-${invoice.invoiceNo}"></svg></div><small class="text-muted">** This is a computer generated invoice **</small></div>
         `;
         document.getElementById('invoiceContent').innerHTML = invoiceHtml;

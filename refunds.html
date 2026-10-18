@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="bn"><head><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
+<script src="assets/js/theme.js"></script><script src="assets/js/responsive.js"></script><script src="assets/js/prefs.js"></script><script src="assets/js/panel.js" defer></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MediCare – Sales Returns & Refunds</title>
+<style>
+:root{--bg:#f4f7fb;--fg:#12263a;--card:#fff;--br:#d6e0ea;--pri:#667eea;--mut:#5b6b7b;--bad:#b3261e}
+@media(prefers-color-scheme:dark){:root{--bg:#10171f;--fg:#e6eef6;--card:#17212c;--br:#2b3a4a;--mut:#9fb0c0}}
+body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg)}main{max-width:1000px;margin:auto;padding:1rem 16px}
+.card{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:1rem;margin:.8rem 0}.row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+input,select{padding:.5rem;border:1px solid var(--br);border-radius:8px;background:var(--card);color:var(--fg);font:inherit}
+.btn{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:.5rem .9rem;cursor:pointer;font:inherit;text-decoration:none}
+.btn2{border:1px solid var(--br);background:var(--card);color:var(--fg);border-radius:8px;padding:.5rem .9rem;cursor:pointer;font:inherit;text-decoration:none}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:540px}th,td{border-bottom:1px solid var(--br);padding:.5rem;text-align:left}.muted{color:var(--mut)}.bad{color:var(--bad)}
+</style></head><body><main>
+<h1>↩️ বিক্রি ফেরত ও রিফান্ড</h1>
+<p class="muted">ইনভয়েস নম্বর দিয়ে খুঁজুন, ফেরত আসা আইটেম বেছে নিন — স্টক ফিরে আসবে ও রিফান্ড রেকর্ড হবে।</p>
+<div id="deny" class="card" hidden>শুধু <b>Admin</b> ও <b>Pharmacist</b>। <a href="login.html">Login</a></div>
+<div id="box" hidden>
+ <div class="card row"><input id="q" placeholder="Invoice no / customer" style="flex:1;min-width:180px"><button class="btn" id="go">খুঁজুন</button></div>
+ <div id="res"></div>
+ <div class="card"><h3>রিফান্ড ইতিহাস <span class="muted" id="tot"></span></h3><div class="row"><button class="btn2" id="csv">⬇️ CSV</button></div>
+  <div class="scroll"><table><thead><tr><th>তারিখ</th><th>ইনভয়েস</th><th>আইটেম</th><th>রিফান্ড</th><th>কারণ</th><th>কে</th></tr></thead><tbody id="hs"></tbody></table></div></div>
+</div>
+<p class="row"><a class="btn2" href="dashboard.html">Dashboard</a><a class="btn2" href="sales.html">POS</a></p>
+</main>
+<script>
+(function(){
+ var $=function(i){return document.getElementById(i)};
+ function rj(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}}
+ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+ var u=null;try{u=JSON.parse(localStorage.getItem('user')||sessionStorage.getItem('user'))}catch(e){}
+ var ok=u&&(u.role==='admin'||u.role==='pharmacist')||sessionStorage.getItem('mc_role')==='Owner'||sessionStorage.getItem('mc_role')==='Pharmacist';
+ if(!ok){$('deny').hidden=false;return}$('box').hidden=false;
+ var who=(u&&(u.name||u.role))||sessionStorage.getItem('mc_role')||'';var tk=function(n){return '৳'+(Math.round(n*100)/100).toLocaleString()};
+ function find(){var q=$('q').value.trim().toLowerCase();if(!q){$('res').innerHTML='';return}
+  var S=rj('pharmacy_sales',[]).filter(function(s){return s&&s.real&&(String(s.invoiceNo).toLowerCase().indexOf(q)>-1||String(s.customer||'').toLowerCase().indexOf(q)>-1)}).slice(-10).reverse();
+  $('res').innerHTML=S.length?S.map(function(s){var ret=s.returned||{};
+   var rows=(s.items||[]).map(function(i,ix){var left=(+i.quantity||0)-(+ret[ix]||0);return '<tr><td>'+esc(i.name)+'</td><td>'+esc(i.price)+'</td><td>'+left+' / '+esc(i.quantity)+'</td><td>'+(left>0?'<input type="number" min="0" max="'+left+'" value="0" data-s="'+s.id+'" data-i="'+ix+'" style="width:70px">':'<span class="muted">ফেরত সম্পন্ন</span>')+'</td></tr>'}).join('');
+   return '<div class="card"><b>'+esc(s.invoiceNo)+'</b> · '+esc(s.customer)+' · '+esc(s.date)+' · '+tk(s.total)+'<div class="scroll"><table><thead><tr><th>আইটেম</th><th>দাম</th><th>ফেরতযোগ্য</th><th>ফেরত পরিমাণ</th></tr></thead><tbody>'+rows+'</tbody></table></div><div class="row" style="margin-top:.6rem"><input placeholder="কারণ" data-r="'+s.id+'" style="flex:1;min-width:160px"><button class="btn" data-refund="'+s.id+'">রিফান্ড করুন</button></div></div>'}).join(''):'<div class="card muted">কিছু পাওয়া যায়নি</div>'}
+ $('go').onclick=find;$('q').addEventListener('keydown',function(e){if(e.key==='Enter')find()});
+ $('res').addEventListener('click',function(e){var b=e.target.closest('[data-refund]');if(!b)return;var id=b.dataset.refund;
+  var S=rj('pharmacy_sales',[]),s=S.find(function(x){return String(x.id)===id});if(!s)return;s.returned=s.returned||{};
+  var meds=rj('pharmacy_medicines',[]),amt=0,lines=[];
+  document.querySelectorAll('input[data-s="'+id+'"]').forEach(function(inp){var q=Math.min(+inp.value||0,+inp.max||0);if(q<=0)return;var ix=inp.dataset.i,it=s.items[ix];
+   amt+=q*(+it.price||0);lines.push(it.name+' ×'+q);s.returned[ix]=(+s.returned[ix]||0)+q;var m=meds.find(function(y){return String(y.id)===String(it.id)});if(m)m.stock=(+m.stock||0)+q});
+  if(!lines.length){alert('ফেরত পরিমাণ দিন');return}
+  var reason=(document.querySelector('input[data-r="'+id+'"]').value||'Customer return').slice(0,120);
+  // proportional discount/tax share is not recalculated: refund at item price (documented)
+  var all=(s.items||[]).every(function(i,ix){return (+s.returned[ix]||0)>=(+i.quantity||0)});if(all)s.status='Refunded';
+  var log=rj('pharmacy_refunds',[]);log.push({at:new Date().toISOString(),date:new Date().toISOString().slice(0,10),invoice:s.invoiceNo,items:lines.join('; '),amount:amt,reason:reason,by:who});
+  localStorage.setItem('pharmacy_sales',JSON.stringify(S));localStorage.setItem('pharmacy_medicines',JSON.stringify(meds));localStorage.setItem('pharmacy_refunds',JSON.stringify(log));
+  try{var a=rj('pharmacy_audit',[]);a.push({at:new Date().toISOString(),by:who,msg:'Refund '+s.invoiceNo+' '+amt});localStorage.setItem('pharmacy_audit',JSON.stringify(a.slice(-300)))}catch(x){}
+  find();hist()});
+ function hist(){var H=rj('pharmacy_refunds',[]);$('tot').textContent='— মোট '+tk(H.reduce(function(a,x){return a+(+x.amount||0)},0));
+  $('hs').innerHTML=H.slice().reverse().map(function(x){return '<tr><td>'+esc(x.date)+'</td><td>'+esc(x.invoice)+'</td><td>'+esc(x.items)+'</td><td class="bad">'+tk(x.amount)+'</td><td>'+esc(x.reason)+'</td><td>'+esc(x.by)+'</td></tr>'}).join('')||'<tr><td colspan="6" class="muted">এখনও নেই</td></tr>'}
+ $('csv').onclick=function(){var L=[['Date','Invoice','Items','Amount','Reason','By']].concat(rj('pharmacy_refunds',[]).map(function(x){return [x.date,x.invoice,x.items,x.amount,x.reason,x.by]}));
+  var c=L.map(function(r){return r.map(function(v){v=String(v==null?'':v);if(/^[=+\-@]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"'}).join(',')}).join('\n');
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+c],{type:'text/csv'}));a.download='refunds.csv';a.click()};
+ hist();
+})();
+</script></body></html>
