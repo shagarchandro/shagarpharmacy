@@ -156,3 +156,34 @@ Salted PBKDF2 password hashes + password policy (also for custom accounts changi
 ## v34 — Split payment + fixes
 - POS: new "Split" payment (cash part + wallet part with TrxID); sale stores `parts`, invoice prints both amounts, Daily Closing counts the cash part toward expected cash and the wallet part under mobile.
 - Fix: the Chart.js offline fallback in `guard.js` no longer throws "Cannot set properties of undefined (setting 'data')" on Reports when the CDN is unreachable (charts still need Chart.js online to draw).
+
+## v35 — Due bills, real POS customers, product reviews
+- POS: customer list now comes from Customers (`pharmacy_customers`) when it has records; shows the customer's existing due. New "Due (বাকি)" payment adds the bill to that customer's due and the customer ledger (needs a saved customer, confirmation prompt).
+- Dashboard payment mix now splits Split-payment sales into their cash/wallet parts.
+- Shop product page: star ratings and reviews (stored on this device only; text is escaped).
+
+## v36 — Customer self-service
+- Shop Orders: customers can cancel their own Pending / Prescription-Review orders (stock is restored, Ops gets a notification).
+- Order-success page: "Print receipt" button.
+
+## v37 — Ops Panel list tools
+- `admin-v36.js`: Products, Inventory, Orders, Customers, Suppliers, Purchases, Returns, Expenses, Alerts and Users lists with 6+ rows get a search box with row count, click-to-sort headers and a CSV export of the visible rows.
+
+## v38 — Control Center: Maintenance tab
+- 🛠 Maintenance (`center-more.js`): health check (duplicate barcodes, expired-but-in-stock, missing price, negative stock, selling below cost, shop products without price), configuration export/import (branding, rules, roles, security, shop settings and coupons — not sales, customers or passwords), and a storage-usage table with one-click clear for safe caches (recently viewed, reviews, saved-for-later, held bills, POS draft, login log, lockouts).
+
+## v39 — Online Shop
+- Catalog quick filters (In stock / No prescription / On offer, remembered for the session), Best sellers strip (from real orders), and the hero/offer text now shows the live first coupon from Control Center instead of a fixed SAVE10.
+
+## v40 — Online Shop product & wishlist pages
+- Product page: quantity box, Buy now (straight to checkout), Share (native share / copy link), and "Notify me when back in stock" for sold-out items (sends a notification to the Ops panel).
+- Wishlist: "Add all to cart" (skips unavailable items) and Clear.
+
+## v41 — Shop: Help, Contact, Ask pharmacist, Orders
+- Help: searchable FAQ (10 answers; delivery fees, free-delivery and minimum-order text come from the live shop settings).
+- Contact: call/address/hours cards (from Ops settings), topic selector, character counter, reference number, recent-message list.
+- Ask pharmacist: emergency notice, topic + medicine picker, reference number, recent questions, profile prefill.
+- Orders: guest "Track an order" (order number + mobile, no login).
+
+## v42 — Ops Notifications inbox
+- Ops → Notifications (`admin-v42.js`): filter chips (All / Unread / Questions / Orders with counts), per-message "Mark read", and written replies to customer questions and contact messages (Owner/Pharmacist). The reply appears to the customer in the shop under "Your recent messages" (Ask pharmacist / Contact).

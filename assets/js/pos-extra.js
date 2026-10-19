@@ -81,7 +81,7 @@
   const cd = $('cashAmountDiv'); if (cd) cd.after(pe);
   function payUI() {
     const m = typeof selectedPaymentMethod !== 'undefined' ? selectedPaymentMethod : 'cash';
-    pe.hidden = m === 'cash';
+    pe.hidden = m === 'cash' || m === 'due';
     const w = m === 'mobile' || m === 'split';
     $('pxProv').style.display = w ? '' : 'none'; $('pxProvL').style.display = w ? '' : 'none';
     $('pxRefL').textContent = w ? 'Transaction ID (TrxID)' : 'Card slip / approval no.';
@@ -105,7 +105,7 @@
       if (!(cp > 0 && cp < t)) { showToast('Cash part must be more than 0 and less than ' + money(t), 'danger'); $('pxCashPart').focus(); return; }
       if (!get('pharmacy_settings', '{}').posNoRef && !/^[A-Z0-9-]{6,20}$/.test(ref)) { showToast('Enter the wallet TrxID for the wallet part', 'danger'); $('pxRef').focus(); return; }
       window.__pay = { provider: $('pxProv').value, ref, parts: [{ m: 'cash', amt: +cp.toFixed(2) }, { m: 'mobile', amt: +(t - cp).toFixed(2) }] };
-    } else if (cart.length && m !== 'cash' && !get('pharmacy_settings', '{}').posNoRef) {
+    } else if (cart.length && m !== 'cash' && m !== 'due' && !get('pharmacy_settings', '{}').posNoRef) {
       if (!/^[A-Z0-9-]{6,20}$/.test(ref)) { showToast(m === 'mobile' ? 'Enter the wallet TrxID (6–20 letters/digits)' : 'Enter the card slip / approval no. (6–20 letters/digits)', 'danger'); $('pxRef').focus(); return; }
       window.__pay = { provider: m === 'mobile' ? $('pxProv').value : 'Card', ref };
     }
@@ -121,6 +121,43 @@
   window.showInvoice = function (inv) {
     _si.apply(this, arguments);
     if (window.__pay) { const w = document.querySelector('#invoiceContent .text-center.mt-4 p'); if (w) w.append(' · ' + window.__pay.provider + ' ref ' + window.__pay.ref + (window.__pay.parts ? ' · cash ' + money(window.__pay.parts[0].amt) + ' + wallet ' + money(window.__pay.parts[1].amt) : '')); }
+  };
+
+
+  // ---- v35: real customers in POS + "Due" (বাকি) bills ----
+  const CK = 'pharmacy_customers';
+  const realCust = () => get(CK, '[]').filter(c => c && c.name);
+  (function () {
+    const R = realCust();
+    if (R.length) { customers = R.map(c => ({ id: c.id, name: c.name, phone: c.phone || '', due: +c.due || 0 })); loadCustomers(); }
+    const sel = $('customerSelect'), info = el('div', { class: 'pxs', id: 'pxCust', 'aria-live': 'polite' }); sel.after(info);
+    sel.addEventListener('change', () => { const c = realCust().find(x => String(x.id) === sel.value); info.textContent = c && +c.due > 0 ? '⚠ Existing due: ' + money(c.due) : ''; });
+    const mob = document.querySelector('.payment-method[data-method="mobile"]'); if (!mob) return;
+    const col = mob.parentElement.cloneNode(true), tile = col.querySelector('.payment-method');
+    tile.dataset.method = 'due'; tile.querySelector('i').className = 'fas fa-book fa-2x mb-1 text-primary'; tile.querySelector('.small').textContent = 'Due (বাকি)'; mob.parentElement.after(col);
+    tile.addEventListener('click', () => { document.querySelectorAll('.payment-method').forEach(x => x.classList.remove('active')); tile.classList.add('active'); selectedPaymentMethod = 'due'; $('cashAmountDiv').style.display = 'none'; setTimeout(payUI, 0); });
+  })();
+  const _pp2 = window.processPayment;
+  window.processPayment = function () {
+    const m = typeof selectedPaymentMethod !== 'undefined' ? selectedPaymentMethod : 'cash';
+    if (m !== 'due') return _pp2.apply(this, arguments);
+    if (!cart.length) return showToast('Cart is empty!', 'warning');
+    const cid = $('customerSelect').value, cu = realCust().find(x => String(x.id) === cid);
+    if (cid === '0' || !cu) return showToast('Select a saved customer for a due (বাকি) bill', 'danger');
+    const total = calculateTotals().total;
+    if (!confirm('Put ' + money(total) + ' on ' + cu.name + "'s account (due)?")) return;
+    const n0 = get('pharmacy_sales', '[]').length;
+    _pp2.apply(this, arguments);
+    try {
+      const S = get('pharmacy_sales', '[]');
+      if (S.length > n0 && !cart.length) {
+        const l = S[S.length - 1]; l.due = true; l.paid = false; l.customerId = cu.id; localStorage.setItem('pharmacy_sales', JSON.stringify(S));
+        const C = get(CK, '[]'), i = C.findIndex(x => String(x.id) === cid); if (i >= 0) { C[i].due = +((+C[i].due || 0) + total).toFixed(2); localStorage.setItem(CK, JSON.stringify(C)); }
+        const L = get('pharmacy_customer_ledger', '[]'); L.push({ id: Date.now(), customerId: cu.id, type: 'due', amount: +total.toFixed(2), invoiceNo: l.invoiceNo, at: new Date().toISOString(), note: 'POS due bill' }); localStorage.setItem('pharmacy_customer_ledger', JSON.stringify(L.slice(-500)));
+        customers = realCust().map(c => ({ id: c.id, name: c.name, phone: c.phone || '', due: +c.due || 0 })); loadCustomers(); $('customerSelect').value = '0'; $('pxCust').textContent = '';
+        showToast(money(total) + ' added to ' + cu.name + "'s due", 'info');
+      }
+    } catch (e) { }
   };
 
   // ---- shortcuts ----

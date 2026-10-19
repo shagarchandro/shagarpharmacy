@@ -40,7 +40,7 @@
     svg += '</svg>';
     // top sellers (30 days) + payment mix
     var cut = dKey(new Date(now.getTime() - 29 * 864e5)), top = {}, mix = {};
-    S.forEach(function (s) { if (s.date < cut) return; (s.items || []).forEach(function (i) { var t = top[i.name] = top[i.name] || { q: 0, v: 0 }; t.q += +i.quantity || 0; t.v += (+i.price || 0) * (+i.quantity || 0); }); var m = (s.paymentMethod || 'cash').toLowerCase(); mix[m] = (mix[m] || 0) + (+s.total || 0); });
+    S.forEach(function (s) { if (s.date < cut) return; (s.items || []).forEach(function (i) { var t = top[i.name] = top[i.name] || { q: 0, v: 0 }; t.q += +i.quantity || 0; t.v += (+i.price || 0) * (+i.quantity || 0); }); if (s.parts && s.parts.length) { s.parts.forEach(function (q) { mix[q.m] = (mix[q.m] || 0) + (+q.amt || 0); }); return; } var m = (s.paymentMethod || 'cash').toLowerCase(); mix[m] = (mix[m] || 0) + (+s.total || 0); });
     var tl = Object.keys(top).map(function (n) { return [n, top[n]]; }).sort(function (a, b) { return b[1].q - a[1].q; }).slice(0, 5);
     var mt = Object.keys(mix).reduce(function (a, k) { return a + mix[k]; }, 0), pal = ['#667eea', '#764ba2', '#2a9d8f', '#e9a23b', '#d6577a'];
     var mixBar = '<div class="mix">' + Object.keys(mix).map(function (k, n) { return '<i style="width:' + (mix[k] / mt * 100) + '%;background:' + pal[n % 5] + '" title="' + esc(k) + '"></i>'; }).join('') + '</div>' +

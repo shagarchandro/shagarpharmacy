@@ -48,5 +48,41 @@ window.CCX = function (c) {
       h('h3', {}, 'Unpaid online orders'), tbl(['Order', 'Customer', 'Method', 'Total', 'Status'], unpaid.map(o => h('tr', {}, h('td', {}, o.no), h('td', {}, o.customer), h('td', {}, o.pay || ''), h('td', {}, tk(o.total)), h('td', {}, o.status))), 'Nothing outstanding'),
       h('p', {}, c.btn('⬇ Export all sales (CSV)', csv, 'btn')));
   };
-  return { tabs: [['payments', '💳 Payments'], ['insights', '📊 Insights']], panels };
+
+  panels.maint = () => {
+    const keys = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i), v = localStorage.getItem(k) || ''; keys.push([k, (k.length + v.length) * 2]); }
+    keys.sort((a, b) => b[1] - a[1]); const total = keys.reduce((a, x) => a + x[1], 0);
+    const SAFE = { mc_recent: 'Recently viewed (shop)', mc_reviews: 'Product reviews', mc_later: 'Saved for later (shop)', pharmacy_held: 'Held POS bills', pharmacy_pos_draft: 'POS cart draft', pharmacy_loginlog: 'Login activity log', mc_lock: 'Login lockouts' };
+    const clr = k => { if (!confirm('Clear "' + SAFE[k] + '"? This cannot be undone.')) return; localStorage.removeItem(k); audit('Cleared ' + k); ok('Cleared'); c.show('maint'); };
+    // health checks
+    const meds = rj('pharmacy_medicines', []), today = day(Date.now()), issues = [], seen = {};
+    meds.forEach(m => { const b = String(m.barcode || '').trim(); if (b) { if (seen[b]) issues.push(['Duplicate barcode ' + b, m.name + ' / ' + seen[b]]); else seen[b] = m.name; }
+      if (m.expiryDate && m.expiryDate < today && +m.stock > 0) issues.push(['Expired but in stock', m.name + ' (' + m.expiryDate + ', ' + m.stock + ')']);
+      if (!(+m.sellingPrice > 0)) issues.push(['Missing selling price', m.name]); if (+m.stock < 0) issues.push(['Negative stock', m.name]);
+      if (+m.costPrice > 0 && +m.sellingPrice > 0 && +m.sellingPrice < +m.costPrice) issues.push(['Selling below cost', m.name]); });
+    const D = c.db(); (D.products || []).forEach(p => { if (!(p.price > 0)) issues.push(['Shop product has no price', p.name]); });
+    const CFG = ['pharmacy_settings', 'pharmacy_roles', 'pharmacy_theme', 'mc_acc'];
+    const exp = () => {
+      const o = { v: 1, at: new Date().toISOString() }; CFG.forEach(k => { const v = rj(k, undefined); if (v !== undefined) o[k] = v; }); o.shop = { settings: D.settings, coupons: D.coupons };
+      const b = new Blob([JSON.stringify(o, null, 1)], { type: 'application/json' }), a = h('a', { href: URL.createObjectURL(b), download: 'medicare-config-' + today + '.json' }); document.body.append(a); a.click(); setTimeout(() => a.remove(), 500); audit('Exported configuration');
+    };
+    const imp = e => {
+      const f = e.target.files[0]; e.target.value = ''; if (!f) return; if (f.size > 200000) return bad('File too large for a config file');
+      f.text().then(t => {
+        let o; try { o = JSON.parse(t); } catch (x) { return bad('Not a valid JSON file'); }
+        if (!o || o.v !== 1 || typeof o !== 'object') return bad('This is not a MediCare config file');
+        if (!confirm('Replace branding, rules, roles and shop settings with the ones in this file?')) return;
+        CFG.forEach(k => { if (o[k] && typeof o[k] === 'object') wj(k, o[k]); });
+        if (o.shop && typeof o.shop === 'object') { const d = c.db(); if (o.shop.settings && typeof o.shop.settings === 'object') d.settings = Object.assign(d.settings, o.shop.settings); if (Array.isArray(o.shop.coupons)) d.coupons = o.shop.coupons.filter(q => q && typeof q.code === 'string' && q.pct > 0 && q.pct <= 100).slice(0, 50); c.save(d); }
+        audit('Imported configuration'); ok('Configuration imported — reload other pages to see it'); c.show('maint');
+      });
+    };
+    return h('div', {}, h('h2', {}, '🛠 Maintenance'),
+      h('h3', {}, 'Health check'), issues.length ? tbl(['Issue', 'Details'], issues.slice(0, 60).map(i => h('tr', {}, h('td', {}, i[0]), h('td', {}, i[1])))) : h('p', { class: 'ok' }, '✔ No problems found in medicines and shop products.'),
+      h('h3', {}, 'Configuration backup'), h('p', { class: 'muted' }, 'Export branding, rules, roles, security and shop settings (not sales, customers or passwords) to move them to another browser/device.'),
+      h('div', { class: 'row' }, c.btn('⬇ Export configuration', exp, 'btn'), h('label', { class: 'btn2', style: 'cursor:pointer' }, '⬆ Import configuration', h('input', { type: 'file', accept: 'application/json,.json', hidden: true, onchange: imp }))),
+      h('h3', {}, 'Browser storage — ' + Math.round(total / 1024) + ' KB used (limit is about 5000 KB)'),
+      tbl(['Key', 'Size', ''], keys.slice(0, 25).map(([k, n]) => h('tr', {}, h('td', {}, SAFE[k] ? SAFE[k] + ' (' + k + ')' : k), h('td', {}, (n / 1024).toFixed(1) + ' KB'), h('td', {}, SAFE[k] ? c.btn('Clear', () => clr(k)) : '')))));
+  };
+  return { tabs: [['payments', '💳 Payments'], ['insights', '📊 Insights'], ['maint', '🛠 Maintenance']], panels };
 };
