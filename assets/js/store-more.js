@@ -56,7 +56,7 @@
   function recent(skip) {
     const ids = rd().filter(i => i !== skip), P = ids.map(i => D.products.find(p => p.id === i)).filter(Boolean).slice(0, 8);
     if (!P.length) return null;
-    return h('section', { class: 'rv' }, h('h2', {}, bn() ? 'সম্প্রতি দেখেছেন' : 'Recently viewed'),
+    return h('section', { class: 'rv', 'data-sec': 'recent' }, h('h2', {}, bn() ? 'সম্প্রতি দেখেছেন' : 'Recently viewed'),
       h('div', { class: 'rvrow' }, P.map(p => h('a', { href: '#/product/' + p.id }, h('b', {}, p.name), h('span', {}, money(eff(p)))))));
   }
 
@@ -114,7 +114,7 @@
     const e = document.getElementById('e-payref'); if (e) e.textContent = '';
     if (isW(pay) && !(D.settings || {}).payNoRef && !/^[A-Z0-9-]{6,20}$/.test(ref)) { if (e) e.textContent = 'Enter the TrxID (6–20 letters/digits)'; return toast('Enter your wallet TrxID', 1); }
     const n0 = D.orders.length; _pl(f, rx); const d = db();
-    if (d.orders.length > n0) { const o = d.orders[d.orders.length - 1]; o.payMethod = pay; if (isW(pay)) { o.payRef = ref; o.paid = false; } else { o.paid = false; } save(d); D = d; }
+    if (d.orders.length > n0) { const o = d.orders[d.orders.length - 1]; o.payMethod = pay; { const z = (d.settings.zones || []).find(x => 'z:' + x.name === (f.elements.area && f.elements.area.value)); if (z) o.zone = z.name; } if (isW(pay)) { o.payRef = ref; o.paid = false; } else { o.paid = false; } save(d); D = d; }
   };
 
   // ---- v35: product reviews (stored in this browser only) ----
@@ -130,7 +130,7 @@
       localStorage.setItem(RK, JSON.stringify(a)); toast(bn() ? 'ধন্যবাদ!' : 'Thanks for your review!'); render();
     } }, h('div', { class: 'row' }, h('select', { name: 'rate', 'aria-label': 'Rating' }, h('option', { value: '' }, 'Rating…'), [5, 4, 3, 2, 1].map(n => h('option', { value: n }, stars(n)))), h('input', { name: 'who', placeholder: 'Your name', maxlength: 30, value: me() || '', 'aria-label': 'Your name' })),
       h('input', { name: 'comment', placeholder: 'Share your experience (optional)', maxlength: 200, 'aria-label': 'Comment' }), h('button', { class: 'btn' }, 'Submit review'));
-    return h('section', { class: 'rv mc-free' }, h('h2', {}, (bn() ? 'রিভিউ' : 'Reviews') + (L.length ? ' · ' + avg.toFixed(1) + ' ' + stars(Math.round(avg)) + ' (' + L.length + ')' : '')),
+    return h('section', { class: 'rv mc-free', 'data-sec': 'reviews' }, h('h2', {}, (bn() ? 'রিভিউ' : 'Reviews') + (L.length ? ' · ' + avg.toFixed(1) + ' ' + stars(Math.round(avg)) + ' (' + L.length + ')' : '')),
       L.length ? L.slice(0, 5).map(r => h('div', { class: 'mcb' }, h('b', {}, stars(r.r) + ' ' + r.n), h('div', {}, r.c || ''), h('small', { class: 'muted' }, new Date(r.at).toLocaleDateString()))) : h('p', { class: 'muted' }, bn() ? 'এখনও কোনো রিভিউ নেই।' : 'No reviews yet — be the first.'),
       h('p', { class: 'muted', style: 'font-size:.8rem' }, 'Reviews are saved on this device only (demo).'), f);
   }
@@ -156,7 +156,7 @@
   function catalogExtras(a) {
     const flt = a.querySelector('.filters'), hero = a.querySelector('.hero'); if (!flt) return;
     const chip = (k, l) => h('button', { class: XF[k] ? 'btn' : '', 'aria-pressed': String(XF[k]), onclick() { XF[k] = !XF[k]; try { sessionStorage.setItem('mc_xf', JSON.stringify(XF)); } catch (e) { } S.page = 1; render(); } }, l);
-    flt.before(h('div', { class: 'row mc-free', role: 'group', 'aria-label': 'Quick filters' }, chip('stock', '✅ ' + (bn() ? 'স্টকে আছে' : 'In stock')), chip('otc', '💊 ' + (bn() ? 'প্রেসক্রিপশন লাগে না' : 'No prescription')), chip('offer', '🏷 ' + (bn() ? 'অফারে' : 'On offer')),
+    flt.before(h('div', { class: 'row mc-free', 'data-sec': 'filters', role: 'group', 'aria-label': 'Quick filters' }, chip('stock', '✅ ' + (bn() ? 'স্টকে আছে' : 'In stock')), chip('otc', '💊 ' + (bn() ? 'প্রেসক্রিপশন লাগে না' : 'No prescription')), chip('offer', '🏷 ' + (bn() ? 'অফারে' : 'On offer')),
       xany() ? h('button', { onclick() { XF.stock = XF.otc = XF.offer = false; try { sessionStorage.removeItem('mc_xf'); } catch (e) { } render(); } }, '✕ ' + (bn() ? 'ফিল্টার মুছুন' : 'Clear filters')) : null));
     // live coupon text instead of the fixed SAVE10 line
     const cp = (D.coupons || [])[0], hp = hero && hero.querySelector('p');
@@ -166,7 +166,7 @@
     if (!xany() && !S.q && !S.cat) {
       const cnt = {}; (D.orders || []).filter(o => o.status !== 'Cancelled').forEach(o => o.items.forEach(i => cnt[i.pid] = (cnt[i.pid] || 0) + i.qty));
       const top = Object.keys(cnt).sort((x, y) => cnt[y] - cnt[x]).map(i => D.products.find(p => p.id === i)).filter(p => p && stock(D, p.id) > 0).slice(0, 5);
-      if (top.length) (a.querySelector('.offers') || hero).after(h('section', { class: 'rv mc-free' }, h('h2', {}, '🔥 ' + (bn() ? 'বেস্ট সেলার' : 'Best sellers')), h('div', { class: 'rvrow' }, top.map(p => h('a', { href: '#/product/' + p.id }, h('b', {}, p.name), h('span', {}, money(eff(p)) + (p.disc > 0 ? ' · -' + p.disc + '%' : '')))))));
+      if (top.length) (a.querySelector('.offers') || hero).after(h('section', { class: 'rv mc-free', 'data-sec': 'best' }, h('h2', {}, '🔥 ' + (bn() ? 'বেস্ট সেলার' : 'Best sellers')), h('div', { class: 'rvrow' }, top.map(p => h('a', { href: '#/product/' + p.id }, h('b', {}, p.name), h('span', {}, money(eff(p)) + (p.disc > 0 ? ' · -' + p.disc + '%' : '')))))));
     }
   }
 
@@ -258,7 +258,26 @@
       const o = D.orders.find(x => String(x.no).toUpperCase() === no && String(x.phone || '').replace(/\D/g, '').slice(-10) === ph);
       out.replaceChildren(o ? h('div', { class: 'mcb' }, h('b', {}, o.no), ' · ', money(o.total), ' · ', o.status, timeline(o)) : h('p', { class: 'bad' }, 'No order found for that number and mobile.'));
     } }, h('div', { class: 'row' }, h('input', { name: 'no', placeholder: 'Order no. e.g. INV-1001', 'aria-label': 'Order number' }), h('input', { name: 'ph', type: 'tel', placeholder: 'Mobile', 'aria-label': 'Mobile' }), h('button', { class: 'btn2' }, bn() ? 'ট্র্যাক' : 'Track')));
-    a.append(h('section', { class: 'mc-free' }, h('h2', {}, bn() ? 'অর্ডার ট্র্যাক করুন' : 'Track an order'), f, out));
+    a.append(h('section', { class: 'mc-free', 'data-sec': 'track' }, h('h2', {}, bn() ? 'অর্ডার ট্র্যাক করুন' : 'Track an order'), f, out));
+  }
+
+  // ---- v43: delivery zones + live order summary at checkout ----
+  const zonesOf = () => ((D.settings || {}).zones || []).filter(z => z && z.name);
+  const _tt = totals;
+  totals = function (area) {
+    const t = _tt(area);
+    if (typeof area === 'string' && area.startsWith('z:')) { const z = zonesOf().find(x => 'z:' + x.name === area); if (z && t.fee > 0) { t.total += z.fee - t.fee; t.fee = z.fee; } }
+    return t;
+  };
+  function checkoutSummary(a) {
+    const f = a.querySelector('form'), sel = f && f.elements.area; if (!sel) return;
+    const Z = zonesOf();
+    if (Z.length) { sel.replaceChildren(...Z.map(z => h('option', { value: 'z:' + z.name }, z.name + ' — ' + money(z.fee) + (z.eta ? ' · ' + z.eta : '')))); }
+    const box = h('div', { class: 'mcb mc-free', 'aria-live': 'polite' });
+    const upd = () => { const t = totals(sel.value), z = Z.find(x => 'z:' + x.name === sel.value);
+      box.replaceChildren(h('div', {}, 'Subtotal: ' + money(t.sub)), t.disc ? h('div', {}, 'Discount: −' + money(t.disc)) : '', h('div', {}, 'Delivery: ' + (t.fee ? money(t.fee) : 'Free')), h('b', {}, 'Total: ' + money(t.total)), z && z.eta ? h('div', { class: 'mc-eta' }, '🚚 ' + z.eta) : ''); };
+    sel.addEventListener('change', upd); upd();
+    const pr = f.querySelector('p.price'); pr ? pr.replaceWith(box) : f.append(box);
   }
   const _r = render;
   render = function (k) {
@@ -270,7 +289,7 @@
       if (route === 'product' && parts[1]) {
         const l = rd().filter(i => i !== parts[1]); l.unshift(parts[1]); localStorage.setItem(RV, JSON.stringify(l.slice(0, 10)));
         productTools(a, parts[1]); const r = recent(parts[1]); const h1 = a.querySelector('h1');
-        if (h1) h1.after(h('p', { class: 'mc-eta' }, '🚚 ' + (bn() ? 'ঢাকায় সাধারণত ২–৬ ঘণ্টায় ডেলিভারি' : 'Usually delivered within 2–6 hours in Dhaka')));
+        if (h1) h1.after(h('p', { class: 'mc-eta', 'data-sec': 'eta' }, '🚚 ' + (bn() ? 'ঢাকায় সাধারণত ২–৬ ঘণ্টায় ডেলিভারি' : 'Usually delivered within 2–6 hours in Dhaka')));
         a.append(reviewBox(parts[1]));
         if (r) a.append(r);
       } else if (route === 'catalog' || route === '') {
@@ -283,7 +302,7 @@
         const o = D.orders.find(x => x.no === parts[1]), card = a.querySelector('section');
         if (o && card) card.append(' ', h('button', { class: 'btn2', onclick() { receipt(o); } }, '🖨 ' + (bn() ? 'রসিদ প্রিন্ট' : 'Print receipt')));
       } else if (route === 'checkout') {
-        enhanceCheckout(a);
+        enhanceCheckout(a); checkoutSummary(a);
       } else if (route === 'cart') {
         if (Object.keys(cart()).length) enhanceCart(a); laterBox(a);
         const s = D.settings || {}, sub = totals('dhaka').sub;

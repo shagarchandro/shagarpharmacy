@@ -84,5 +84,49 @@ window.CCX = function (c) {
       h('h3', {}, 'Browser storage — ' + Math.round(total / 1024) + ' KB used (limit is about 5000 KB)'),
       tbl(['Key', 'Size', ''], keys.slice(0, 25).map(([k, n]) => h('tr', {}, h('td', {}, SAFE[k] ? SAFE[k] + ' (' + k + ')' : k), h('td', {}, (n / 1024).toFixed(1) + ' KB'), h('td', {}, SAFE[k] ? c.btn('Clear', () => clr(k)) : '')))));
   };
-  return { tabs: [['payments', '💳 Payments'], ['insights', '📊 Insights'], ['maint', '🛠 Maintenance']], panels };
+
+  panels.delivery = () => {
+    const D = c.db(), s = D.settings, Z = s.zones || [];
+    const f = h('form', { class: 'cc-form', onsubmit(e) {
+      e.preventDefault(); const el = e.target.elements, nm = el.zn.value.trim(), fee = parseFloat(el.zf.value), eta = el.ze.value.trim().slice(0, 40);
+      if (nm.length < 2 || nm.length > 30 || /[<>]/.test(nm)) return bad('Zone name must be 2–30 characters');
+      if (isNaN(fee) || fee < 0 || fee > 2000) return bad('Fee must be 0–2000');
+      if (Z.some(z => z.name.toLowerCase() === nm.toLowerCase())) return bad('That zone already exists'); if (Z.length >= 20) return bad('Maximum 20 zones');
+      s.zones = Z.concat([{ name: nm, fee, eta }]); c.save(D); audit('Added delivery zone ' + nm); ok('Zone added'); c.show('delivery');
+    } }, h('div', { class: 'two' }, field('Zone name', inp('zn', '', 'text', { placeholder: 'e.g. Dhanmondi / Mirpur' })), field('Delivery fee ৳', inp('zf', '', 'number', { min: 0, max: 2000, step: 1 }))), field('Delivery time shown to customers (optional)', inp('ze', '', 'text', { placeholder: 'e.g. 1–2 hours' })), h('button', { class: 'btn' }, 'Add zone'));
+    return h('div', {}, h('h2', {}, '🚚 Delivery zones'), h('p', { class: 'muted' }, 'When at least one zone exists, customers choose a zone at checkout and its fee replaces the default Dhaka / outside-Dhaka fees (free-delivery and coupon rules still apply). Remove all zones to go back to the defaults.'),
+      f, tbl(['Zone', 'Fee', 'Time', ''], Z.map((z, i) => h('tr', {}, h('td', {}, z.name), h('td', {}, tk(z.fee)), h('td', {}, z.eta || '—'), h('td', {}, c.btn('Remove', () => { if (!confirm('Remove zone "' + z.name + '"?')) return; s.zones = Z.filter((_, j) => j !== i); c.save(D); audit('Removed delivery zone ' + z.name); c.show('delivery'); })))), 'No zones — defaults (৳' + s.feeDhaka + ' Dhaka / ৳' + s.feeOut + ' outside) are used.'));
+  };
+
+  panels.shop = () => {
+    const D = c.db(), s = D.settings, off = s.shopOff || [], F = s.featured || [];
+    const SEC = [['offers', 'Offers cards under the banner'], ['featured', 'Featured products strip'], ['best', 'Best sellers strip'], ['recent', 'Recently viewed strip'], ['filters', 'Quick filters (In stock / No prescription / On offer)'], ['reviews', 'Product reviews & ratings'], ['eta', 'Delivery-time note on product page'], ['track', 'Guest order tracking box'], ['trust', 'Trust & testimonials section'], ['wish', 'Wishlist link'], ['ask', 'Ask pharmacist (link and page)']];
+    const f = h('form', { class: 'cc-form', onsubmit(e) {
+      e.preventDefault(); const el = e.target.elements;
+      const mo = parseFloat(el.minOrder.value) || 0, fm = parseFloat(el.freeMin.value) || 0; if (mo < 0 || fm < 0 || mo > 1e6 || fm > 1e6) return bad('Amounts must be 0–1,000,000');
+      Object.assign(s, { shopOpen: el.shopOpen.checked, notice: el.notice.value.trim().slice(0, 200), minOrder: mo, freeMin: fm,
+        heroTitle: el.heroTitle.value.trim().slice(0, 80), heroSub: el.heroSub.value.trim().slice(0, 200), heroCoupon: el.heroCoupon.checked, footerNote: el.footerNote.value.trim().slice(0, 160) });
+      s.shopOff = SEC.filter(([k]) => !el['sec|' + k].checked).map(([k]) => k);
+      const feat = [], P = D.products || [];
+      for (const p of P) { const d = parseFloat(el['d|' + p.id].value); if (!isNaN(d) && (d < 0 || d > 90)) return bad('Discount for "' + p.name + '" must be 0–90%'); }
+      P.forEach(p => { p.hide = !el['v|' + p.id].checked; if (!p.hide && el['f|' + p.id].checked) feat.push(p.id); const d = parseFloat(el['d|' + p.id].value); if (isNaN(d) || d <= 0) delete p.disc; else p.disc = Math.round(d * 10) / 10; });
+      if (feat.length > 12) return bad('Choose at most 12 featured products'); s.featured = feat;
+      c.save(D); audit('Changed customer shop controls'); ok('Saved — the customer shop updates immediately'); c.show('shop');
+    } },
+      h('p', {}, h('a', { class: 'btn2', href: 'shop.html', target: '_blank', rel: 'noopener' }, '↗ Open customer shop'), ' ', h('span', { class: 'muted' }, 'Open it in another tab: it refreshes by itself when you save.')),
+      h('h3', {}, 'Shop status & rules'),
+      chk('shopOpen', s.shopOpen !== false, 'Shop is open for online orders'), field('Announcement banner (blank = none)', inp('notice', s.notice || '', 'text', { maxlength: 200 })),
+      h('div', { class: 'two' }, field('Minimum order ৳ (0 = none)', inp('minOrder', s.minOrder || 0, 'number', { min: 0 })), field('Free delivery from ৳ (0 = off)', inp('freeMin', s.freeMin || 0, 'number', { min: 0 }))),
+      h('h3', {}, 'Storefront text'),
+      field('Home headline (blank = default)', inp('heroTitle', s.heroTitle || '', 'text', { maxlength: 80 })), field('Home sub-line (blank = default)', inp('heroSub', s.heroSub || '', 'text', { maxlength: 200 })),
+      chk('heroCoupon', s.heroCoupon !== false, 'Mention the first coupon in the sub-line'), field('Footer note (shown on every shop page)', inp('footerNote', s.footerNote || '', 'text', { maxlength: 160 })),
+      h('h3', {}, 'Sections shown to customers'), h('div', { class: 'cc-grid' }, SEC.map(([k, l]) => h('div', { class: 'cc-card' }, chk('sec|' + k, !off.includes(k), l)))),
+      h('h3', {}, 'Products online'), h('p', { class: 'muted' }, 'Visible = sold on the shop. Featured = shown in the ⭐ strip. Discount % shows a strike-through price (blank = none). Prices, stock and prescription flags come from Medicines.'),
+      tbl(['Product', 'Price', 'Visible', 'Featured', 'Discount %'], (D.products || []).map(p => h('tr', {}, h('td', {}, p.name), h('td', {}, tk(p.price)),
+        h('td', {}, h('input', { type: 'checkbox', name: 'v|' + p.id, checked: p.hide ? null : 'checked', 'aria-label': 'Visible: ' + p.name })), h('td', {}, h('input', { type: 'checkbox', name: 'f|' + p.id, checked: F.includes(p.id) ? 'checked' : null, 'aria-label': 'Featured: ' + p.name })),
+        h('td', {}, h('input', { type: 'number', name: 'd|' + p.id, min: 0, max: 90, step: 0.5, value: p.disc || '', style: 'width:5rem', 'aria-label': 'Discount % for ' + p.name })))), 'No products yet'),
+      h('button', { class: 'btn' }, 'Save shop controls'));
+    return h('div', {}, h('h2', {}, '🛍 Customer shop'), f);
+  };
+  return { tabs: [['shop', '🛍 Customer shop'], ['payments', '💳 Payments'], ['delivery', '🚚 Delivery'], ['insights', '📊 Insights'], ['maint', '🛠 Maintenance']], panels };
 };

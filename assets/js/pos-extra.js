@@ -160,6 +160,42 @@
     } catch (e) { }
   };
 
+  // ---- v45: top-seller chips, editable quantities, today's bills with reprint ----
+  const sales = () => get('pharmacy_sales', '[]').filter(x => x && x.real);
+  const dkey = x => new Date(x).toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' });
+  const favs = el('div', { id: 'pxFav', class: 'pxq', 'aria-label': 'Top sellers' });
+  const grid = $('productsGrid'); if (grid) grid.before(favs);
+  function drawFav() {
+    const cut = Date.now() - 30 * 864e5, cnt = {};
+    sales().forEach(x => { if (new Date(x.at || x.date) < cut) return; (x.items || []).forEach(i => cnt[i.id] = (cnt[i.id] || 0) + (+i.quantity || 0)); });
+    const top = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a]).map(id => products.find(p => String(p.id) === String(id))).filter(p => p && p.stock > 0).slice(0, 6);
+    favs.replaceChildren(...(top.length ? [el('small', { class: 'text-muted' }, '⭐ Top sellers:')].concat(top.map(p => el('button', { type: 'button', onclick() { addToCart(p.id); } }, p.name))) : []));
+  }
+  // editable quantity: replace the number between − and + with an input
+  const _uc2 = window.updateCart;
+  window.updateCart = function () {
+    _uc2.apply(this, arguments);
+    document.querySelectorAll('#cartItems .cart-item').forEach((row, i) => {
+      const it = cart[i], sp = row.querySelector('span.fw-bold.mx-2'); if (!it || !sp) return;
+      const p = products.find(x => x.id === it.id), inp = el('input', { type: 'number', min: '1', max: String(p ? p.stock : 9999), value: String(it.quantity), 'aria-label': 'Quantity of ' + it.name, style: 'width:3.6rem;text-align:center', class: 'form-control form-control-sm d-inline-block' });
+      inp.addEventListener('change', () => { const v = Math.floor(+inp.value); if (!(v >= 1)) { updateCart(); return; } updateQuantity(it.id, v); });
+      sp.replaceWith(inp);
+    });
+    drawToday(); drawFav();
+  };
+  const today = el('details', { id: 'pxToday', class: 'pxh' });
+  const acts = document.querySelector('.d-grid.gap-2.mt-3'); if (acts) acts.after(today);
+  function reprint(x) {
+    const items = (x.items || []).map(i => ({ id: i.id, name: i.name, price: +i.price || 0, quantity: +i.quantity || 0, total: (+i.price || 0) * (+i.quantity || 0) }));
+    showInvoice({ invoiceNo: x.invoiceNo, date: new Date(x.at || x.date).toLocaleString(), customer: x.customer || 'Walk-in Customer', rx: x.rx ? { no: x.rx.no, by: x.rx.by } : null, items, subtotal: +x.subtotal || +x.total, discount: +x.discount || 0, tax: +x.tax || 0, total: +x.total || 0, paymentMethod: String(x.paymentMethod || '') + ' ', cashAmount: 0, change: 0 });
+  }
+  function drawToday() {
+    const t = dkey(Date.now()), L = sales().filter(x => dkey(x.at || x.date) === t).reverse(), sum = L.reduce((a, x) => a + (+x.total || 0), 0);
+    today.replaceChildren(el('summary', {}, '🧾 Today: ' + L.length + ' bill(s) · ' + money(sum)),
+      ...(L.length ? L.slice(0, 15).map(x => el('div', { class: 'it' }, el('span', {}, new Date(x.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' · ' + (x.customer || 'Walk-in') + ' · ' + money(x.total) + ' · ' + (x.parts ? 'split' : x.paymentMethod || '')), el('button', { type: 'button', onclick() { reprint(x); } }, 'Reprint'))) : [el('small', { class: 'text-muted' }, 'No bills yet today.')]));
+  }
+  window.addEventListener('mc-sale', () => { drawToday(); drawFav(); });
+
   // ---- shortcuts ----
   document.addEventListener('keydown', e => {
     if (e.key === 'F2') { e.preventDefault(); const s = $('searchProduct'); s && s.focus(); }

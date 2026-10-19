@@ -187,3 +187,18 @@ Salted PBKDF2 password hashes + password policy (also for custom accounts changi
 
 ## v42 — Ops Notifications inbox
 - Ops → Notifications (`admin-v42.js`): filter chips (All / Unread / Questions / Orders with counts), per-message "Mark read", and written replies to customer questions and contact messages (Owner/Pharmacist). The reply appears to the customer in the shop under "Your recent messages" (Ask pharmacist / Contact).
+
+## v43 — Delivery zones
+- Control Center → 🚚 Delivery: add/remove delivery zones with a fee and optional delivery-time text (max 20). With zones defined, checkout shows them instead of Dhaka/outside-Dhaka and uses the zone fee (free-delivery rule still applies); the order records the zone.
+- Checkout now has a live order summary (subtotal, discount, delivery, total, ETA) that updates when the zone changes.
+
+## v44 — Smarter alerts (Ops Panel)
+- Ops → Alerts (`admin-v44.js`): severity levels (Critical / Warning / Info) with filter chips, more checks (sold-out products, Rx waiting 2h+, orders Pending 12h+, wallet payments unchecked 24h+, unanswered customer questions, back-in-stock requests), "Open →" jump buttons (respecting role access), 24-hour Snooze/Unsnooze, and a live count on the Alerts tab button and the page title.
+
+## v45 — POS Sales
+- Top-seller chips (last 30 days) for one-tap adding; quantity in the cart is an editable box (stock-checked); "Today" panel lists the day's bills with totals and **Reprint** for any bill.
+
+## v46 — Admin controls the customer shop
+- Control Center → 🛍 Customer shop (`center-more.js`) and shop layer `store-control.js`: open/closed + banner, minimum order, free-delivery threshold, home headline/sub-line, footer note, 11 section switches (offers, featured, best sellers, recently viewed, quick filters, reviews, delivery note, guest tracking, trust/testimonials, wishlist, Ask pharmacist), per-product Visible / Featured / Discount %.
+- The shop refreshes itself when the admin saves in another tab (storage event); hidden products disappear from the catalog, product page, wishlist and block checkout if still in a cart.
+- Online-only: hiding a product does not stop it being sold at the POS.
