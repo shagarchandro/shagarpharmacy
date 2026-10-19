@@ -709,7 +709,8 @@
     function esc(x) { return String(x == null ? '' : x).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
     addEventListener('DOMContentLoaded', () => { const l = document.getElementById('taxPctLbl'); if (l) l.textContent = Math.round(TAXR()*1000)/10; });
     function loadProductsFromStorage() {
-        const stored = localStorage.getItem(STORAGE_KEY);
+        let stored = localStorage.getItem(STORAGE_KEY);
+        try { if (stored && !JSON.parse(stored).length) stored = null; } catch (e) { stored = null; }   // an empty list must not hide the demo products
         if (stored) {
             const medicines = JSON.parse(stored);
             return medicines.map(med => ({

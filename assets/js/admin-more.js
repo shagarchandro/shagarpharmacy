@@ -79,7 +79,7 @@
         h('h2', {}, D.settings.store || 'MediCare'), h('p', {}, `Order ${o.no} · ${dhaka(o.at)}`),
         h('p', {}, h('b', {}, o.customer), ' · ', o.phone, h('br'), o.addr),
         h('ul', {}, (o.items || []).map(i => h('li', {}, `${i.name} × ${i.qty}`))),
-        h('p', {}, h('b', {}, 'Collect: '), (o.pay && /cash/i.test(o.pay)) ? money(o.total) : 'Paid / ' + (o.pay || 'online'), ' · Total ' + money(o.total)),
+        h('p', {}, h('b', {}, 'Collect: '), (o.pay && /cash|on delivery/i.test(o.pay)) ? money(o.total) : 'Paid / ' + (o.pay || 'online'), ' · Total ' + money(o.total)),
         o.rx ? h('p', {}, '⚠️ Prescription item — verify before handing over.') : '')));
       const ps = h('style', { class: 'mcprint' }, '.mcprint{display:none}@media print{body>*:not(.mcprint){display:none!important}.mcprint{display:block!important}}');
       document.head.append(ps); document.body.append(p); setTimeout(() => { print(); }, 50); setTimeout(() => { p.remove(); ps.remove(); }, 1500);

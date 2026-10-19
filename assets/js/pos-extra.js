@@ -69,6 +69,60 @@
   document.addEventListener('click', e => { if (e.target.closest('.payment-method, #discountSlider')) setTimeout(liveChange, 0); });
   const ds = $('discountSlider'); ds && ds.addEventListener('input', liveChange);
 
+
+  // ---- v31: payment details (mobile wallet / card slip reference) ----
+  const pe = el('div', { id: 'pxPay', class: 'pxh', hidden: '' },
+    el('label', { for: 'pxProv', class: 'form-label small fw-semibold', id: 'pxProvL' }, 'Wallet'),
+    el('select', { id: 'pxProv', class: 'form-select rounded-3 mb-2' }, ['bKash', 'Nagad', 'Rocket', 'Upay'].map(x => el('option', {}, x))),
+    el('label', { for: 'pxRef', class: 'form-label small fw-semibold', id: 'pxRefL' }, 'Transaction ID'),
+    el('input', { id: 'pxRef', class: 'form-control rounded-3', maxlength: '20', autocomplete: 'off', placeholder: 'e.g. 9A7B3C2D1E' }),
+    el('div', { id: 'pxSplitBox', style: 'display:none;margin-top:.5rem' }, el('label', { for: 'pxCashPart', class: 'form-label small fw-semibold' }, 'Cash part (৳) — the rest is paid by wallet'), el('input', { id: 'pxCashPart', type: 'number', min: '0', step: '0.01', class: 'form-control rounded-3' }), el('small', { class: 'text-muted', id: 'pxRest' })),
+    el('small', { class: 'text-muted', id: 'pxPayHint' }, 'Demo only — no real payment is processed. Never enter card numbers or PINs.'));
+  const cd = $('cashAmountDiv'); if (cd) cd.after(pe);
+  function payUI() {
+    const m = typeof selectedPaymentMethod !== 'undefined' ? selectedPaymentMethod : 'cash';
+    pe.hidden = m === 'cash';
+    const w = m === 'mobile' || m === 'split';
+    $('pxProv').style.display = w ? '' : 'none'; $('pxProvL').style.display = w ? '' : 'none';
+    $('pxRefL').textContent = w ? 'Transaction ID (TrxID)' : 'Card slip / approval no.';
+    $('pxSplitBox').style.display = m === 'split' ? '' : 'none'; restUI();
+  }
+  function restUI() { const t = calculateTotals().total, v = parseFloat($('pxCashPart').value) || 0; $('pxRest').textContent = t ? 'Wallet part: ' + money(Math.max(0, t - v)) + ' of ' + money(t) : ''; }
+  $('pxCashPart').addEventListener('input', restUI);
+  (function () { const mob = document.querySelector('.payment-method[data-method="mobile"]'); if (!mob) return; const col = mob.parentElement.cloneNode(true), tile = col.querySelector('.payment-method');
+    tile.dataset.method = 'split'; tile.querySelector('i').className = 'fas fa-columns fa-2x mb-1 text-primary'; tile.querySelector('.small').textContent = 'Split'; mob.parentElement.after(col);
+    tile.addEventListener('click', () => { document.querySelectorAll('.payment-method').forEach(x => x.classList.remove('active')); tile.classList.add('active'); selectedPaymentMethod = 'split'; $('cashAmountDiv').style.display = 'none'; setTimeout(payUI, 0); }); })();
+  document.addEventListener('click', e => { if (e.target.closest('.payment-method')) setTimeout(payUI, 0); });
+  (function () { const S = get('pharmacy_settings', '{}'), off = S.posPayOff || []; off.forEach(k => { const m = document.querySelector('.payment-method[data-method="' + k + '"]'); if (m && m.parentElement) m.parentElement.style.display = 'none'; }); })();
+  payUI();
+  const _pp = window.processPayment;
+  window.__pay = null;
+  window.processPayment = function () {
+    const m = typeof selectedPaymentMethod !== 'undefined' ? selectedPaymentMethod : 'cash', ref = ($('pxRef').value || '').trim().toUpperCase();
+    window.__pay = null;
+    if (cart.length && m === 'split') {
+      const t = calculateTotals().total, cp = parseFloat($('pxCashPart').value);
+      if (!(cp > 0 && cp < t)) { showToast('Cash part must be more than 0 and less than ' + money(t), 'danger'); $('pxCashPart').focus(); return; }
+      if (!get('pharmacy_settings', '{}').posNoRef && !/^[A-Z0-9-]{6,20}$/.test(ref)) { showToast('Enter the wallet TrxID for the wallet part', 'danger'); $('pxRef').focus(); return; }
+      window.__pay = { provider: $('pxProv').value, ref, parts: [{ m: 'cash', amt: +cp.toFixed(2) }, { m: 'mobile', amt: +(t - cp).toFixed(2) }] };
+    } else if (cart.length && m !== 'cash' && !get('pharmacy_settings', '{}').posNoRef) {
+      if (!/^[A-Z0-9-]{6,20}$/.test(ref)) { showToast(m === 'mobile' ? 'Enter the wallet TrxID (6–20 letters/digits)' : 'Enter the card slip / approval no. (6–20 letters/digits)', 'danger'); $('pxRef').focus(); return; }
+      window.__pay = { provider: m === 'mobile' ? $('pxProv').value : 'Card', ref };
+    }
+    const n0 = get('pharmacy_sales', '[]').length;
+    _pp.apply(this, arguments);
+    try {
+      const S = get('pharmacy_sales', '[]');
+      if (window.__pay && S.length && S[S.length - 1].real && (S.length !== n0 || cart.length === 0)) { const l = S[S.length - 1]; l.provider = window.__pay.provider; l.payRef = window.__pay.ref; l.paid = true; if (window.__pay.parts) l.parts = window.__pay.parts; localStorage.setItem('pharmacy_sales', JSON.stringify(S)); }
+      if (!cart.length) $('pxRef').value = '';
+    } catch (e) { }
+  };
+  const _si = window.showInvoice;
+  window.showInvoice = function (inv) {
+    _si.apply(this, arguments);
+    if (window.__pay) { const w = document.querySelector('#invoiceContent .text-center.mt-4 p'); if (w) w.append(' · ' + window.__pay.provider + ' ref ' + window.__pay.ref + (window.__pay.parts ? ' · cash ' + money(window.__pay.parts[0].amt) + ' + wallet ' + money(window.__pay.parts[1].amt) : '')); }
+  };
+
   // ---- shortcuts ----
   document.addEventListener('keydown', e => {
     if (e.key === 'F2') { e.preventDefault(); const s = $('searchProduct'); s && s.focus(); }

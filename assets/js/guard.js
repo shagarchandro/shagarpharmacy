@@ -7,7 +7,7 @@
   function chain(){var o=function(){return o};['to','from','fromTo','set','timeline','registerPlugin','add','kill','play','pause','delay','killTweensOf','utils'].forEach(function(k){o[k]=function(){return o}});return o}
   if(!window.gsap)window.gsap=chain();
   if(!window.ScrollTrigger)window.ScrollTrigger={};
-  if(!window.Chart){window.Chart=function(){this.data={datasets:[],labels:[]};this.options={};this.destroy=function(){};this.update=function(){}};window.Chart.register=function(){};window.Chart.defaults={}}
+  if(!window.Chart){window.Chart=function(){this.data={datasets:[{data:[]},{data:[]},{data:[]},{data:[]}],labels:[]};this.options={};this.destroy=function(){};this.update=function(){}};window.Chart.register=function(){};window.Chart.defaults={}}
   if(!window.AOS)window.AOS={init:function(){},refresh:function(){}};
 })();
 (function () {

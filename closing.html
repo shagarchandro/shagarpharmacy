@@ -41,7 +41,7 @@ if(!ok){$('deny').hidden=false;return}$('box').hidden=false;
 $('d').value=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Dhaka'});
 var cash=0,net=0;
 function calc(){var d=$('d').value,S=rj('pharmacy_sales',[]).filter(function(s){return s&&s.real&&s.date===d&&s.status!=='Voided'}),R=rj('pharmacy_refunds',[]).filter(function(r){return r.date===d});
- var by={},tot=0;S.forEach(function(s){var m=(s.paymentMethod||'cash').toLowerCase();by[m]=by[m]||{n:0,t:0};by[m].n++;by[m].t+=+s.total||0;tot+=+s.total||0});
+ var by={},tot=0;S.forEach(function(s){tot+=+s.total||0;if(s.parts&&s.parts.length){s.parts.forEach(function(q){var m=q.m==='mobile'?'mobile':q.m;by[m]=by[m]||{n:0,t:0};by[m].n++;by[m].t+=+q.amt||0});return}var m=(s.paymentMethod||'cash').toLowerCase();by[m]=by[m]||{n:0,t:0};by[m].n++;by[m].t+=+s.total||0});
  var ref=R.reduce(function(a,r){return a+(+r.amount||0)},0);net=tot-ref;cash=(by.cash?by.cash.t:0)-ref;
  $('k').innerHTML='<div><b>'+S.length+'</b>ইনভয়েস</div><div><b>'+tk(tot)+'</b>মোট বিক্রি</div><div><b class="bad">'+tk(ref)+'</b>রিফান্ড</div><div><b>'+tk(net)+'</b>নিট বিক্রি</div><div><b>'+tk(cash)+'</b>ক্যাশ বিক্রি (রিফান্ড বাদে)</div>';
  $('m').innerHTML=Object.keys(by).map(function(m){return '<tr><td>'+esc(m)+'</td><td>'+by[m].n+'</td><td>'+tk(by[m].t)+'</td></tr>'}).join('')||'<tr><td colspan="3" class="muted">বিক্রি নেই</td></tr>';diff()}

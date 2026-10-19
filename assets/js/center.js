@@ -295,6 +295,7 @@
   };
 
   const TABS = [['overview', '🏠 Overview'], ['brand', '🎨 Branding'], ['rules', '🧾 Rules'], ['roles', '🛡️ Roles'], ['accounts', '👥 Accounts'], ['features', '🧩 Features'], ['security', '🔐 Security'], ['sync', '🔄 Shop sync'], ['logs', '📋 Sales & audit'], ['data', '🗄️ Data']];
+  if (window.CCX) { try { const x = window.CCX({ h, db: shop, save: d => save(d), rj, wj, audit, ok, bad, field, inp, chk, tbl, btn, tk }); TABS.splice(TABS.length - 1, 0, ...x.tabs); Object.assign(P, x.panels); } catch (e) { console.error(e); } }
   let curTab = 'overview';
   function show(t) {
     curTab = t || curTab; tabsEl.replaceChildren(...TABS.map(([k, l]) => h('button', { class: k === curTab ? 'on' : '', role: 'tab', 'aria-selected': k === curTab ? 'true' : 'false', onclick() { location.hash = k; show(k); } }, l)));

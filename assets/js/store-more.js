@@ -90,6 +90,27 @@
         h('span', {}, h('button', { class: 'btn2', disabled: !st, onclick() { const cc = cart(); cc[i] = Math.min((cc[i] || 0) + 1, st); const ll = later(); delete ll[i]; setLater(ll); setCart(cc); } }, st ? 'Move to cart' : 'Out of stock'), ' ',
           h('button', { onclick() { const ll = later(); delete ll[i]; setLater(ll); render(); } }, '✕'))); })));
   }
+
+  // ---- v31: checkout payment options (demo; no real gateway) ----
+  const PAYS = [['Cash on delivery', 'Pay the rider in cash when your order arrives.'], ['Card on delivery', 'The rider brings a card machine (no card details are taken online).'], ['bKash (demo)', 'Send to the shop bKash number, then enter your TrxID below.'], ['Nagad (demo)', 'Send to the shop Nagad number, then enter your TrxID below.'], ['Rocket (demo)', 'Send to the shop Rocket number, then enter your TrxID below.']];
+  const isW = v => /\((demo)\)/.test(v || '');
+  function enhanceCheckout(a) {
+    const f = a.querySelector('form'), sel = f && f.elements.pay; if (!sel) return;
+    const st0 = (D.settings || {}), off = st0.payOff || [], num = st0.payNum || {}, PL = PAYS.filter(x => !off.includes(x[0]));
+    const keep = sel.value; sel.replaceChildren(...(PL.length ? PL : PAYS).map(x => h('option', { value: x[0], selected: x[0] === keep }, x[0])));
+    const note = h('small', { class: 'muted', id: 'payNote' }), ref = h('input', { name: 'payref', maxlength: 20, autocomplete: 'off', placeholder: 'e.g. 9A7B3C2D1E' }), lab = h('label', { id: 'payRefL' }, 'Transaction ID (TrxID)', ref, h('small', { class: 'err', id: 'e-payref' }));
+    const upd = () => { const v = sel.value, w = isW(v), n = PAYS.find(x => x[0] === v); const nm = (v.match(/^(bKash|Nagad|Rocket)/) || [])[1]; note.textContent = n ? n[1] + (nm && num[nm] ? ' Number: ' + num[nm] : '') : ''; ref.required = false;  lab.style.display = w && !st0.payNoRef ? '' : 'none'; };
+    sel.addEventListener('change', upd); sel.closest('label').after(note, lab); upd();
+    const t = totals(f.elements.area ? f.elements.area.value : 'dhaka'); note.after(h('p', { class: 'mc-eta' }, '🔒 ' + (bn() ? 'ডেমো — কোনো আসল পেমেন্ট হয় না, কার্ড নম্বর/PIN দেবেন না। মোট: ' : 'Demo — no real payment is taken; never enter card numbers or PINs. Total: ') + money(t.total)));
+  }
+  const _pl = place;
+  place = function (f, rx) {
+    D = db(); const pay = f.elements.pay ? f.elements.pay.value : '', ref = f.elements.payref ? f.elements.payref.value.trim().toUpperCase() : '';
+    const e = document.getElementById('e-payref'); if (e) e.textContent = '';
+    if (isW(pay) && !(D.settings || {}).payNoRef && !/^[A-Z0-9-]{6,20}$/.test(ref)) { if (e) e.textContent = 'Enter the TrxID (6–20 letters/digits)'; return toast('Enter your wallet TrxID', 1); }
+    const n0 = D.orders.length; _pl(f, rx); const d = db();
+    if (d.orders.length > n0) { const o = d.orders[d.orders.length - 1]; o.payMethod = pay; if (isW(pay)) { o.payRef = ref; o.paid = false; } else { o.paid = false; } save(d); D = d; }
+  };
   const _r = render;
   render = function (k) {
     _r(k); D = db();
@@ -106,6 +127,8 @@
         const r = recent(); if (r) a.append(r);
       } else if (route === 'orders') {
         const t = track(); if (t) a.prepend(t);
+      } else if (route === 'checkout') {
+        enhanceCheckout(a);
       } else if (route === 'cart') {
         if (Object.keys(cart()).length) enhanceCart(a); laterBox(a);
         const s = D.settings || {}, sub = totals('dhaka').sub;

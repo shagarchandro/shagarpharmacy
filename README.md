@@ -138,3 +138,21 @@ Salted PBKDF2 password hashes + password policy (also for custom accounts changi
 ## v30 — POS Sales + Shopping Cart
 - POS (`assets/js/pos-extra.js`, loaded by `sales.html`): hold/resume bills (F4), unsaved-cart autosave/restore, quick-cash buttons with live change/short display, cart unit summary, shortcuts F2 (search) / F9 (pay).
 - Shop cart (`assets/js/store-more.js`): +/− steppers, per-unit price and low-stock note, Save for later list, Clear cart, savings line, Rx notice, "You may also need" suggestions.
+
+## v31 — Payment system (demo, no real gateway)
+- POS (`pos-extra.js`): Mobile → provider (bKash/Nagad/Rocket/Upay) + required TrxID; Card → required slip/approval no.; reference saved on the sale and printed on the invoice. Never stores card numbers.
+- Shop checkout (`store-more.js`): Cash on delivery, Card on delivery, bKash/Nagad/Rocket (demo) with required TrxID; saved on the order.
+- Ops Orders (`admin-v29.js`): per-method totals with unpaid amounts, pay-reference tag, "Paid" checkbox per order, CSV includes Pay ref / Paid.
+- Fix: `sales.html` no longer shows an empty product list when `pharmacy_medicines` is an empty array.
+
+## v32 — Control Center (admin panel) upgrade
+- 💳 Payments tab (`center-more.js`): turn each online method (COD, Card on delivery, bKash, Nagad, Rocket) and POS method (Card, Mobile) on/off, set wallet numbers shown at checkout, choose whether TrxID/slip numbers are mandatory.
+- 📊 Insights tab: all-time and 14-day revenue, 14-day bar chart, payment mix, top 5 products, unpaid online orders, CSV export of all sales.
+
+## v33 — Admin Dashboard + Ops Panel
+- Admin Dashboard (`dash-admin.js`, admin role only): online-shop snapshot, system health (last backup, storage, default passwords), recent sign-ins and changes, shortcuts into Control Center tabs.
+- Ops Panel (`admin-v29.js`): Dashboard "Needs attention" list with jump buttons and 14-day revenue bars; Orders "Confirm all pending" bulk action.
+
+## v34 — Split payment + fixes
+- POS: new "Split" payment (cash part + wallet part with TrxID); sale stores `parts`, invoice prints both amounts, Daily Closing counts the cash part toward expected cash and the wallet part under mobile.
+- Fix: the Chart.js offline fallback in `guard.js` no longer throws "Cannot set properties of undefined (setting 'data')" on Reports when the CDN is unreachable (charts still need Chart.js online to draw).

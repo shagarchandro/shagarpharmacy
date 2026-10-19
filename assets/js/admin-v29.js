@@ -25,11 +25,42 @@
   V.orders = () => {
     const r = o0(), L = D.orders || [], cnt = {};
     L.forEach(o => cnt[o.status] = (cnt[o.status] || 0) + 1);
+    const pm = {}; L.filter(o => o.status !== 'Cancelled').forEach(o => { const k = (o.pay || 'Unknown').replace(/ \(demo.*\)/, ''); (pm[k] = pm[k] || { n: 0, t: 0, unpaid: 0 }); pm[k].n++; pm[k].t += +o.total || 0; if (!o.paid && o.status !== 'Delivered') pm[k].unpaid += +o.total || 0; });
+    r.querySelectorAll('tbody tr').forEach(tr => { const o = L.find(x => x.no === tr.children[0].textContent); if (!o) return; const c = tr.children[1];
+      if (o.payRef) c.append(h('div', { class: 'tag' }, (o.pay || '').replace(/ \(demo.*\)/, '') + ' · ' + o.payRef));
+      c.append(h('div', {}, h('label', { style: 'font-size:.8rem' }, h('input', { type: 'checkbox', checked: !!o.paid, 'aria-label': 'Paid ' + o.no, onchange(e) { o.paid = e.target.checked; save(D); toast(o.paid ? 'Marked as paid' : 'Marked as unpaid'); go(); } }), ' Paid'))); });
+    r.prepend(h('div', { class: 'tdy', 'aria-label': 'Payments' }, Object.keys(pm).map(k => h('div', {}, h('b', {}, money(pm[k].t)), h('span', {}, k + ' · ' + pm[k].n + ' order(s)' + (pm[k].unpaid ? ' · ' + money(pm[k].unpaid) + ' unpaid' : ''))))));
     r.prepend(h('div', { class: 'chips' },
       Object.keys(cnt).map(s => h('span', { class: 'tag' }, s + ': ' + cnt[s])),
       h('button', { onclick() {
-        csv('orders-' + day(Date.now()) + '.csv', [['No', 'Date', 'Customer', 'Phone', 'Address', 'Items', 'Total', 'Payment', 'Status']].concat(L.map(o => [o.no, day(o.at), o.customer, o.phone, o.addr, (o.items || []).map(i => i.name + 'x' + i.qty).join('; '), o.total, o.pay, o.status])));
+        csv('orders-' + day(Date.now()) + '.csv', [['No', 'Date', 'Customer', 'Phone', 'Address', 'Items', 'Total', 'Payment', 'Pay ref', 'Paid', 'Status']].concat(L.map(o => [o.no, day(o.at), o.customer, o.phone, o.addr, (o.items || []).map(i => i.name + 'x' + i.qty).join('; '), o.total, o.pay, o.payRef || '', o.paid ? 'Yes' : 'No', o.status])));
       } }, '⬇ Export CSV')));
+    return r;
+  };
+})();
+
+/* v33: Ops dashboard "Needs attention" + 14-day trend, and bulk-confirm on Orders. */
+(function () {
+  'use strict';
+  const d1 = V.dash;
+  V.dash = () => {
+    const r = d1(), L = D.orders || [];
+    const unpaid = L.filter(o => !o.paid && !['Cancelled', 'Delivered'].includes(o.status)).length, rx = L.filter(o => o.status === 'Prescription Review').length, pend = L.filter(o => o.status === 'Pending').length;
+    const low = D.products.filter(p => stock(D, p.id) < p.reorder).length;
+    const item = (n, label, tabK) => n ? h('li', {}, h('span', {}, label), h('button', { class: 'mini', onclick() { tab = tabK; go(); } }, n + ' →')) : null;
+    const att = [item(rx, 'Prescriptions to review', 'rx'), item(pend, 'New orders to confirm', 'orders'), item(unpaid, 'Orders not marked paid', 'orders'), item(low, 'Low-stock products', 'alerts')].filter(Boolean);
+    const key = x => new Date(x).toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' }), days = [...Array(14)].map((_, i) => key(Date.now() - (13 - i) * 864e5)), by = {};
+    [...(D.sales || []).map(s => [key(s.at || s.date || 0), +s.total || 0]), ...L.filter(o => o.status !== 'Cancelled').map(o => [key(o.at), +o.total || 0])].forEach(([k, v]) => by[k] = (by[k] || 0) + v);
+    const mx = Math.max(1, ...days.map(k => by[k] || 0));
+    r.append(h('section', { class: 'att' }, h('h2', {}, '🚦 Needs attention'), att.length ? h('ul', { style: 'list-style:none;padding:0' }, att) : h('p', {}, 'All clear ✔'),
+      h('h2', {}, '📈 Revenue — 14 days'), h('div', { class: 'cxbars', style: 'display:flex;align-items:flex-end;gap:4px;height:110px', role: 'img', 'aria-label': 'Revenue last 14 days' }, days.map(k => h('div', { title: k + ': ' + money(by[k] || 0), style: 'flex:1;background:#0a7d5a;border-radius:4px 4px 0 0;height:' + Math.max(2, Math.round((by[k] || 0) / mx * 100)) + '%' })))));
+    return r;
+  };
+  const o1 = V.orders;
+  V.orders = () => {
+    const r = o1(), L = D.orders || [], can = ['Owner', 'Pharmacist'].includes(R) || R === 'Cashier';
+    const n = L.filter(o => o.status === 'Pending' && !o.rx).length;
+    if (n && can) r.prepend(h('div', { class: 'chips' }, h('button', { onclick() { if (!confirm('Confirm ' + n + ' pending non-prescription order(s)?')) return; L.forEach(o => { if (o.status === 'Pending' && !o.rx) o.status = 'Confirmed'; }); save(D); toast(n + ' order(s) confirmed'); go(); } }, '✔ Confirm all pending (' + n + ')')));
     return r;
   };
 })();
