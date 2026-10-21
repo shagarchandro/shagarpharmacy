@@ -786,9 +786,9 @@
                     <td>${s.invoiceNo}</td>
                     <td>${s.customer}</td>
                     <td>${s.items} items</td>
-                    <td>৳${s.subtotal.toFixed(2)}</td>
-                    <td>৳${s.tax.toFixed(2)}</td>
-                    <td><strong>৳${s.total.toFixed(2)}</strong></td>
+                    <td>৳${(+s.subtotal||0).toFixed(2)}</td>
+                    <td>৳${(+s.tax||0).toFixed(2)}</td>
+                    <td><strong>৳${(+s.total||0).toFixed(2)}</strong></td>
                 </tr>
             `).join('');
         }
@@ -847,8 +847,8 @@
                     <td>${i.name}</td>
                     <td>${i.category}</td>
                     <td class="${i.stock < 20 ? 'text-warning fw-bold' : ''}">${i.stock} unit(s)</td>
-                    <td>৳${i.purchasePrice.toFixed(2)}</td>
-                    <td>৳${i.sellingPrice.toFixed(2)}</td>
+                    <td>৳${(+i.purchasePrice||0).toFixed(2)}</td>
+                    <td>৳${(+i.sellingPrice||0).toFixed(2)}</td>
                     <td>${i.expiryDate}</td>
                     <td class="${statusClass} fw-bold">${status}</td>
                 </tr>
@@ -1143,5 +1143,5 @@
     
     // ... rest of your existing code ...
 </script>
-</body>
+<script src="assets/js/reports-real.js"></script><script src="assets/js/reports-fix.js"></script></body>
 </html>

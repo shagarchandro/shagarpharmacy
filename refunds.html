@@ -36,18 +36,18 @@ input,select{padding:.5rem;border:1px solid var(--br);border-radius:8px;backgrou
   var S=rj('pharmacy_sales',[]).filter(function(s){return s&&s.real&&(String(s.invoiceNo).toLowerCase().indexOf(q)>-1||String(s.customer||'').toLowerCase().indexOf(q)>-1)}).slice(-10).reverse();
   $('res').innerHTML=S.length?S.map(function(s){var ret=s.returned||{};
    var rows=(s.items||[]).map(function(i,ix){var left=(+i.quantity||0)-(+ret[ix]||0);return '<tr><td>'+esc(i.name)+'</td><td>'+esc(i.price)+'</td><td>'+left+' / '+esc(i.quantity)+'</td><td>'+(left>0?'<input type="number" min="0" max="'+left+'" value="0" data-s="'+s.id+'" data-i="'+ix+'" style="width:70px">':'<span class="muted">ফেরত সম্পন্ন</span>')+'</td></tr>'}).join('');
-   return '<div class="card"><b>'+esc(s.invoiceNo)+'</b> · '+esc(s.customer)+' · '+esc(s.date)+' · '+tk(s.total)+'<div class="scroll"><table><thead><tr><th>আইটেম</th><th>দাম</th><th>ফেরতযোগ্য</th><th>ফেরত পরিমাণ</th></tr></thead><tbody>'+rows+'</tbody></table></div><div class="row" style="margin-top:.6rem"><input placeholder="কারণ" data-r="'+s.id+'" style="flex:1;min-width:160px"><button class="btn" data-refund="'+s.id+'">রিফান্ড করুন</button></div></div>'}).join(''):'<div class="card muted">কিছু পাওয়া যায়নি</div>'}
+   return '<div class="card"><b>'+esc(s.invoiceNo)+'</b> · '+esc(s.customer)+' · '+esc(s.date)+' · '+tk(s.total)+'<div class="scroll"><table><thead><tr><th>আইটেম</th><th>দাম</th><th>ফেরতযোগ্য</th><th>ফেরত পরিমাণ</th></tr></thead><tbody>'+rows+'</tbody></table></div><div class="row" style="margin-top:.6rem"><select data-m="'+s.id+'" aria-label="রিফান্ড মাধ্যম"><option value="cash">ক্যাশে ফেরত</option><option value="original">আগের মাধ্যমে (bKash/কার্ড)</option><option value="credit">ক্রেডিট/বাকিতে সমন্বয়</option></select><input placeholder="কারণ" data-r="'+s.id+'" style="flex:1;min-width:160px"><button class="btn" data-refund="'+s.id+'">রিফান্ড করুন</button></div></div>'}).join(''):'<div class="card muted">কিছু পাওয়া যায়নি</div>'}
  $('go').onclick=find;$('q').addEventListener('keydown',function(e){if(e.key==='Enter')find()});
  $('res').addEventListener('click',function(e){var b=e.target.closest('[data-refund]');if(!b)return;var id=b.dataset.refund;
   var S=rj('pharmacy_sales',[]),s=S.find(function(x){return String(x.id)===id});if(!s)return;s.returned=s.returned||{};
   var meds=rj('pharmacy_medicines',[]),amt=0,lines=[];
   document.querySelectorAll('input[data-s="'+id+'"]').forEach(function(inp){var q=Math.min(+inp.value||0,+inp.max||0);if(q<=0)return;var ix=inp.dataset.i,it=s.items[ix];
-   amt+=q*(+it.price||0);lines.push(it.name+' ×'+q);s.returned[ix]=(+s.returned[ix]||0)+q;var m=meds.find(function(y){return String(y.id)===String(it.id)});if(m)m.stock=(+m.stock||0)+q});
-  if(!lines.length){alert('ফেরত পরিমাণ দিন');return}
+   var share=(+s.subtotal>0&&+s.discount>0)?(1-(+s.discount/+s.subtotal)):1;amt+=Math.round(q*(+it.price||0)*share*100)/100;lines.push(it.name+' ×'+q);s.returned[ix]=(+s.returned[ix]||0)+q;var m=meds.find(function(y){return String(y.id)===String(it.id)});if(m)m.stock=(+m.stock||0)+q});
+  if(!lines.length){alert('ফেরত পরিমাণ দিন');return}var age=Math.floor((Date.now()-new Date(s.at||s.date))/864e5);if(age>30&&!confirm('এই বিক্রি '+age+' দিন আগের। তবুও ফেরত নেবেন?'))return;
   var reason=(document.querySelector('input[data-r="'+id+'"]').value||'Customer return').slice(0,120);
-  // proportional discount/tax share is not recalculated: refund at item price (documented)
+  // refund = item price minus its fair share of the invoice discount
   var all=(s.items||[]).every(function(i,ix){return (+s.returned[ix]||0)>=(+i.quantity||0)});if(all)s.status='Refunded';
-  var log=rj('pharmacy_refunds',[]);log.push({at:new Date().toISOString(),date:new Date().toISOString().slice(0,10),invoice:s.invoiceNo,items:lines.join('; '),amount:amt,reason:reason,by:who});
+  var log=rj('pharmacy_refunds',[]);var mEl=document.querySelector('select[data-m="'+id+'"]'),meth=mEl?mEl.value:'cash';log.push({at:new Date().toISOString(),date:new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Dhaka'}),invoice:s.invoiceNo,items:lines.join('; '),amount:amt,method:meth,reason:reason,by:who});
   localStorage.setItem('pharmacy_sales',JSON.stringify(S));localStorage.setItem('pharmacy_medicines',JSON.stringify(meds));localStorage.setItem('pharmacy_refunds',JSON.stringify(log));
   try{var a=rj('pharmacy_audit',[]);a.push({at:new Date().toISOString(),by:who,msg:'Refund '+s.invoiceNo+' '+amt});localStorage.setItem('pharmacy_audit',JSON.stringify(a.slice(-300)))}catch(x){}
   find();hist()});

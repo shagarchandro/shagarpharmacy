@@ -202,3 +202,53 @@ Salted PBKDF2 password hashes + password policy (also for custom accounts changi
 - Control Center → 🛍 Customer shop (`center-more.js`) and shop layer `store-control.js`: open/closed + banner, minimum order, free-delivery threshold, home headline/sub-line, footer note, 11 section switches (offers, featured, best sellers, recently viewed, quick filters, reviews, delivery note, guest tracking, trust/testimonials, wishlist, Ask pharmacist), per-product Visible / Featured / Discount %.
 - The shop refreshes itself when the admin saves in another tab (storage event); hidden products disappear from the catalog, product page, wishlist and block checkout if still in a cart.
 - Online-only: hiding a product does not stop it being sold at the POS.
+
+## v47 — Online shop design + footer
+- `assets/css/shop-design.css` + `assets/js/store-design.js`: new hero (call-to-action buttons, trust chips), icon offer cards, scrollable category chips, card-style filter bar, redesigned product cards (hover lift, full-width Add to cart row), softer trust section, compact non-sticky header on phones.
+- New multi-column footer: brand blurb + admin footer note, quick links (respects hidden sections), contact (tap-to-call, address, hours), delivery fees/free-delivery/minimum order and the enabled payment methods, bottom bar with privacy/terms and back-to-top — all from the live shop settings, English or Bengali.
+
+## v48 — Control Center: Checkup, Coupons, Audit explorer
+- **🩺 Checkup** (`center-more.js`): health score + issues found in the live config (shop closed, no phone/address, payments off, products hidden/priced 0/out of stock, expired coupons, default passwords, stale backup) with a one-click jump to the right tab.
+- **🎟 Coupons**: add with percent, minimum order, max-discount cap, expiry date and usage limit; pause/resume/delete; status (Live / Paused / Expired / Used up) and usage count.
+- `assets/js/store-coupons.js` enforces those rules in the customer shop (Apply, totals cap, re-check at checkout) and stores `order.coupon` on each order; cancelled orders don't count toward the limit.
+- **📜 Audit explorer**: search, filter by person, CSV export of the admin audit trail.
+
+## v49 — Backup & Restore (`backup.html` + `assets/js/backup-more.js`)
+- Choose exactly which datasets to back up; "⚡ quick backup" takes everything except passwords/roles/accounts (🔒 items are off by default).
+- Backup files now carry a checksum (v8 format). Restore first shows a **preview** (file date, checksum ✅/⚠, each dataset: in file vs now) and only restores the ticked items; corrupt entries are disabled. Old v7 files still open (no checksum).
+- Every restore and every "delete all" first saves a restore point; **↩️ Undo** returns to it.
+- Backup-age badge (✅ ≤2 days, 🟡 ≤7, ⛔ older) and a browser-storage meter.
+- Pharmacists still get export only; non-admin users still see the access-denied card.
+
+## v50 — Reports: real business summary (`reports.html` + `assets/js/reports-real.js`)
+- New tab **📈 Business summary** built only from real data: POS sales (Completed only; voids excluded) + online orders (cancelled/returned excluded). Period (today/7/30/month/all/custom) and source (POS/Online/both) filters.
+- Revenue, real **gross profit** (item purchase price from Medicines / shop product cost; sales without a cost are listed as excluded), expenses from the Ops cashbook, net, discounts; daily trend, top products, payment mix (split payments counted per method), top customers, cashiers, busy hours.
+- Working **CSV export** (sales lines) and Print. The old "Export" buttons in the other tabs were stubs that only showed a toast — they now download CSV too.
+- Hardened the sales/inventory tables against records with missing numbers.
+
+## v51 — Daily closing + cart/checkout/contact entry pages
+- `closing.html` (+ `assets/js/closing-v51.js`): full cash-drawer reconciliation — opening cash (auto = previous closing's counted − deposit), + cash sales (net of refunds), + customer dues collected in cash, − cash expenses from the Ops cashbook, − manual cash-out entries, = expected cash. Denomination counter (৳1000…৳1) fills the counted cash. A difference of ৳1+ requires a reason note. Bank/owner deposit field. Re-closing a day is confirmed and counted as a revision. Day navigation (◀ ▶, today), closed/open badge, cashier table, discounts/dues/voids tiles, last-30-day over/short summary, click a history row to open that day, CSV export, print header. Days now use Dhaka time (previously UTC date).
+- `cart.html`, `checkout.html`, `contact.html`: branded redirect pages (dark-mode aware) showing live cart count / shop phone, then forwarding to the shop. Checkout with an empty cart goes to the cart instead.
+
+## v52 — Reports: remaining demo parts made real (`assets/js/reports-fix.js`)
+- Sales tab: voided invoices excluded; "N items" shows the real quantity (was `[object Object] items`); Top product computed from sale lines (was hard-coded Paracetamol); 12-month trend aligned to its month labels.
+- Financial tab: year list is now the current year and 4 before (was 2022–2024); real **Profit & Loss**, **Cash flow** and a simplified **Balance sheet**; revenue/expense/profit charts use real monthly numbers for the selected year (was fixed arrays and "expenses = 65% of revenue"). Supplier payments are treated as stock purchases (inside COGS), not operating expense.
+- Customer tab: outstanding dues come from Customers. Expiry tab: "Mark for Discount" really sets a % discount on the matching online-shop product.
+
+## v53–v57 — Medicines, Purchases, Suppliers, Prescriptions, Customers
+- **Medicines** (`medicines-extra.js`): validated CSV import with preview (new vs update by name+batch, bad rows listed), CSV export + template, bulk % price change by category, stock adjustment with a reason (logged in `pharmacy_stock_log`, CSV), one-click undo of the last import/bulk price change.
+- **Purchases** (`purchases-extra.js`): supplier payables aging (0–30 / 31–60 / 60+ days), pay a supplier across their oldest invoices first (FIFO; also recorded in the Ops cashbook as a supplier payment), purchases CSV.
+- **Suppliers** (`supplier-sync.js`, `suppliers-extra.js`): fixed a data-model clash — Purchases and Suppliers used different field names (name/contact vs companyName/contactPerson) for the same list and each hid the other's records. Both spellings are now kept, and totals are recomputed from real purchases. Payables overview: credit-limit use, overdue vs payment terms, call / WhatsApp reminder, CSV.
+- **Prescriptions** (`prescriptions-extra.js`): "Needs attention" panel (expiring ≤7 days, expired & not fully dispensed), real WhatsApp/SMS reminders (the old button only showed a fake "Reminder sent"), expired prescriptions need a confirmed pharmacist override before going to POS, demo-OCR notice.
+- **Customers** (`customers-extra.js`): real SMS/WhatsApp messages (the old SMS button was a fake toast), date of birth is now saved (the field was ignored), join date no longer resets on edit, follow-up panel (dues, birthdays in 14 days, inactive 60+ days from real POS sales) with CSV.
+
+## v58 — Smart reorder (`reorder.html` + `assets/js/reorder-v58.js`)
+- Suggested quantity from real POS sales velocity (voids excluded): enough for N days of stock (default 14, looked back 30 days), at least twice the minimum; "days left" per item; urgent tag (stock 0 or < 7 days).
+- Supplier comes from the last purchase of that medicine (or one you choose — remembered in `pharmacy_med_supplier`); unit cost from the last purchase price.
+- Select rows, edit quantities, filter by supplier / urgent / search; CSV of the selection; **purchase orders grouped by supplier** with print, copy text and a prefilled WhatsApp message to the supplier's saved number.
+
+## v59 — Refunds & write-offs
+- **Refunds** (`refunds.html`): the refund now deducts the item's fair share of the invoice discount (before, a discounted sale was refunded at full item price); choose how the money goes back — cash / original method (bKash, card) / credit adjustment; a warning appears for invoices older than 30 days; dates use Dhaka time.
+- **Daily closing**: only *cash* refunds reduce the drawer's expected cash (refunds returned to bKash/card no longer cause a false shortage).
+- **Write-off** (`writeoff-extra.js`): partial / manual write-off with quantity and reason (damaged, lost, supplier return, other) next to the existing expired-stock write-off; same history & CSV.
+- **Reports → Financial**: write-off losses now count as an operating expense ("Stock write-offs").

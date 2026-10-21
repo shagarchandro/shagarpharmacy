@@ -128,5 +128,62 @@ window.CCX = function (c) {
       h('button', { class: 'btn' }, 'Save shop controls'));
     return h('div', {}, h('h2', {}, '🛍 Customer shop'), f);
   };
-  return { tabs: [['shop', '🛍 Customer shop'], ['payments', '💳 Payments'], ['delivery', '🚚 Delivery'], ['insights', '📊 Insights'], ['maint', '🛠 Maintenance']], panels };
+  /* ---- v48: Coupons, Checkup, Audit explorer ---- */
+  const dh = x => new Date(x).toLocaleString('en-GB', { timeZone: 'Asia/Dhaka', hour12: false }).slice(0, 17);
+  const csvDl = (name, rows) => { const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; const a = h('a', { download: name, href: URL.createObjectURL(new Blob(['﻿' + rows.map(r => r.map(q).join(',')).join('\n')], { type: 'text/csv' })) }); document.body.append(a); a.click(); a.remove(); };
+  panels.coupons = () => {
+    const D = c.db(), tdy = day(Date.now()), used = k => (D.orders || []).filter(o => o.coupon === k.code && o.status !== 'Cancelled');
+    const status = k => k.off ? ['Paused', ''] : (k.expires && k.expires < tdy) ? ['Expired', 'bad'] : (k.limit > 0 && used(k).length >= k.limit) ? ['Used up', 'bad'] : ['Live', 'ok'];
+    const af = h('form', { class: 'cc-form', onsubmit(e) {
+      e.preventDefault(); const f = e.target.elements, code = f.code.value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, ''), pct = +f.pct.value;
+      if (!code || code.length > 16) return bad('Code: 1–16 letters/numbers');
+      if (!(pct > 0 && pct <= 100)) return bad('Percent must be 1–100');
+      if ((D.coupons || []).some(x => x.code === code)) return bad('That code already exists');
+      const mn = +f.min.value || 0, mx = +f.max.value || 0, lim = Math.floor(+f.limit.value) || 0; if (mn < 0 || mx < 0 || lim < 0) return bad('Numbers cannot be negative');
+      if (f.expires.value && f.expires.value < tdy) return bad('Expiry date is in the past');
+      const k = { code, pct, min: mn }; if (mx) k.max = mx; if (lim) k.limit = lim; if (f.expires.value) k.expires = f.expires.value;
+      D.coupons.push(k); c.save(D); audit('Added coupon ' + code); ok('Coupon ' + code + ' added'); c.show('coupons');
+    } },
+      h('div', { class: 'two' }, field('Code', inp('code', '', 'text', { maxlength: 16, placeholder: 'EID20' })), field('Percent off', inp('pct', '', 'number', { min: 1, max: 100 }))),
+      h('div', { class: 'two' }, field('Minimum order ৳', inp('min', '', 'number', { min: 0 })), field('Max discount ৳ (blank = none)', inp('max', '', 'number', { min: 0 }))),
+      h('div', { class: 'two' }, field('Expires on (blank = never)', inp('expires', '', 'date')), field('Usage limit (blank = unlimited)', inp('limit', '', 'number', { min: 1 }))),
+      h('button', { class: 'btn' }, 'Add coupon'));
+    const rows = (D.coupons || []).map(k => { const [st, cl] = status(k); return h('tr', {}, h('td', {}, h('b', {}, k.code)), h('td', {}, k.pct + '%' + (k.max ? ' (max ' + tk(k.max) + ')' : '')), h('td', {}, tk(k.min || 0)), h('td', {}, k.expires || '—'),
+      h('td', {}, used(k).length + (k.limit ? ' / ' + k.limit : '')), h('td', { class: cl }, st),
+      h('td', {}, c.btn(k.off ? 'Resume' : 'Pause', () => { k.off = !k.off; if (!k.off) delete k.off; c.save(D); audit((k.off ? 'Paused' : 'Resumed') + ' coupon ' + k.code); c.show('coupons'); }), ' ',
+        c.btn('Delete', () => { if (!confirm('Delete coupon ' + k.code + '?')) return; D.coupons = D.coupons.filter(x => x !== k); c.save(D); audit('Deleted coupon ' + k.code); c.show('coupons'); }))); });
+    const saved = (D.orders || []).filter(o => o.coupon && o.status !== 'Cancelled').length;
+    return h('div', {}, h('h2', {}, '🎟 Coupons'), h('p', { class: 'muted' }, 'Rules are enforced in the customer shop at Apply and at checkout. Orders remember the coupon used (' + saved + ' so far).'),
+      af, tbl(['Code', 'Off', 'Min order', 'Expires', 'Used', 'Status', ''], rows, 'No coupons yet'));
+  };
+  panels.checkup = () => {
+    const D = c.db(), s = D.settings, S = rj('pharmacy_settings', {}), P = D.products || [], tdy = day(Date.now()), out = [];
+    const add = (lvl, msg, tab, fix) => out.push({ lvl, msg, tab, fix });
+    if (s.shopOpen === false) add('warn', 'The online shop is CLOSED — customers cannot order.', 'shop', 'Open it');
+    if (!s.phone || !/\d{6,}/.test(s.phone)) add('warn', 'Shop phone number is missing or looks wrong (shown in the footer).', 'rules', 'Fix');
+    if (!s.addr) add('warn', 'Shop address is empty.', 'rules', 'Fix');
+    const offp = s.payOff || []; if (offp.length >= SHOP.length) add('bad', 'All online payment methods are off — checkout is impossible.', 'payments', 'Fix');
+    else if (!offp.includes('bKash (demo)') && !(s.payNum || {}).bKash) add('warn', 'bKash is on but no bKash number is set.', 'payments', 'Fix');
+    if (P.length && P.every(p => p.hide)) add('bad', 'Every product is hidden online — the shop is empty.', 'shop', 'Fix');
+    const nostock = P.filter(p => !p.hide && typeof stock === "function" && stock(D, p.id) <= 0).length; if (nostock) add('info', nostock + ' visible product(s) are out of stock.', 'shop', 'Review');
+    const bad0 = P.filter(p => !(p.price > 0)).length; if (bad0) add('bad', bad0 + ' product(s) have no valid price.', 'shop', 'Review');
+    (D.coupons || []).forEach(k => { if (k.expires && k.expires < tdy && !k.off) add('info', 'Coupon ' + k.code + ' expired on ' + k.expires + '.', 'coupons', 'Manage'); });
+    const pend = (D.orders || []).filter(o => o.status === 'Pending').length; if (pend) add('info', pend + ' order(s) are waiting for confirmation.', null);
+    if (!(s.zones || []).length && !(s.feeDhaka >= 0)) add('info', 'No delivery fee configured.', 'delivery', 'Fix');
+    const acc = D.users || []; if (acc.some(u => u.password === 'admin123' || u.pass === 'admin123' || u.pin === '1234')) add('warn', 'A demo account still uses its default password.', 'accounts', 'Change');
+    const lb = +localStorage.getItem('pharmacy_lastbackup') || 0; if (!lb) add('info', 'No backup has been taken on this browser yet.', 'data', 'Back up'); else if (Date.now() - lb > 7 * 864e5) add('info', 'Last backup is more than 7 days old.', 'data', 'Back up');
+    if (S.posPayOff && S.posPayOff.includes('cash')) add('bad', 'Cash is disabled in POS.', 'rules', 'Fix');
+    const ic = { bad: '⛔', warn: '⚠️', info: 'ℹ️' }, score = Math.max(0, 100 - out.filter(x => x.lvl === 'bad').length * 25 - out.filter(x => x.lvl === 'warn').length * 10 - out.filter(x => x.lvl === 'info').length * 3);
+    return h('div', {}, h('h2', {}, '🩺 Checkup'), h('p', {}, h('b', { class: score >= 90 ? 'ok' : score >= 60 ? '' : 'bad', style: 'font-size:1.6rem' }, score + '/100'), ' ', h('span', { class: 'muted' }, out.length ? out.length + ' thing(s) to look at' : 'Everything looks good')),
+      out.length ? h('div', { class: 'cc-grid' }, out.map(x => h('div', { class: 'cc-card' }, h('p', {}, ic[x.lvl] + ' ' + x.msg), x.tab ? c.btn(x.fix, () => c.show(x.tab)) : null))) : h('p', { class: 'ok' }, '✅ No problems found.'));
+  };
+  panels.audit = () => {
+    const all = rj('pharmacy_audit', []).slice().reverse(); let q = '', who = '';
+    const box = h('div', {}), sel = h('select', { 'aria-label': 'Filter by person', onchange() { who = sel.value; draw(); } }, h('option', { value: '' }, 'Everyone'), ...[...new Set(all.map(a => a.by))].map(w => h('option', { value: w }, w)));
+    const draw = () => { const r = all.filter(a => (!who || a.by === who) && (!q || (a.msg + ' ' + a.by).toLowerCase().includes(q))); box.replaceChildren(h('p', { class: 'muted' }, r.length + ' of ' + all.length + ' entries (the log keeps the latest 300)'), tbl(['When', 'Who', 'What'], r.slice(0, 200).map(a => h('tr', {}, h('td', {}, dh(a.at)), h('td', {}, a.by), h('td', {}, a.msg))), 'Nothing matches.')); };
+    draw();
+    return h('div', {}, h('h2', {}, '📜 Audit explorer'), h('div', { class: 'row' }, h('input', { type: 'search', placeholder: 'Search changes…', 'aria-label': 'Search audit', oninput(e) { q = e.target.value.trim().toLowerCase(); draw(); } }), sel,
+      c.btn('⬇ CSV', () => csvDl('audit-' + day(Date.now()) + '.csv', [['When', 'Who', 'What']].concat(all.map(a => [dh(a.at), a.by, a.msg]))))), box);
+  };
+  return { tabs: [['checkup', '🩺 Checkup'], ['shop', '🛍 Customer shop'], ['coupons', '🎟 Coupons'], ['payments', '💳 Payments'], ['delivery', '🚚 Delivery'], ['insights', '📊 Insights'], ['audit', '📜 Audit'], ['maint', '🛠 Maintenance']], panels };
 };

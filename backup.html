@@ -47,4 +47,4 @@
   if(!ks.length)throw 0;if(!confirm(ks.length+' টি ডেটা-কী রিস্টোর হবে এবং বর্তমান ডেটা বদলে যাবে। চালিয়ে যাবেন?'))return;ks.forEach(function(k){JSON.parse(o.data[k]);});keys().forEach(function(k){localStorage.removeItem(k)});ks.forEach(function(k){localStorage.setItem(k,o.data[k])});show();say('রিস্টোর সম্পন্ন।')}catch(x){say('ফাইলটি সঠিক MediCare ব্যাকআপ নয়।')}};r.readAsText(f)};
  $('rst').onclick=function(){if(!confirm('সব ব্যবসায়িক ডেটা মুছে যাবে। আগে ব্যাকআপ নিয়েছেন?'))return;keys().forEach(function(k){localStorage.removeItem(k)});show();say('ডেটা মোছা হয়েছে। (পরের লোডে ডেমো ডেটা ফিরে আসতে পারে)')};
 })();
-</script></body></html>
+</script><script src="assets/js/backup-more.js"></script></body></html>
