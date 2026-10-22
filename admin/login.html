@@ -11,26 +11,30 @@
 <main class="logincard">
   <h1>✚ MediCare Operations Panel</h1>
   <p class="muted">Owner · Pharmacist · Cashier · Inventory Manager · Delivery Staff</p>
+  <div id="notice" class="alert" role="status" hidden></div>
   <form id="f" autocomplete="off">
-    <label>User / ইউজার
-      <select id="r" aria-label="User"></select>
+    <fieldset class="users" aria-label="User"><legend>User / ইউজার</legend><div id="ul"></div></fieldset>
+    <label><span id="cl">Demo code / ডেমো কোড</span>
+      <span class="pwrow"><input id="c" type="password" autocomplete="off" required placeholder="" inputmode="text"><button type="button" id="eye" class="btn2" aria-label="Show / hide">👁</button></span>
     </label>
-    <label>Demo code / ডেমো কোড
-      <input id="c" type="password" autocomplete="off" required placeholder="demo">
-    </label>
-    <small class="muted">Demo code: <b>demo</b> — শুধু ডেমো, আসল নিরাপত্তা নয়।</small>
-    <button class="btn">Log in / লগ ইন</button>
+    <small class="muted" id="ch"></small>
+    <p id="lock" class="lockmsg" role="alert" hidden></p>
+    <button class="btn" id="go">Log in / লগ ইন</button>
   </form>
   <div class="access" id="acc"></div>
+  <p class="muted small" id="last"></p>
   <p class="row center"><a class="btn2" href="../shop.html">🛒 Customer shop</a><a class="btn2" href="../login.html">🧑‍⚕️ Management dashboard</a><a class="btn2" href="../LOGIN-GUIDE.html">📖 Guide</a><a class="btn2" href="../index.html">🏠 Home</a></p>
 </main>
-<script src="../assets/js/core.js"></script>
-<script>
-const WHAT={Owner:'সব ট্যাব: Dashboard, Products, Inventory, POS, Orders, Reports, Data (+Users, Settings ইত্যাদি)',Pharmacist:'Dashboard, Orders — প্রেসক্রিপশন অনুমোদন/প্রত্যাখ্যান',Cashier:'POS (বিক্রি) ও Orders',"Inventory Manager":'Dashboard, Products, Inventory — স্টক, ব্যাচ, মেয়াদ',"Delivery Staff":'শুধু Orders — ডেলিভারি আপডেট'};
-for(const u of db().users.filter(u=>u.active))r.append(h('option',{value:u.id},u.name+' ('+u.role+')'));
-function hint(){const u=db().users.find(x=>x.id===r.value);acc.textContent=u?(u.role+': '+(WHAT[u.role]||'')):''}
-r.onchange=hint;hint();
-f.onsubmit=e=>{e.preventDefault();if(c.value.trim().toLowerCase()!=='demo')return toast('Wrong demo code',1);const u=db().users.find(x=>x.id===r.value);if(!u||!u.active)return toast('User is inactive',1);sessionStorage.setItem('mc_role',u.role);location.href='index.html'};
-</script>
+<style>
+.users{border:0;padding:0;margin:0 0 .6rem}.users legend{font-weight:600;margin-bottom:.3rem}#ul{display:grid;gap:.4rem}
+.uc{display:flex;gap:.6rem;align-items:center;border:2px solid var(--br,#cfe3dd);border-radius:12px;padding:.5rem .7rem;cursor:pointer;background:var(--card,#fff);transition:.15s}
+.uc:hover{transform:translateY(-1px)}.uc.on{border-color:var(--pri,#0b7a6b);box-shadow:0 0 0 3px rgba(11,122,107,.18)}.uc input{accent-color:var(--pri,#0b7a6b)}
+.uc b{display:block}.uc small{color:#6b7a8a}.uc .pin{margin-left:auto;font-size:.75rem;border:1px solid currentColor;border-radius:999px;padding:0 .45rem;opacity:.8}
+.pwrow{display:flex;gap:.4rem}.pwrow input{flex:1}.lockmsg{background:#fff4e5;color:#8a4b00;border-radius:8px;padding:.5rem .7rem;margin:.5rem 0}
+#notice{background:#e8f3ff;color:#0b3b66;border-radius:8px;padding:.5rem .7rem;margin:.5rem 0}#notice.warn{background:#fff4e5;color:#8a4b00}
+@media(prefers-color-scheme:dark){.uc{background:#14201e;border-color:#294341}.uc small{color:#9db7b2}.lockmsg,#notice.warn{background:#3a2a10;color:#ffd9a0}#notice{background:#12304a;color:#cfe6ff}}
+</style>
+<script src="../assets/js/core.js"></script><script src="../assets/js/pw.js"></script>
+<script src="../assets/js/ops-login.js"></script>
 </body>
 </html>

@@ -3,6 +3,7 @@
 window.CCX = function (c) {
   'use strict';
   const { h, rj, wj, audit, ok, bad, field, inp, chk, tbl, tk } = c;
+  const btn = c.btn;
   const SHOP = [['Cash on delivery', 'Cash on delivery'], ['Card on delivery', 'Card on delivery (rider carries a machine)'], ['bKash (demo)', 'bKash'], ['Nagad (demo)', 'Nagad'], ['Rocket (demo)', 'Rocket']];
   const POS = [['cash', 'Cash'], ['card', 'Card'], ['mobile', 'Mobile wallet']];
   const day = x => new Date(x).toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' });
@@ -185,5 +186,24 @@ window.CCX = function (c) {
     return h('div', {}, h('h2', {}, '📜 Audit explorer'), h('div', { class: 'row' }, h('input', { type: 'search', placeholder: 'Search changes…', 'aria-label': 'Search audit', oninput(e) { q = e.target.value.trim().toLowerCase(); draw(); } }), sel,
       c.btn('⬇ CSV', () => csvDl('audit-' + day(Date.now()) + '.csv', [['When', 'Who', 'What']].concat(all.map(a => [dh(a.at), a.by, a.msg]))))), box);
   };
-  return { tabs: [['checkup', '🩺 Checkup'], ['shop', '🛍 Customer shop'], ['coupons', '🎟 Coupons'], ['payments', '💳 Payments'], ['delivery', '🚚 Delivery'], ['insights', '📊 Insights'], ['audit', '📜 Audit'], ['maint', '🛠 Maintenance']], panels };
+  /* ---- v60: sign-in tab (admin PIN, Ops personal PINs, recent sign-ins) ---- */
+  function pinBad(p) { if (!/^\d{4,8}$/.test(p)) return 'PIN must be 4–8 digits'; if (/^(\d)\1+$/.test(p)) return 'PIN is too simple (repeated digits)'; if ('01234567890123456789'.indexOf(p) > -1 || '98765432109876543210'.indexOf(p) > -1) return 'PIN is too simple (sequence)'; return ''; }
+  panels.signin = () => {
+    const S = rj('pharmacy_settings', {}), D = c.db(), pins = S.opsPins || {}, L = rj('pharmacy_loginlog', []).slice().reverse();
+    const hashP = p => (window.MCPW ? MCPW.hash(p) : Promise.reject(new Error('Password helper missing')));
+    const adminForm = h('form', { class: 'cc-form', onsubmit(e) {
+      e.preventDefault(); const p = e.target.elements.pin.value.trim(), p2 = e.target.elements.pin2.value.trim(); const m = pinBad(p); if (m) return bad(m); if (p !== p2) return bad('The two PINs do not match');
+      hashP(p).then(hs => { const x = rj('pharmacy_settings', {}); x.adminPin = hs; wj('pharmacy_settings', x); audit('Set admin sign-in PIN'); ok('Admin PIN saved — the staff login now asks Admin for it'); c.show('signin'); }, err => bad(err.message));
+    } }, h('p', { class: 'muted' }, S.adminPin ? '✅ Admin PIN is ON: after the password, Admin must enter this PIN (second step).' : 'Admin PIN is OFF. Turn it on for a second step at the staff login (role Admin only).'),
+      h('div', { class: 'two' }, field('New admin PIN (4–8 digits)', inp('pin', '', 'password', { inputmode: 'numeric', maxlength: 8, autocomplete: 'new-password' })), field('Repeat PIN', inp('pin2', '', 'password', { inputmode: 'numeric', maxlength: 8, autocomplete: 'new-password' }))),
+      h('div', { class: 'row' }, h('button', { class: 'btn' }, S.adminPin ? 'Change PIN' : 'Turn on admin PIN'), S.adminPin ? btn('Turn off', () => { if (!confirm('Turn off the admin PIN step?')) return; const x = rj('pharmacy_settings', {}); delete x.adminPin; wj('pharmacy_settings', x); audit('Turned off admin PIN'); ok('Admin PIN turned off'); c.show('signin'); }) : null));
+    const opsRows = (D.users || []).map(u => { const inpEl = h('input', { type: 'password', inputmode: 'numeric', maxlength: 8, placeholder: pins[u.id] ? 'new PIN' : 'set PIN', 'aria-label': 'PIN for ' + u.name, style: 'width:7rem', autocomplete: 'new-password' });
+      return h('tr', {}, h('td', {}, u.name), h('td', {}, u.role), h('td', {}, pins[u.id] ? '🔑 PIN set' : 'demo code'), h('td', {}, inpEl, ' ', btn(pins[u.id] ? 'Change' : 'Set', () => { const m = pinBad(inpEl.value.trim()); if (m) return bad(m); hashP(inpEl.value.trim()).then(hs => { const x = rj('pharmacy_settings', {}); x.opsPins = Object.assign({}, x.opsPins, { [u.id]: hs }); wj('pharmacy_settings', x); audit('Set Ops PIN for ' + u.name); ok('PIN saved for ' + u.name); c.show('signin'); }, err => bad(err.message)); }), pins[u.id] ? [' ', btn('Remove', () => { const x = rj('pharmacy_settings', {}); if (x.opsPins) delete x.opsPins[u.id]; wj('pharmacy_settings', x); audit('Removed Ops PIN for ' + u.name); ok('PIN removed'); c.show('signin'); })] : null)); });
+    const fails = L.filter(x => !x.ok).length;
+    return h('div', {}, h('h2', {}, '🔑 Sign-in'), h('div', { class: 'cc-two' }, h('div', { class: 'cc-card' }, h('h3', {}, 'Admin PIN (second step)'), adminForm),
+      h('div', { class: 'cc-card' }, h('h3', {}, 'Operations Panel PINs'), h('p', { class: 'muted' }, 'A user with a PIN signs in to the Ops Panel with it; others use the shared demo code. PINs are stored hashed in this browser.'), tbl(['User', 'Role', 'Sign-in', ''], opsRows, 'No Ops users'))),
+      h('h3', {}, 'Recent sign-ins (' + L.length + ' · ' + fails + ' failed)'), tbl(['When', 'Who', 'Where', 'Result'], L.slice(0, 40).map(x => h('tr', {}, h('td', {}, dh(x.at)), h('td', {}, x.email || '—'), h('td', {}, x.scope === 'ops' ? 'Ops Panel' : 'Staff login · ' + (x.role || '')), h('td', { class: x.ok ? 'ok' : 'bad' }, x.ok ? '✔ success' : '✖ failed'))), 'No sign-ins recorded yet.'),
+      h('div', { class: 'row' }, btn('⬇ CSV', () => csvDl('signins-' + day(Date.now()) + '.csv', [['When', 'Who', 'Where', 'Result']].concat(L.map(x => [dh(x.at), x.email || '', x.scope === 'ops' ? 'Ops' : 'Staff ' + (x.role || ''), x.ok ? 'success' : 'failed'])))), btn('Open login security settings', () => c.show('security'))));
+  };
+  return { tabs: [['checkup', '🩺 Checkup'], ['shop', '🛍 Customer shop'], ['coupons', '🎟 Coupons'], ['signin', '🔑 Sign-in'], ['payments', '💳 Payments'], ['delivery', '🚚 Delivery'], ['insights', '📊 Insights'], ['audit', '📜 Audit'], ['maint', '🛠 Maintenance']], panels };
 };

@@ -252,3 +252,21 @@ Salted PBKDF2 password hashes + password policy (also for custom accounts changi
 - **Daily closing**: only *cash* refunds reduce the drawer's expected cash (refunds returned to bKash/card no longer cause a false shortage).
 - **Write-off** (`writeoff-extra.js`): partial / manual write-off with quantity and reason (damaged, lost, supplier return, other) next to the existing expired-stock write-off; same history & CSV.
 - **Reports → Financial**: write-off losses now count as an operating expense ("Stock write-offs").
+
+## v60 — Admin login system ও login pages আপডেট
+- `admin/login.html` নতুন ডিজাইন: Ops user কার্ড, পাসওয়ার্ড/কোড দেখানোর বোতাম, শেষ লগইনের সময়, নোটিশ/ফ্ল্যাশ ব্যানার।
+- `assets/js/ops-login.js`: ভুল কোডে লক-আউট (ক্রমবর্ধমান সময়), লগইন লগ, ব্যক্তিগত Ops PIN সাপোর্ট (না থাকলে ডেমো কোড `demo`)।
+- `assets/js/ops-session.js`: idle ও সর্বোচ্চ সেশন টাইমআউট, ১ মিনিট আগে সতর্কবার।
+- `assets/js/login-v60.js`: staff login-এ Admin role-এর জন্য দ্বিতীয় ধাপ Admin PIN।
+- Control Center → 🔑 Sign-in ট্যাব: Admin PIN সেট, প্রতি Ops user-এর PIN, সাম্প্রতিক লগইন তালিকা + CSV।
+- সীমাবদ্ধতা: ডেমো-স্তরের নিরাপত্তা; PIN হ্যাশ (PBKDF2) হলেও এই ব্রাউজারের localStorage-এ থাকে।
+
+## v61 — Rx Register ও Team Board আপডেট
+- `register.html` + `assets/js/register-extra.js`: দ্রুত ফিল্টার (আজ/৭ দিন/এই মাস/সব/⚠️ Rx ref ছাড়া), KPI (বিক্রি, গ্রাহক, ইউনিট), শীর্ষ ৫ ওষুধ, verifier অনুযায়ী সারাংশ, Rx ref নেই এমন সারি লাল হাইলাইট; CSV এখন নির্বাচিত ফিল্টার মানে।
+- `team.html` + `assets/js/team-extra.js`: সারাংশ বার (অপঠিত, জরুরি, খোলা কাজ, দেরি, আজ সম্পন্ন), নোটিশ সার্চ + অপঠিত/জরুরি ফিল্টার, "সব পড়েছি", কাজের ফিল্টার (দেরি/আজ)।
+- টেস্ট: `t.py`-এর Ops লগইন স্টেপ নতুন কার্ড-লগইনে মানানো হয়েছে।
+
+## v62 — Smart Alerts (Warning সিস্টেম)
+- `assets/js/alerts-v62.js` (dashboard): আসল ডেটা থেকে সতর্কতা কেন্দ্র — মেয়াদোত্তীর্ণ / ৩০·৬০·৯০ দিনের মধ্যে মেয়াদ, স্টক শেষ/কম (প্রস্তাবিত অর্ডার সহ), গ্রাহক ও সরবরাহকারীর বাকি, গতকালের ক্লোজিং বাকি, Rx ref ছাড়া বিক্রি, অপেক্ষমাণ প্রেসক্রিপশন, ব্যাকআপ পুরনো/নেই, অনলাইন অর্ডার।
+- তিন স্তর (🔴 জরুরি / 🟠 সতর্ক / 🔵 তথ্য), ফিল্টার চিপ, প্রতিটি সতর্কতায় সংশ্লিষ্ট পেজে বোতাম, 💤 ২৪ ঘণ্টা snooze ও ফেরানো।
+- নকল বেল-নোটিফিকেশন ও ব্যাজ বদলে আসল সতর্কতা; Low-stock ও Expiry কার্ড নতুন রঙিন ডিজাইনে; "Order Now/Take Action" এখন নকল টোস্টের বদলে Reorder/Medicines পেজে নেয়।
