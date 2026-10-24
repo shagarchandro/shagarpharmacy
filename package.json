@@ -1,0 +1,12 @@
+{
+  "name": "medicare-pharmacy",
+  "version": "69.0.0",
+  "description": "MediCare Pharmacy Management System — local server (Node.js 22.5+ built-in SQLite)",
+  "private": true,
+  "engines": {
+    "node": ">=22.5"
+  },
+  "scripts": {
+    "start": "node --no-warnings --experimental-sqlite server/server.js"
+  }
+}

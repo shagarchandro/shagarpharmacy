@@ -161,7 +161,7 @@
   };
 
   // ---- v45: top-seller chips, editable quantities, today's bills with reprint ----
-  const sales = () => get('pharmacy_sales', '[]').filter(x => x && x.real);
+  const sales = () => get('pharmacy_sales', '[]').filter(x => x && x.real && x.status !== 'Voided');
   const dkey = x => new Date(x).toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' });
   const favs = el('div', { id: 'pxFav', class: 'pxq', 'aria-label': 'Top sellers' });
   const grid = $('productsGrid'); if (grid) grid.before(favs);

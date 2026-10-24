@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
+<head><script src="assets/js/server-sync.js"></script><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
     <script src="assets/js/guard.js"></script>
     <script src="assets/js/theme.js"></script><script src="assets/js/responsive.js"></script><script src="assets/js/prefs.js"></script><script src="assets/js/avatar.js"></script><script src="assets/js/pw.js"></script><script src="assets/js/panel.js" defer></script><script src="assets/js/dash-extra.js" defer></script>
     <script src="assets/js/enhance.js" defer></script>
@@ -694,7 +694,7 @@ body.dark-mode .sidebar-overlay {
     }
 }
     </style>
-</head>
+<script src="assets/js/dialogs.js"></script></head>
 <body>
 
 <!-- Sidebar -->
@@ -1179,7 +1179,7 @@ body.dark-mode .sidebar-overlay {
     
     function loadSales() {
         const stored = localStorage.getItem(SALES_STORAGE_KEY);
-        if (stored) return JSON.parse(stored);
+        if (stored) return JSON.parse(stored).filter(x => !x || x.status !== 'Voided');
         // Generate sample sales data for demo
         const sampleSales = [];
         for (let i = 1; i <= 30; i++) {

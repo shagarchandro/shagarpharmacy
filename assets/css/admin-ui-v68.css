@@ -1,0 +1,45 @@
+/* v68 – Ops Panel UI: সাইডবার, পেজ হেডার, KPI কার্ড */
+:root{--side:248px;--hh:56px}
+.bar{box-shadow:0 2px 14px #0b7a6b33}
+.bar .brand{display:flex;align-items:center;gap:.4rem;letter-spacing:.2px}
+.bar .tools a,.bar .tools button{font-size:.88rem;border-radius:8px}
+.bar .tools a{padding:.3rem .6rem;background:#ffffff1c}
+.mcu{display:inline-flex;align-items:center;gap:.4rem;background:#ffffff25;border-radius:99px;padding:.2rem .7rem .2rem .25rem;font-size:.88rem}
+.mcu i{width:26px;height:26px;border-radius:50%;background:#fff;color:var(--pri2);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:.8rem}
+.mck{display:none;align-items:center;gap:.4rem;background:#ffffff20!important;border:1px solid #ffffff40!important;color:#fff;border-radius:99px!important;padding:.3rem .8rem!important}.mck kbd{font:inherit;font-size:.75rem;background:#0003;border-radius:5px;padding:0 .35rem}
+/* সাইডবার */
+#mcSide{display:none}
+@media(min-width:960px){
+ body.mcsb main{max-width:none;padding-left:calc(var(--side) + 1.2rem);padding-right:1.2rem;transition:padding-left .2s}body.mcsb.col main{padding-left:calc(72px + 1.2rem)}body.mcsb #app{max-width:1100px;margin:0 auto}
+ body.mcsb .bar nav{display:none}
+ body.mcsb .mck{display:inline-flex}
+ body.mcsb .bar{flex-wrap:nowrap}body.mcsb .bar .tools{margin-left:auto}
+ #mcSide{display:flex;flex-direction:column;position:fixed;left:0;top:var(--hh);bottom:0;width:var(--side);background:var(--card);border-right:1px solid var(--br);overflow-y:auto;z-index:4;padding:.6rem .55rem 0;transition:width .2s}
+ body.col #mcSide{width:72px}body.col #mcSide .lb,body.col #mcSide h4,body.col #mcSide .bd{display:none}body.col #mcSide button.it{justify-content:center}
+ #mcSide h4{margin:.9rem .6rem .25rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
+ #mcSide button.it{display:flex;align-items:center;gap:.65rem;width:100%;text-align:left;border:0;background:transparent;color:var(--fg);padding:.5rem .65rem;border-radius:10px;font:inherit;font-size:.93rem;position:relative}
+ #mcSide button.it:hover{background:color-mix(in srgb,var(--pri) 10%,transparent)}
+ #mcSide button.it.on{background:linear-gradient(135deg,var(--pri2),var(--pri));color:#fff;font-weight:700;box-shadow:0 4px 12px #0b7a6b40}
+ #mcSide .ic{width:24px;text-align:center;font-size:1.1rem;flex:none}#mcSide .lb{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ #mcSide .bd{background:var(--bad);color:#fff;border-radius:99px;font-size:.72rem;font-weight:700;padding:0 .45rem;min-width:20px;text-align:center}
+ #mcSide .ft{margin-top:auto;position:sticky;bottom:0;background:var(--card);padding:.5rem 0;border-top:1px solid var(--br)}
+ .mcf{display:none}
+}
+@media(max-width:959px){
+ .bar{padding:.5rem .8rem;gap:.3rem .7rem}.bar nav{flex-wrap:nowrap;overflow-x:auto;width:100%;order:3;scrollbar-width:none;padding-bottom:.2rem}.bar nav::-webkit-scrollbar{display:none}.bar nav button{white-space:nowrap}
+ .bar .tools{flex-wrap:wrap;gap:.3rem;margin-left:auto;font-size:.85rem}
+ main{padding-bottom:5rem}
+}
+/* পেজ হেডার */
+.pghd{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin:.2rem 0 1rem}
+.pghd .pi{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:1.5rem;background:linear-gradient(135deg,color-mix(in srgb,var(--pri) 18%,transparent),color-mix(in srgb,var(--pri2) 10%,transparent));flex:none}
+.pghd h1{margin:0;font-size:1.5rem;flex:1;min-width:8rem}
+.pghd .dt{font-size:.85rem;color:var(--mut);background:var(--card);border:1px solid var(--br);border-radius:99px;padding:.25rem .8rem;white-space:nowrap}
+/* KPI */
+.grid>.card.kpi{position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s;border-left:4px solid var(--pri)}
+.grid>.card.kpi.go{cursor:pointer}.grid>.card.kpi.go:hover{transform:translateY(-3px);box-shadow:0 10px 24px #0b7a6b2a}
+.grid>.card.kpi .ki{position:absolute;right:.8rem;top:.7rem;font-size:1.6rem;opacity:.9}
+.grid>.card.kpi.t-bad{border-left-color:var(--bad)}.grid>.card.kpi.t-warn{border-left-color:#f29900}.grid>.card.kpi.t-ok{border-left-color:var(--ok)}
+.grid>.card.kpi.t-bad b{color:var(--bad)}
+.bars .bcol i{min-height:4px;border-radius:5px 5px 0 0}
+@media print{#mcSide,.mck,.mcu{display:none!important}body.mcsb main{padding-left:1rem!important}}

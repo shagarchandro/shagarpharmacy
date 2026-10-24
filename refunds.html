@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="bn"><head><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
+<html lang="bn"><head><script src="assets/js/server-sync.js"></script><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
 <script src="assets/js/theme.js"></script><script src="assets/js/responsive.js"></script><script src="assets/js/prefs.js"></script><script src="assets/js/panel.js" defer></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MediCare – Sales Returns & Refunds</title>
 <style>
@@ -11,7 +11,7 @@ input,select{padding:.5rem;border:1px solid var(--br);border-radius:8px;backgrou
 .btn{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:.5rem .9rem;cursor:pointer;font:inherit;text-decoration:none}
 .btn2{border:1px solid var(--br);background:var(--card);color:var(--fg);border-radius:8px;padding:.5rem .9rem;cursor:pointer;font:inherit;text-decoration:none}
 .scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:540px}th,td{border-bottom:1px solid var(--br);padding:.5rem;text-align:left}.muted{color:var(--mut)}.bad{color:var(--bad)}
-</style></head><body><main>
+</style><script src="assets/js/dialogs.js"></script></head><body><main>
 <h1>↩️ বিক্রি ফেরত ও রিফান্ড</h1>
 <p class="muted">ইনভয়েস নম্বর দিয়ে খুঁজুন, ফেরত আসা আইটেম বেছে নিন — স্টক ফিরে আসবে ও রিফান্ড রেকর্ড হবে।</p>
 <div id="deny" class="card" hidden>শুধু <b>Admin</b> ও <b>Pharmacist</b>। <a href="login.html">Login</a></div>
@@ -33,7 +33,7 @@ input,select{padding:.5rem;border:1px solid var(--br);border-radius:8px;backgrou
  if(!ok){$('deny').hidden=false;return}$('box').hidden=false;
  var who=(u&&(u.name||u.role))||sessionStorage.getItem('mc_role')||'';var tk=function(n){return '৳'+(Math.round(n*100)/100).toLocaleString()};
  function find(){var q=$('q').value.trim().toLowerCase();if(!q){$('res').innerHTML='';return}
-  var S=rj('pharmacy_sales',[]).filter(function(s){return s&&s.real&&(String(s.invoiceNo).toLowerCase().indexOf(q)>-1||String(s.customer||'').toLowerCase().indexOf(q)>-1)}).slice(-10).reverse();
+  var S=rj('pharmacy_sales',[]).filter(function(s){return s&&s.real&&s.status!=='Voided'&&(String(s.invoiceNo).toLowerCase().indexOf(q)>-1||String(s.customer||'').toLowerCase().indexOf(q)>-1)}).slice(-10).reverse();
   $('res').innerHTML=S.length?S.map(function(s){var ret=s.returned||{};
    var rows=(s.items||[]).map(function(i,ix){var left=(+i.quantity||0)-(+ret[ix]||0);return '<tr><td>'+esc(i.name)+'</td><td>'+esc(i.price)+'</td><td>'+left+' / '+esc(i.quantity)+'</td><td>'+(left>0?'<input type="number" min="0" max="'+left+'" value="0" data-s="'+s.id+'" data-i="'+ix+'" style="width:70px">':'<span class="muted">ফেরত সম্পন্ন</span>')+'</td></tr>'}).join('');
    return '<div class="card"><b>'+esc(s.invoiceNo)+'</b> · '+esc(s.customer)+' · '+esc(s.date)+' · '+tk(s.total)+'<div class="scroll"><table><thead><tr><th>আইটেম</th><th>দাম</th><th>ফেরতযোগ্য</th><th>ফেরত পরিমাণ</th></tr></thead><tbody>'+rows+'</tbody></table></div><div class="row" style="margin-top:.6rem"><select data-m="'+s.id+'" aria-label="রিফান্ড মাধ্যম"><option value="cash">ক্যাশে ফেরত</option><option value="original">আগের মাধ্যমে (bKash/কার্ড)</option><option value="credit">ক্রেডিট/বাকিতে সমন্বয়</option></select><input placeholder="কারণ" data-r="'+s.id+'" style="flex:1;min-width:160px"><button class="btn" data-refund="'+s.id+'">রিফান্ড করুন</button></div></div>'}).join(''):'<div class="card muted">কিছু পাওয়া যায়নি</div>'}

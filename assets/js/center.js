@@ -43,7 +43,7 @@
 
   P.overview = () => {
     const med = rj('pharmacy_medicines', []), cus = rj('pharmacy_customers', []), sup = rj('pharmacy_suppliers', []), pur = rj('pharmacy_purchases', []), rx = rj('pharmacy_prescriptions', []);
-    const sales = rj('pharmacy_sales', []).filter(x => x.real), D = shop(), today = new Date().toISOString().slice(0, 10);
+    const sales = rj('pharmacy_sales', []).filter(x => x.real && x.status !== 'Voided'), D = shop(), today = new Date().toISOString().slice(0, 10);
     const exp = med.filter(m => m.expiryDate && m.expiryDate < today).length, low = med.filter(m => +m.stock <= +(m.minStock || 0)).length;
     const rxp = rx.filter(x => x.status === 'pending' || x.status === 'partial').length, rxo = D.orders.filter(o => o.status === 'Prescription Review').length;
     const last = localStorage.getItem('pharmacy_lastbackup') || localStorage.getItem('mc_lastbackup'), days = last ? Math.floor((Date.now() - new Date(last)) / 864e5) : null;
@@ -232,9 +232,10 @@
 
   P.logs = () => {
     const sales = rj('pharmacy_sales', []).filter(x => x.real).slice(-30).reverse(), shifts = rj('pharmacy_shifts', []).slice(-10).reverse(), au = rj('pharmacy_audit', []).slice(-40).reverse();
-    const voidSale = s => { const why = prompt('Void invoice ' + s.invoiceNo + '? Stock will be returned. Reason:'); if (!why || why.trim().length < 3) return bad('A reason is required'); const meds = rj('pharmacy_medicines', []); (s.items || []).forEach(i => { const m = meds.find(x => x.id === i.id); if (m) m.stock = (+m.stock || 0) + (+i.quantity || 0); }); wj('pharmacy_medicines', meds); wj('pharmacy_sales', rj('pharmacy_sales', []).filter(x => x.id !== s.id)); audit('Voided ' + s.invoiceNo + ' (' + why.trim().slice(0, 80) + ')'); ok('Sale voided, stock restored'); show('logs'); };
+    const doVoid = (s, why) => { if (why == null) return; const r = window.mcVoid ? window.mcVoid(s, why, who()) : { ok: false, msg: 'void-core.js not loaded' }; if (!r.ok) return bad(r.msg); ok(r.msg); show('logs'); };
+    const voidSale = s => { const msg = 'ইনভয়েস ' + s.invoiceNo + ' (' + tk(s.total) + ') void করবেন?\nস্টক ফেরত যাবে। কারণ লিখুন:'; if (window.MCD) MCD.prompt(msg, { title: 'Void ইনভয়েস', icon: '🗑️', danger: true, type: 'text', ok: 'Void করুন' }).then(w => doVoid(s, w)); else doVoid(s, prompt(msg)); };
     return h('div', {}, h('h2', {}, 'Sales, shifts & audit'),
-      h('h3', {}, 'Recent POS sales'), tbl(['Invoice', 'Date', 'Cashier', 'Payment', 'Total', ''], sales.map(s => h('tr', {}, h('td', {}, s.invoiceNo), h('td', {}, s.date), h('td', {}, s.cashier || '—'), h('td', {}, s.paymentMethod), h('td', {}, tk(s.total)), h('td', {}, btn('Void', () => voidSale(s))))), 'No POS sales yet.'),
+      h('h3', {}, 'Recent POS sales'), tbl(['Invoice', 'Date', 'Cashier', 'Payment', 'Total', ''], sales.map(s => h('tr', {}, h('td', {}, s.invoiceNo), h('td', {}, s.date), h('td', {}, s.cashier || '—'), h('td', {}, s.paymentMethod), h('td', {}, tk(s.total)), h('td', {}, s.status === 'Voided' ? 'VOID' + (s.voidReason ? ' — ' + s.voidReason : '') : btn('Void', () => voidSale(s))))), 'No POS sales yet.'),
       h('h3', {}, 'Closed shifts'), tbl(['Date', 'By', 'Invoices', 'Total', 'Counted', 'Difference'], shifts.map(x => h('tr', {}, h('td', {}, x.date), h('td', {}, x.by), h('td', {}, x.invoices), h('td', {}, tk(x.total)), h('td', {}, tk(x.counted)), h('td', { class: x.diff < 0 ? 'bad' : 'ok' }, (x.diff >= 0 ? '+' : '') + tk(x.diff)))), 'No shifts closed yet.'),
       h('h3', {}, 'Admin audit trail'), tbl(['When', 'Who', 'What'], au.map(a => h('tr', {}, h('td', {}, dhaka(a.at)), h('td', {}, a.by), h('td', {}, a.msg))), 'No admin changes recorded.'));
   };

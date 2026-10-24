@@ -76,9 +76,22 @@
   }
   function resumeBill() {
     var h = heldList(); if (!h.length) return alert('No held bills.');
-    var pick = prompt('Resume which bill?\n' + h.map(function (x, i) { return (i + 1) + '. ' + new Date(x.at).toLocaleTimeString('en-GB', { timeZone: 'Asia/Dhaka' }) + ' — ' + x.cart.length + ' item(s), ' + tk(x.cart.reduce(function (a, c) { return a + c.total; }, 0)) + ' (' + x.by + ')'; }).join('\n') + '\n\nEnter number:', '1');
+    var M = window.MCD && MCD.enabled && MCD.enabled();
+    function total(x) { return x.cart.reduce(function (a, c) { return a + c.total; }, 0); }
+    if (M) {
+      MCD.choose('কোন হোল্ড-করা বিলটি ফিরিয়ে আনবেন?', { title: 'হোল্ড বিল (' + h.length + ')', items: h.map(function (x, i) { return { value: i, label: new Date(x.at).toLocaleTimeString('en-GB', { timeZone: 'Asia/Dhaka', hour: '2-digit', minute: '2-digit' }) + ' · ' + x.cart.length + ' আইটেম', sub: x.cart.slice(0, 3).map(function (c) { return c.name; }).join(', ') + (x.cart.length > 3 ? '…' : '') + ' — ' + x.by, right: tk(total(x)) }; }) }).then(function (i) {
+        if (i == null) return;
+        if ((0, eval)('cart.length')) MCD.confirm('বর্তমান কার্ট বদলে হোল্ড-করা বিলটি আনবেন?', { danger: false, ok: 'হ্যাঁ, বদলান' }).then(function (y) { if (y) doResume(h, i); });
+        else doResume(h, i);
+      });
+      return;
+    }
+    var pick = prompt('Resume which bill?\n' + h.map(function (x, i) { return (i + 1) + '. ' + new Date(x.at).toLocaleTimeString('en-GB', { timeZone: 'Asia/Dhaka' }) + ' — ' + x.cart.length + ' item(s), ' + tk(total(x)) + ' (' + x.by + ')'; }).join('\n') + '\n\nEnter number:', '1');
     var i = parseInt(pick, 10) - 1; if (!(i >= 0 && i < h.length)) return;
     if ((0, eval)('cart.length') && !confirm('Replace the current cart with the held bill?')) return;
+    doResume(h, i);
+  }
+  function doResume(h, i) {
     var b = h.splice(i, 1)[0]; localStorage.setItem('pharmacy_held', JSON.stringify(h));
     (0, eval)('products = loadProductsFromStorage(); cart = ' + JSON.stringify(b.cart) + '.map(function (c) { var p = products.find(function (x) { return x.id === c.id; }); if (!p || p.stock <= 0) return null; c.quantity = Math.min(c.quantity, p.stock); c.price = p.price; c.total = c.price * c.quantity; return c; }).filter(Boolean); updateCart();');
     var sel = document.getElementById('customerSelect'); if (sel) sel.value = b.customer; var sl = document.getElementById('discountSlider'), di = document.getElementById('discountInput');
@@ -89,8 +102,16 @@
     var mine = mySales(sales), by = {}, tot = 0, tax = 0, disc = 0;
     mine.forEach(function (x) { by[x.paymentMethod] = (by[x.paymentMethod] || 0) + x.total; tot += x.total; tax += x.tax || 0; disc += x.discount || 0; });
     if (!mine.length) return alert('No sales recorded for you today.');
-    var counted = prompt('Cash counted in the drawer (৳)? Expected cash from your sales: ' + tk(by.cash || 0));
-    if (counted === null) return; counted = parseFloat(counted); if (isNaN(counted) || counted < 0) return alert('Enter a valid amount.');
+    var exp = by.cash || 0;
+    if (window.MCD && MCD.enabled && MCD.enabled()) {
+      MCD.prompt('ড্রয়ারে গোনা নগদ টাকা লিখুন।\nআপনার বিক্রি অনুযায়ী প্রত্যাশিত নগদ: ' + tk(exp), { title: 'শিফট ক্লোজ', icon: '🧮', chips: false, def: exp ? String(Math.round(exp * 100) / 100) : '', type: 'num', live: function (v) { if (v === '' || isNaN(+v)) return {}; var d = +v - exp; return { text: Math.abs(d) < 0.005 ? '✅ হিসাব মিলেছে' : (d > 0 ? '▲ বেশি ' : '▼ কম ') + tk(Math.abs(d)), cls: Math.abs(d) < 0.005 ? 'pos' : (d < 0 ? 'neg' : 'pos') }; } }).then(function (v) { if (v === null) return; finishShift(parseFloat(v), mine, by, tot, tax, disc); });
+      return;
+    }
+    var counted = prompt('Cash counted in the drawer (৳)? Expected cash from your sales: ' + tk(exp));
+    if (counted === null) return; finishShift(parseFloat(counted), mine, by, tot, tax, disc);
+  }
+  function finishShift(counted, mine, by, tot, tax, disc) {
+    if (isNaN(counted) || counted < 0) return alert('Enter a valid amount.');
     var diff = counted - (by.cash || 0), rec = { id: Date.now(), date: today, by: me(), invoices: mine.length, total: +tot.toFixed(2), byMethod: by, counted: counted, diff: +diff.toFixed(2), at: new Date().toISOString() };
     var L = []; try { L = JSON.parse(localStorage.getItem('pharmacy_shifts') || '[]'); } catch (e) {} L.push(rec); localStorage.setItem('pharmacy_shifts', JSON.stringify(L));
     var w = window.open('', '_blank'); if (!w) return alert('Shift saved. Allow pop-ups to print the report.');
@@ -124,13 +145,13 @@
       var r = role(); if (r === 'staff') lookupPanel(m); if (r === 'pharmacist' || r === 'admin') panel('🩺 Needs attention — expiry & stock', attention(m), ['Issue', 'Medicine', 'Batch', 'Expiry', 'Stock', 'Rack', 'Action']);
     },
     customers: function () {
-      var c = load('pharmacy_customers'), s = load('pharmacy_sales').filter(function (x) { return x.real; });
+      var c = load('pharmacy_customers'), s = load('pharmacy_sales').filter(function (x) { return x.real && x.status !== 'Voided'; });
       var due = c.reduce(function (a, x) { return a + (+x.due || 0); }, 0), over = c.filter(function (x) { return +x.due > +(x.creditLimit || 0); });
       var m = today.slice(0, 7), mt = s.filter(function (x) { return (x.date || '').slice(0, 7) === m; }).reduce(function (a, x) { return a + x.total; }, 0);
       mount([card('Customers', c.length), card('Total outstanding due', tk(due), due ? 'warn' : 'ok'), card('Over credit limit', over.length, over.length ? 'bad' : 'ok'), card('POS sales this month', tk(mt), 'ok')], []);
     },
     sales: function () {
-      var s = load('pharmacy_sales').filter(function (x) { return x.real; }), t = s.filter(function (x) { return x.date === today; });
+      var s = load('pharmacy_sales').filter(function (x) { return x.real && x.status !== 'Voided'; }), t = s.filter(function (x) { return x.date === today; });
       var sum = function (a) { return a.reduce(function (z, x) { return z + (+x.total || 0); }, 0); };
       var mine = mySales(s), isStaff = role() === 'staff', held = heldList().length;
       var cards = isStaff ? [card('My sales today', tk(sum(mine)), 'ok'), card('My invoices', mine.length), card('Held bills', held, held ? 'warn' : 'ok')]
@@ -166,7 +187,7 @@
       panel('⏳ Unfilled prescriptions', r.filter(function (x) { return x.status === 'pending' || x.status === 'partial'; }).map(function (x) { return [x.prescriptionNo, x.patientName, x.doctorName, x.validUntil || '—', (x.validUntil && x.validUntil < today) ? 'PAST VALIDITY' : x.status]; }), ['Rx no.', 'Patient', 'Doctor', 'Valid until', 'State']);
     },
     reports: function () {
-      var m = load('pharmacy_medicines'), s = load('pharmacy_sales').filter(function (x) { return x.real; }), rxs = s.filter(function (x) { return x.rx; });
+      var m = load('pharmacy_medicines'), s = load('pharmacy_sales').filter(function (x) { return x.real && x.status !== 'Voided'; }), rxs = s.filter(function (x) { return x.rx; });
       mount([card('Expired batches', m.filter(function (x) { return x.expiryDate && x.expiryDate < today; }).length, 'bad'), card('Expiring in 60 days', m.filter(function (x) { return x.expiryDate && x.expiryDate >= today && x.expiryDate <= in60; }).length, 'warn'),
         card('Low stock', m.filter(function (x) { return +x.stock <= +(x.minStock || 0); }).length, 'warn'), card('Rx sales (all time)', rxs.length), card('Prescriptions dispensed', load('pharmacy_prescriptions').filter(function (x) { return x.status === 'filled'; }).length, 'ok')],
         [['⬇ Expiry & stock report', function () { csv('expiry-stock-' + today + '.csv', [['Issue', 'Medicine', 'Batch', 'Expiry', 'Stock', 'Rack', 'Action']].concat(attention(m))); }],
@@ -174,7 +195,7 @@
       panel('📋 Rx dispensing log', rxs.slice(-10).reverse().map(function (x) { return [x.date, x.invoiceNo, x.rx.no, x.rx.by, x.customer]; }), ['Date', 'Invoice', 'Rx ref', 'Verified by', 'Customer']);
     },
     dashboard: function () {
-      var m = load('pharmacy_medicines'), s = load('pharmacy_sales').filter(function (x) { return x.real; });
+      var m = load('pharmacy_medicines'), s = load('pharmacy_sales').filter(function (x) { return x.real && x.status !== 'Voided'; });
       var exp = m.filter(function (x) { return x.expiryDate && x.expiryDate < today; }).length, low = m.filter(function (x) { return +x.stock <= +(x.minStock || 0); }).length;
       var td = s.filter(function (x) { return x.date === today; }).reduce(function (a, x) { return a + x.total; }, 0);
       if (role() === 'staff') {

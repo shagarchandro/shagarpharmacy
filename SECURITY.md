@@ -28,3 +28,17 @@ show good practice, but they are **not a substitute for a server**.
 3. Remove the demo accounts and the demo code `demo`; add 2-factor login and per-user sessions with server-side expiry.
 4. Validate and escape all input and output on the server; keep an immutable audit log.
 5. Back up the database regularly, test restores, and restrict who can export patient/prescription data.
+
+## v69 — Server mode (`npm start`)
+| Area | Measure |
+|---|---|
+| Passwords / PIN | scrypt (N=16384) per-user salt, constant-time compare; hashes never leave the server. Policy: ≥ 8 chars, letters + numbers, not the e-mail/name, no common passwords. |
+| Sessions | Random 256-bit token in an `HttpOnly; SameSite=Strict` cookie, stored hashed (SHA-256); absolute limit from Control Center, 120-min idle limit; password change/reset ends other sessions. |
+| CSRF | Every write needs header `x-pms: 1` (cannot be sent cross-site without CORS) **and** a same-origin `Origin`. |
+| Brute force | Server-side lock per account and per IP, growing cool-down; failures and successes logged server-side (clients cannot write the login log). |
+| Authorisation | Server checks role per data key (e.g. settings/roles = Admin/Owner only; purchasing = Admin/Owner/Inventory Manager); customers can only use the public shop API. |
+| Shop orders | Price, stock (unexpired, FEFO), coupon, delivery fee, prescription and TrxID rules re-computed on the server; rate-limited per IP. |
+| Data safety | SQLite WAL, daily automatic backups (last 14), safety backup before import/reset, audit log of admin actions. |
+| Static files | `server/`, `data/`, `*.db`, dot-files and `package.json` are never served. |
+
+Still **not** covered: HTTPS (put a TLS reverse proxy such as Caddy/nginx in front before exposing beyond your own network), real payment/SMS gateways, 2-factor for non-admin roles, per-field encryption of the database file (protect `data/` with disk encryption and OS permissions).

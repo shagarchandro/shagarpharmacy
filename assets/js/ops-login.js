@@ -8,7 +8,8 @@
   var WHAT = { Owner: 'সব ট্যাব: Dashboard, Products, Inventory, POS, Orders, Reports, Data (+Users, Settings)', Pharmacist: 'Dashboard, Orders — প্রেসক্রিপশন অনুমোদন/প্রত্যাখ্যান', Cashier: 'POS (বিক্রি) ও Orders', 'Inventory Manager': 'Dashboard, Products, Inventory — স্টক, ব্যাচ, মেয়াদ', 'Delivery Staff': 'শুধু Orders — ডেলিভারি আপডেট' };
   var ICON = { Owner: '👑', Pharmacist: '💊', Cashier: '🧾', 'Inventory Manager': '📦', 'Delivery Staff': '🛵' };
   var S = rj('pharmacy_settings', {}), MAX = Math.min(Math.max(+S.lockMax || 5, 3), 10), BASE = Math.min(Math.max(+S.lockBase || 30, 10), 600), PINS = S.opsPins || {};
-  var users = db().users.filter(function (u) { return u.active; }), sel = null, timer = null;
+  var SRV = !!(window.MCSRV && MCSRV.active), users, sel = null, timer = null;
+  if (SRV) { var pr = MCSRV.get('/api/public/ops-users'); users = (pr.json && pr.json.users) || []; PINS = {}; } else users = db().users.filter(function (u) { return u.active; });
   var ul = $('ul'), c = $('c');
   function lockKey(u) { return 'ops:' + u.id; }
   function lockOf(k) { return (rj('mc_lock', {})[k]) || { n: 0, until: 0, rounds: 0 }; }
@@ -16,6 +17,7 @@
   function logEv(u, ok) { try { var L = rj('pharmacy_loginlog', []); L.push({ at: new Date().toISOString(), email: u.name + ' (Ops)', ok: ok, role: u.role, scope: 'ops' }); localStorage.setItem('pharmacy_loginlog', JSON.stringify(L.slice(-100))); } catch (e) { } }
   function pick(u) {
     sel = u; ul.querySelectorAll('.uc').forEach(function (n) { n.classList.toggle('on', n.getAttribute('data-id') === u.id); n.querySelector('input').checked = n.getAttribute('data-id') === u.id; });
+    if (SRV) { $('cl').textContent = 'Password / পাসওয়ার্ড'; $('ch').textContent = 'আপনার ব্যক্তিগত পাসওয়ার্ড দিন (সার্ভারে যাচাই হয়)।'; c.value = ''; $('acc').textContent = u.role + ': ' + (WHAT[u.role] || ''); $('last').textContent = ''; showLock(); return; }
     var has = !!PINS[u.id]; $('cl').textContent = has ? 'PIN / আপনার পিন' : 'Demo code / ডেমো কোড'; c.value = ''; c.setAttribute('inputmode', has ? 'numeric' : 'text');
     $('ch').textContent = has ? 'আপনার ব্যক্তিগত PIN দিন।' : 'Demo code: demo — শুধু ডেমো, আসল নিরাপত্তা নয়। (Control Center → 🔑 Sign-in থেকে ব্যক্তিগত PIN দেওয়া যায়)';
     $('acc').textContent = u.role + ': ' + (WHAT[u.role] || '');
@@ -35,6 +37,14 @@
   $('eye').onclick = function () { c.type = c.type === 'password' ? 'text' : 'password'; };
   $('f').onsubmit = function (e) {
     e.preventDefault(); if (!sel) return toast('একজন ইউজার বেছে নিন', 1);
+    if (SRV) {
+      var k0 = lockKey(sel), l0 = lockOf(k0); if (l0.until > Date.now()) { showLock(); return; }
+      MCSRV.apost('/api/login', { scope: 'ops', userId: sel.id, password: c.value }).then(function (r) {
+        if (r.status === 200 && r.json && r.json.ok) { setLock(k0, null); MCSRV.setOpsSession(r.json.user); try { localStorage.setItem('mc_ops_lastuser', sel.id); } catch (e) { } location.href = 'index.html'; return; }
+        var j = r.json || {}; if (j.locked) { setLock(k0, { n: 0, until: Date.now() + j.locked * 1000, rounds: 1 }); showLock(); return; }
+        toast(j.error || 'সার্ভারের সাথে যোগাযোগ করা যায়নি', 1); c.select();
+      }); return;
+    }
     var k = lockKey(sel), l = lockOf(k); if (l.until > Date.now()) { showLock(); return; }
     var u = sel, val = c.value.trim();
     var check = PINS[u.id] ? (window.MCPW ? MCPW.verify(val, PINS[u.id]) : Promise.resolve(false)) : Promise.resolve(val.toLowerCase() === 'demo');

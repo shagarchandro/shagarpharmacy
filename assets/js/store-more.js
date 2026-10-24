@@ -255,7 +255,7 @@
   function guestTrack(a) {
     const out = h('div', {}), f = h('form', { novalidate: true, onsubmit(e) {
       e.preventDefault(); const t = e.target.elements, no = t.no.value.trim().toUpperCase(), ph = t.ph.value.replace(/\D/g, '').slice(-10);
-      const o = D.orders.find(x => String(x.no).toUpperCase() === no && String(x.phone || '').replace(/\D/g, '').slice(-10) === ph);
+      const o = D.orders.find(x => String(x.no).toUpperCase() === no && String(x.phone || '').replace(/\D/g, '').slice(-10) === ph) || (window.MCSRV && MCSRV.active ? MCSRV.trackSync(no, ph) : null);
       out.replaceChildren(o ? h('div', { class: 'mcb' }, h('b', {}, o.no), ' · ', money(o.total), ' · ', o.status, timeline(o)) : h('p', { class: 'bad' }, 'No order found for that number and mobile.'));
     } }, h('div', { class: 'row' }, h('input', { name: 'no', placeholder: 'Order no. e.g. INV-1001', 'aria-label': 'Order number' }), h('input', { name: 'ph', type: 'tel', placeholder: 'Mobile', 'aria-label': 'Mobile' }), h('button', { class: 'btn2' }, bn() ? 'ট্র্যাক' : 'Track')));
     a.append(h('section', { class: 'mc-free', 'data-sec': 'track' }, h('h2', {}, bn() ? 'অর্ডার ট্র্যাক করুন' : 'Track an order'), f, out));

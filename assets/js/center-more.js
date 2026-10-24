@@ -32,7 +32,7 @@ window.CCX = function (c) {
     return h('div', {}, h('h2', {}, '💳 Payments'), f);
   };
   panels.insights = () => {
-    const D = c.db(), sales = rj('pharmacy_sales', []).filter(x => x && x.real), orders = (D.orders || []).filter(o => o.status !== 'Cancelled');
+    const D = c.db(), sales = rj('pharmacy_sales', []).filter(x => x && x.real && x.status !== 'Voided'), orders = (D.orders || []).filter(o => o.status !== 'Cancelled');
     const rec = [...sales.map(x => ({ d: day(x.at || x.date), t: +x.total || 0, p: (x.paymentMethod || 'cash'), items: x.items || [] })),
       ...orders.map(o => ({ d: day(o.at), t: +o.total || 0, p: (o.pay || 'Unknown').replace(/ \(demo.*\)/, ''), items: (o.items || []).map(i => ({ name: i.name, quantity: i.qty, price: i.price })) }))];
     const days = [...Array(14)].map((_, i) => day(Date.now() - (13 - i) * 864e5)), by = {}; rec.forEach(r => by[r.d] = (by[r.d] || 0) + r.t);
