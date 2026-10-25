@@ -6,7 +6,7 @@
 (function () {
   'use strict';
   function rj(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
-  function today() { return new Date().toISOString().slice(0, 10); }
+  function today() { return new Date(Date.now() + 216e5).toISOString().slice(0, 10); }
   function shopImg(m) { return (typeof m.image === 'string' && m.image.indexOf('data:image/') === 0 && m.image.length < 60000) ? m.image : undefined; }
 
   window.mcSync = function (opts) {

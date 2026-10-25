@@ -10,7 +10,7 @@
     // prefer the page's own in-memory list (it holds seeded demo data before anything is saved)
     try { if (localStorage.getItem(k) == null && FNS[k] && typeof (0, eval)(FNS[k]) === 'function') { var fb = (0, eval)(FNS[k] + '()'); if (Array.isArray(fb)) return fb; } } catch (e) {}
     if (VARS[k]) { try { var live = (0, eval)('typeof ' + VARS[k] + " !== 'undefined' ? " + VARS[k] + ' : null'); if (Array.isArray(live)) return live; } catch (e) {} } try { var v = JSON.parse(localStorage.getItem(k)); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
-  var today = new Date().toISOString().slice(0, 10);
+  var today = new Date(Date.now() + 216e5).toISOString().slice(0, 10);
   var in60 = new Date(Date.now() + 60 * 864e5).toISOString().slice(0, 10);
   function cell(v) { var s = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; }
   function csv(name, rows) {

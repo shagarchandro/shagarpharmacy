@@ -865,7 +865,7 @@
         const product = products.find(p => p.id === productId);
         if (!product) return;
         if (product.stock <= 0) { showToast('Product out of stock!', 'danger'); return; }
-        if (product.expiry && product.expiry < new Date().toISOString().slice(0,10)) { showToast('Expired medicine cannot be sold!', 'danger'); return; }
+        if (product.expiry && product.expiry < new Date(Date.now() + 216e5).toISOString().slice(0,10)) { showToast('Expired medicine cannot be sold!', 'danger'); return; }
         
         if (product.rx && !rxGate()) return;
         const existingItem = cart.find(item => item.id === productId);
@@ -989,7 +989,7 @@
         items.forEach(it => {
             const nm = String(it.name || '').toLowerCase();
             const pr = products.find(p => p.name.toLowerCase() === nm) || products.find(p => p.name.toLowerCase().includes(nm) || nm.includes(p.name.toLowerCase()));
-            if (!pr || pr.stock <= 0 || (pr.expiry && pr.expiry < new Date().toISOString().slice(0, 10))) { missing.push(it.name); return; }
+            if (!pr || pr.stock <= 0 || (pr.expiry && pr.expiry < new Date(Date.now() + 216e5).toISOString().slice(0, 10))) { missing.push(it.name); return; }
             const ex = cart.find(c => c.id === pr.id);
             if (!ex) cart.push({ id: pr.id, name: pr.name, price: pr.price, quantity: 1, total: pr.price });
         });
@@ -1005,7 +1005,7 @@
             const rx = list.find(r => String(r.id) === String(rxInfo.id)); if (!rx) return;
             (rx.medicines || []).forEach(m => { if (soldItems.some(i => i.name.toLowerCase() === String(m.name).toLowerCase() || String(m.name).toLowerCase().includes(i.name.toLowerCase()))) m.status = 'filled'; });
             const all = rx.medicines.every(m => m.status === 'filled'), any = rx.medicines.some(m => m.status === 'filled');
-            rx.status = all ? 'filled' : (any ? 'partial' : rx.status); if (all) rx.filledDate = new Date().toISOString().split('T')[0];
+            rx.status = all ? 'filled' : (any ? 'partial' : rx.status); if (all) rx.filledDate = new Date(Date.now() + 216e5).toISOString().split('T')[0];
             rx.dispensedBy = rxInfo.by; localStorage.setItem(K, JSON.stringify(list));
         } catch (e) { console.warn(e); }
     }
@@ -1061,7 +1061,7 @@
             const real = hist.filter(x => x && x.real);
             real.push({ id: Date.now(), real: true, invoiceNo: invoice.invoiceNo, customer: invoice.customer,
                 total: +invoice.total.toFixed(2), subtotal: +invoice.subtotal.toFixed(2), discount: +invoice.discount.toFixed(2), tax: +invoice.tax.toFixed(2),
-                date: new Date().toISOString().split('T')[0], at: new Date().toISOString(), status: 'Completed',
+                date: new Date(Date.now() + 216e5).toISOString().split('T')[0], at: new Date().toISOString(), status: 'Completed',
                 rx: rxInfo ? { no: rxInfo.no, by: rxInfo.by } : null, cashier: curUser().name || curUser().role || '',
                 paymentMethod: invoice.paymentMethod, items: invoice.items.map(i => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })) });
             localStorage.setItem(SK, JSON.stringify(real)); window.dispatchEvent(new Event('mc-sale'));

@@ -54,7 +54,7 @@
   };
   var undoB = btn('↩ Undo last bulk change', function () { var s = localStorage.getItem('mc_med_undo'); if (!s || !confirm('Restore the medicine list as it was before the last import / bulk price change?')) return; medicines = JSON.parse(s); localStorage.removeItem('mc_med_undo'); commit(); undoB.hidden = true; audit('Medicines bulk change undone'); say('Restored.'); }, 'btn-outline-secondary'); undoB.hidden = !localStorage.getItem('mc_med_undo');
   panel.append(el('h6', { text: 'Import / export', class: 'fw-bold' }), el('div', { class: 'd-flex flex-wrap gap-2 mb-2' }, [
-    btn('⬇ Export all (CSV)', function () { var rows = [COLS.slice()]; medicines.forEach(function (m) { rows.push(COLS.map(function (c) { return m[c] == null ? '' : m[c]; })); }); csvDl('medicines-' + new Date().toISOString().slice(0, 10) + '.csv', rows); }),
+    btn('⬇ Export all (CSV)', function () { var rows = [COLS.slice()]; medicines.forEach(function (m) { rows.push(COLS.map(function (c) { return m[c] == null ? '' : m[c]; })); }); csvDl('medicines-' + new Date(Date.now() + 216e5).toISOString().slice(0, 10) + '.csv', rows); }),
     btn('⬇ CSV template', function () { csvDl('medicines-template.csv', [COLS.slice(), ['Napa 500mg', 'Paracetamol', 'Beximco', 'Pain Relief', 'B001', '', 'A-1', 2, 5, 4, 100, 20, '2026-01-01', '2028-12-31', 'no']]); }),
     el('label', { class: 'btn btn-sm btn-outline-primary mb-0', text: '⬆ Import CSV…' }, [file]), undoB]), pv);
 

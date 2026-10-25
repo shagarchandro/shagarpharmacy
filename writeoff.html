@@ -37,11 +37,11 @@ input,select{padding:.5rem;border:1px solid var(--br);border-radius:8px;backgrou
  if(!ok){$('deny').hidden=false;return}$('box').hidden=false;
  var who=(u&&(u.name||u.role))||sessionStorage.getItem('mc_role')||'';
  var KM='pharmacy_medicines',KW='pharmacy_writeoffs',tk=function(n){return '৳'+(Math.round(n*100)/100).toLocaleString()};
- function due(){var meds=rj(KM,[]),lim=new Date();lim.setDate(lim.getDate()+(+$('days').value||0));var l=lim.toISOString().slice(0,10),t=new Date().toISOString().slice(0,10);
+ function due(){var meds=rj(KM,[]),lim=new Date();lim.setDate(lim.getDate()+(+$('days').value||0));var l=lim.toISOString().slice(0,10),t=new Date(Date.now() + 216e5).toISOString().slice(0,10);
   return meds.filter(function(m){var e=m.expiryDate;return e&&(+m.stock||0)>0&&(+$('days').value?e<=l:e<t)})}
  function write(list,reason){if(!list.length)return;var meds=rj(KM,[]),log=rj(KW,[]),now=new Date();
   list.forEach(function(x){var m=meds.find(function(y){return String(y.id)===String(x.id)});if(!m)return;var q=+m.stock||0;
-   log.push({at:now.toISOString(),date:now.toISOString().slice(0,10),id:m.id,name:m.name,qty:q,loss:q*(+m.purchasePrice||0),reason:reason,by:who});m.stock=0});
+   log.push({at:now.toISOString(),date:new Date(now.getTime()+216e5).toISOString().slice(0,10),id:m.id,name:m.name,qty:q,loss:q*(+m.purchasePrice||0),reason:reason,by:who});m.stock=0});
   localStorage.setItem(KM,JSON.stringify(meds));localStorage.setItem(KW,JSON.stringify(log));
   try{var a=rj('pharmacy_audit',[]);a.push({at:now.toISOString(),by:who,msg:'Write-off '+list.length+' item(s)'});localStorage.setItem('pharmacy_audit',JSON.stringify(a.slice(-300)))}catch(e){}
   draw()}

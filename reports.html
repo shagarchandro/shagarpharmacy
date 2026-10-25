@@ -746,7 +746,7 @@
         let filtered = [...salesData];
         
         if (range === 'today') {
-            const todayStr = today.toISOString().split('T')[0];
+            const todayStr = new Date(today.getTime() + 216e5).toISOString().split('T')[0];
             filtered = salesData.filter(s => s.date === todayStr);
         } else if (range === 'week') {
             const weekAgo = new Date(today.setDate(today.getDate() - 7));

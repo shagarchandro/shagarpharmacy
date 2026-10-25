@@ -2,7 +2,7 @@
 /* অনলাইন শপ: অর্ডার সার্ভারে যাচাই ও স্টক-কাটা (FEFO), ট্র্যাকিং, গ্রাহকের প্রশ্ন */
 const D = require('./db');
 const A = require('./auth');
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => new Date(Date.now() + 216e5).toISOString().slice(0, 10);
 const uid = p => p + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 const eff = p => Math.round(p.price * (100 - (p.disc || 0)) / 100);
 const usable = (d, pid) => d.batches.filter(b => b.pid === pid && b.qty > 0 && b.exp >= today()).sort((a, b) => a.exp.localeCompare(b.exp));

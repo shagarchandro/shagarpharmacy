@@ -4,7 +4,7 @@ const $=(s,r=document)=>r.querySelector(s);
 function h(t,p={},...k){const e=document.createElement(t);for(const[a,v]of Object.entries(p)){if(a==='class')e.className=v;else if(a.startsWith('on'))e.addEventListener(a.slice(2),v);else if(v!==false&&v!=null)e.setAttribute(a,v)}for(const c of k.flat())if(c!=null&&c!==false)e.append(c.nodeType?c:document.createTextNode(c));return e}
 const money=n=>'৳'+Number(n||0).toLocaleString('en-BD',{maximumFractionDigits:2});
 const dhaka=d=>new Date(d).toLocaleString('en-GB',{timeZone:'Asia/Dhaka',dateStyle:'medium',timeStyle:'short'});
-const today=()=>new Date().toISOString().slice(0,10);
+const today=()=>new Date(Date.now() + 216e5).toISOString().slice(0,10);
 const eff=p=>Math.round(p.price*(100-(p.disc||0))/100);
 const uid=p=>p+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 const csvCell=v=>{let s=String(v??'');if(/^[=+\-@\t\r]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'};

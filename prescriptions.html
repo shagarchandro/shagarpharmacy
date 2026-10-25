@@ -810,7 +810,7 @@
         medicineFields.forEach(field => field.div.remove());
         medicineFields = [];
         document.getElementById('prescriptionForm').reset();
-        document.getElementById('prescriptionDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('prescriptionDate').value = new Date(Date.now() + 216e5).toISOString().split('T')[0];
         document.getElementById('imagePreviewContainer').innerHTML = '';
         uploadedImages = [];
     }
@@ -847,7 +847,7 @@
             patientPhone: document.getElementById('patientPhone').value,
             doctorName: document.getElementById('doctorName').value,
             doctorContact: document.getElementById('doctorContact').value,
-            prescriptionDate: document.getElementById('prescriptionDate').value || new Date().toISOString().split('T')[0],
+            prescriptionDate: document.getElementById('prescriptionDate').value || new Date(Date.now() + 216e5).toISOString().split('T')[0],
             validUntil: document.getElementById('validUntil').value,
             diagnosis: document.getElementById('diagnosis').value,
             status: 'pending',
@@ -980,7 +980,7 @@
         document.getElementById('totalPrescriptions').textContent = prescriptions.length;
         document.getElementById('pendingCount').textContent = prescriptions.filter(p => p.status === 'pending').length;
         
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = new Date(Date.now() + 216e5).toISOString().split('T')[0];
         document.getElementById('filledToday').textContent = prescriptions.filter(p => p.filledDate === todayStr).length;
         
         const uniquePatients = new Set(prescriptions.map(p => p.patientName));
@@ -1111,7 +1111,7 @@
                 
                 if(allFilled) {
                     prescription.status = 'filled';
-                    prescription.filledDate = new Date().toISOString().split('T')[0];
+                    prescription.filledDate = new Date(Date.now() + 216e5).toISOString().split('T')[0];
                 } else if(anyFilled) {
                     prescription.status = 'partial';
                 }
@@ -1207,7 +1207,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `prescriptions_export_${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `prescriptions_export_${new Date(Date.now() + 216e5).toISOString().split('T')[0]}.csv`;
         a.click();
         URL.revokeObjectURL(url);
         showToast("Prescriptions exported successfully!", "success");
@@ -1291,7 +1291,7 @@
     checkAuth();
     displayPrescriptions();
     updateStats();
-    document.getElementById('prescriptionDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('prescriptionDate').value = new Date(Date.now() + 216e5).toISOString().split('T')[0];
     
     window.addEventListener('beforeunload', () => {
         if(refreshInterval) clearInterval(refreshInterval);

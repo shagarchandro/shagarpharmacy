@@ -265,17 +265,20 @@
   function onEvent(m) {
     if (!m || !m.key || !isSync(m.key)) return;
     if (S.authed && !S.must) {
-      if (m.deleted) { lrem(m.key); delete S.vers[m.key]; delete S.base[m.key]; notifyNew(); return; }
+      if (m.deleted) { lrem(m.key); delete S.vers[m.key]; delete S.base[m.key]; notifyNew(m.key); return; }
       if (m.ver <= (S.vers[m.key] || 0)) return;
-      areq('GET', '/api/kv/' + m.key).then(function (r) { if (r.status === 200 && r.json && r.json.ver > (S.vers[m.key] || 0)) { applyRemote(m.key, r.json.v, r.json.ver); notifyNew(); } });
+      areq('GET', '/api/kv/' + m.key).then(function (r) { if (r.status === 200 && r.json && r.json.ver > (S.vers[m.key] || 0)) { applyRemote(m.key, r.json.v, r.json.ver); notifyNew(m.key); } });
     } else if (!S.authed && m.key === 'mc_db') {
       areq('GET', '/api/shop/catalog').then(function (r) {
-        if (r.status !== 200 || !r.json || !r.json.v) return; var s = setCatalog(r.json); if (!s) return;
+        if (r.status !== 200 || !r.json || !r.json.v) return;
+        var before = {}; mine().forEach(function (m) { if (m.order) before[m.no] = m.order.status; });
+        var s = setCatalog(r.json); if (!s) return;
+        mine().forEach(function (m) { if (m.order && before[m.no] && before[m.no] !== m.order.status) toast('📦 আপনার অর্ডার ' + m.no + ' এখন: ' + m.order.status); });
         var a = document.activeElement; if (typeof window.render === 'function' && !(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))) { try { window.render(); } catch (e) { } }
       });
     }
   }
-  function notifyNew() { if (S.flags.dirty) return; pillMsg = '🔄 নতুন ডেটা এসেছে — ট্যাপ করে রিফ্রেশ'; pill(); }
+  function notifyNew(key) { if (S.flags.dirty || (window.__mcLive && window.__mcLive[key])) return; pillMsg = '🔄 নতুন ডেটা এসেছে — ট্যাপ করে রিফ্রেশ'; pill(); }
   function startSSE() {
     if (!window.EventSource) return; var es = new EventSource('/api/events?cid=' + CID);
     es.onmessage = function (e) { var m = J(e.data); onEvent(m); };

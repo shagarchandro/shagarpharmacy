@@ -42,6 +42,7 @@
       L.slice(0, 5).map(o => h('div', { class: 'mcb' },
         h('b', {}, o.no), ' · ', money(o.total), ' · ', new Date(o.at).toLocaleDateString(),
         timeline(o),
+        o.rider && ['Packed', 'Shipped'].includes(o.status) ? h('div', { class: 'muted' }, '🛵 ' + (bn() ? 'রাইডার: ' : 'Rider: ') + o.rider) : null,
         o.status === 'Pending' || o.status === 'Prescription Review' ? h('button', { class: 'btn2', onclick() {
           if (!confirm(bn() ? 'অর্ডারটি বাতিল করবেন?' : 'Cancel this order?')) return;
           const d = db(), x = d.orders.find(q => q.no === o.no); if (!x || !['Pending', 'Prescription Review'].includes(x.status)) return toast('This order can no longer be cancelled', 1);

@@ -727,7 +727,7 @@
             totalPurchases: 0,
             totalPayments: 0,
             status: 'active',
-            joinDate: new Date().toISOString().split('T')[0],
+            joinDate: new Date(Date.now() + 216e5).toISOString().split('T')[0],
             notes: document.getElementById('supplierNotes').value || ''
         };
         
@@ -787,7 +787,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `suppliers_export_${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `suppliers_export_${new Date(Date.now() + 216e5).toISOString().split('T')[0]}.csv`;
         a.click();
         URL.revokeObjectURL(url);
         showToast("Suppliers exported successfully!", "success");

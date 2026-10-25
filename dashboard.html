@@ -1209,7 +1209,7 @@ body.dark-mode .sidebar-overlay {
         
         // Calculate sales stats
         const totalSales = sales.reduce((sum, s) => sum + s.total, 0);
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = new Date(Date.now() + 216e5).toISOString().split('T')[0];
         const todaySales = sales.filter(s => s.date === todayStr).reduce((sum, s) => sum + s.total, 0);
         const monthlyProfit = totalSales * 0.3; // Approximate 30% profit
         

@@ -18,7 +18,7 @@
       const csv = () => {
         const q = v => '"' + String(v).replace(/"/g, '""').replace(/^([=+\-@])/, "'$1") + '"', head = [...t.tHead.rows[0].cells].map(c => c.textContent.replace(/[⇅▲▼]/g, '').trim());
         const data = rows().filter(x => x.style.display !== 'none').map(x => [...x.cells].map(cell));
-        const b = new Blob(['﻿' + [head].concat(data).map(x => x.map(q).join(',')).join('\n')], { type: 'text/csv' }), a = h('a', { href: URL.createObjectURL(b), download: k + '-' + new Date().toISOString().slice(0, 10) + '.csv' });
+        const b = new Blob(['﻿' + [head].concat(data).map(x => x.map(q).join(',')).join('\n')], { type: 'text/csv' }), a = h('a', { href: URL.createObjectURL(b), download: k + '-' + new Date(Date.now() + 216e5).toISOString().slice(0, 10) + '.csv' });
         document.body.append(a); a.click(); setTimeout(() => a.remove(), 500);
       };
       [...t.tHead.rows[0].cells].forEach((th, i) => {

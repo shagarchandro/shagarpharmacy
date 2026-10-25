@@ -486,7 +486,7 @@
     
     function init() {
         generateInvoiceNo();
-        document.getElementById('purchaseDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('purchaseDate').value = new Date(Date.now() + 216e5).toISOString().split('T')[0];
         loadSuppliers();
         loadMedicines();
         refreshAllData();
@@ -801,7 +801,7 @@
                 supplierName: purchase.supplierName, 
                 amount: amount, 
                 reason: 'Return', 
-                date: new Date().toISOString().split('T')[0], 
+                date: new Date(Date.now() + 216e5).toISOString().split('T')[0], 
                 status: 'approved' 
             });
             saveReturnsToStorage();

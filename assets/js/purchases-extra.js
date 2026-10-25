@@ -31,7 +31,7 @@
     var v = prompt('Pay ' + name + ' (total due ' + tk(max) + ').\nAmount — applied to the OLDEST invoices first:', max); if (v === null) return; var amt = Math.round(parseFloat(v) * 100) / 100;
     if (!(amt > 0)) return toast('Enter a positive amount', 'warning'); if (amt > max + 0.001) return toast('That is more than the ' + tk(max) + ' due', 'warning');
     var left = amt, touched = 0; purchases.filter(function (p) { return p.due > 0 && ((p.supplierId == sid && sid != null) || p.supplierName === name); }).sort(function (a, b) { return String(a.date) < String(b.date) ? -1 : 1; }).forEach(function (p) {
-      if (left <= 0) return; var x = Math.min(left, p.due); p.paid = Math.round(((+p.paid || 0) + x) * 100) / 100; p.due = Math.round((p.due - x) * 100) / 100; if (p.due <= 0.004) { p.due = 0; p.status = 'paid'; } else p.status = 'partial'; p.datePaid = new Date().toISOString().slice(0, 10); left = Math.round((left - x) * 100) / 100; touched++;
+      if (left <= 0) return; var x = Math.min(left, p.due); p.paid = Math.round(((+p.paid || 0) + x) * 100) / 100; p.due = Math.round((p.due - x) * 100) / 100; if (p.due <= 0.004) { p.due = 0; p.status = 'paid'; } else p.status = 'partial'; p.datePaid = new Date(Date.now() + 216e5).toISOString().slice(0, 10); left = Math.round((left - x) * 100) / 100; touched++;
     });
     var si = suppliers.findIndex(function (s) { return s.id == sid || s.name === name; }); if (si >= 0) suppliers[si].due = Math.max(0, Math.round(((+suppliers[si].due || 0) - amt) * 100) / 100);
     savePurchasesToStorage(); saveSuppliersToStorage();
@@ -41,7 +41,7 @@
   function exportCsv() {
     var r = [['Invoice', 'Date', 'Supplier', 'Medicine', 'Batch', 'Expiry', 'Qty', 'Unit cost', 'Invoice total', 'Paid', 'Due', 'Status']];
     purchases.forEach(function (p) { (p.items && p.items.length ? p.items : [{}]).forEach(function (i, n) { r.push([p.invoiceNo, p.date, p.supplierName, i.medicineName || i.name || '', i.batchNo || i.batch || '', i.expiryDate || i.expiry || '', i.qty || '', i.price || i.unitPrice || '', n ? '' : p.totalAmount, n ? '' : p.paid, n ? '' : p.due, p.status]); }); });
-    csvDl('purchases-' + new Date().toISOString().slice(0, 10) + '.csv', r);
+    csvDl('purchases-' + new Date(Date.now() + 216e5).toISOString().slice(0, 10) + '.csv', r);
   }
   var _r = refreshAllData; refreshAllData = function () { _r.apply(this, arguments); try { draw(); } catch (e) { } };
   draw();

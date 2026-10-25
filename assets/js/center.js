@@ -43,7 +43,7 @@
 
   P.overview = () => {
     const med = rj('pharmacy_medicines', []), cus = rj('pharmacy_customers', []), sup = rj('pharmacy_suppliers', []), pur = rj('pharmacy_purchases', []), rx = rj('pharmacy_prescriptions', []);
-    const sales = rj('pharmacy_sales', []).filter(x => x.real && x.status !== 'Voided'), D = shop(), today = new Date().toISOString().slice(0, 10);
+    const sales = rj('pharmacy_sales', []).filter(x => x.real && x.status !== 'Voided'), D = shop(), today = new Date(Date.now() + 216e5).toISOString().slice(0, 10);
     const exp = med.filter(m => m.expiryDate && m.expiryDate < today).length, low = med.filter(m => +m.stock <= +(m.minStock || 0)).length;
     const rxp = rx.filter(x => x.status === 'pending' || x.status === 'partial').length, rxo = D.orders.filter(o => o.status === 'Prescription Review').length;
     const last = localStorage.getItem('pharmacy_lastbackup') || localStorage.getItem('mc_lastbackup'), days = last ? Math.floor((Date.now() - new Date(last)) / 864e5) : null;
@@ -217,7 +217,7 @@
   P.sync = () => {
     const meds = rj('pharmacy_medicines', null), st = rj('mc_sync', { pub: {}, applied: {}, auto: false, last: null }), D = shop();
     if (!Array.isArray(meds)) return h('div', {}, h('h2', {}, 'Shop sync'), h('p', { class: 'empty' }, 'No medicines yet. Open the Medicines page once (it creates the demo list), then come back.'), h('a', { class: 'btn', href: 'medicines.html' }, 'Open Medicines'));
-    const shopStock = pid => D.batches.filter(b => b.pid === pid && b.qty > 0 && b.exp >= new Date().toISOString().slice(0, 10)).reduce((a, b) => a + b.qty, 0);
+    const shopStock = pid => D.batches.filter(b => b.pid === pid && b.qty > 0 && b.exp >= new Date(Date.now() + 216e5).toISOString().slice(0, 10)).reduce((a, b) => a + b.qty, 0);
     const setAll = v => { st.pub = {}; if (v) meds.forEach(m => st.pub['L' + m.id] = true); wj('mc_sync', st); show('sync'); };
     const rows = meds.map(m => { const lid = 'L' + m.id, pub = !!st.pub[lid]; return h('tr', {}, h('td', {}, h('input', { type: 'checkbox', checked: pub ? 'checked' : null, 'aria-label': 'Publish ' + m.name, onchange(e) { st.pub[lid] = e.target.checked; if (!e.target.checked) delete st.pub[lid]; wj('mc_sync', st); } })), h('td', {}, m.name + (m.rxRequired ? ' ℞' : '')), h('td', {}, tk(m.sellingPrice)), h('td', {}, m.stock), h('td', {}, pub ? shopStock(lid) : '—'), h('td', {}, m.expiryDate || '—')); });
     const applied = Object.keys(st.applied || {}).length;

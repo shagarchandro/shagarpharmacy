@@ -799,7 +799,7 @@
             type: document.getElementById('custType').value,
             due: parseFloat(document.getElementById('openingDue').value) || 0,
             totalPurchases: 0,
-            joinDate: new Date().toISOString().split('T')[0],
+            joinDate: new Date(Date.now() + 216e5).toISOString().split('T')[0],
             avatar: currentImageData || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff`,
             creditLimit: parseFloat(document.getElementById('creditLimit').value) || 1000,
             notes: document.getElementById('custNotes').value
@@ -976,7 +976,7 @@
             
             if(!paymentHistory[currentCustomerId]) paymentHistory[currentCustomerId] = [];
             paymentHistory[currentCustomerId].unshift({
-                date: new Date().toISOString().split('T')[0],
+                date: new Date(Date.now() + 216e5).toISOString().split('T')[0],
                 amount: amount,
                 method: method
             });
@@ -1040,7 +1040,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `customers_export_${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `customers_export_${new Date(Date.now() + 216e5).toISOString().split('T')[0]}.csv`;
         a.click();
         URL.revokeObjectURL(url);
         showToast("Customers exported successfully!", "success");
