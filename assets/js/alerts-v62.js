@@ -43,6 +43,8 @@
     else { var bd = Math.floor((Date.now() - new Date(lb)) / 864e5); if (bd >= 7) A.push({ k: 'bk-old-' + dhaka(new Date(lb)), sev: bd >= 30 ? 'crit' : 'warn', ic: '💾', t: 'শেষ ব্যাকআপ ' + bd + ' দিন আগে', s: 'নিয়মিত ব্যাকআপ নিন', href: 'backup.html', cta: 'ব্যাকআপ', grp: 'ops' }); }
     var shop = rj('mc_db', {}), po = (shop.orders || []).filter(function (o) { return o && /^(Ordered|Pending|Prescription Review|Return Requested)$/.test(o.status || ''); });
     if (po.length) A.push({ k: 'ord-' + po.length, sev: 'info', ic: '🛒', t: po.length + 'টি অনলাইন অর্ডারে মনোযোগ দরকার', s: 'Pending / Rx review / return request', href: 'admin/login.html', cta: 'Ops Panel', grp: 'ops' });
+    try { var P80 = rj('pharmacy_prefs_v80', {}), me80 = (function () { try { return String(JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')).email || '').toLowerCase(); } catch (e) { return ''; } })(), pr80 = P80[me80] || {};
+      A = A.filter(function (x) { if (pr80.noStock && x.grp === 'stock') return false; if (pr80.noExpiry && x.grp === 'expiry') return false; if (pr80.noMoney && x.grp === 'money') return false; if (pr80.noOps && x.grp === 'ops') return false; if (x.grp === 'expiry' && pr80.expDays && x.n > pr80.expDays) return false; return true; }); } catch (e) { }
     var ord = { crit: 0, warn: 1, info: 2 };
     A.sort(function (a, b) { return ord[a.sev] - ord[b.sev] || (a.n == null ? 999 : a.n) - (b.n == null ? 999 : b.n); });
     return A;

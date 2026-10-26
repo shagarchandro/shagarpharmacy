@@ -363,3 +363,16 @@ Salted PBKDF2 password hashes + password policy (also for custom accounts changi
 - Customers → 📣 Follow-ups-এ নতুন **💊 Refill** ট্যাব: একই গ্রাহক একই ওষুধ ২+ বার (আলাদা দিনে) কিনলে গড় ব্যবধান (৭–১২০ দিন) ধরে পরের কেনার সময় হিসাব হয়; যাদের সময় ৫ দিনের মধ্যে আসছে বা ৩০ দিন পর্যন্ত পেরিয়েছে তাদের তালিকা ("প্রতি ~30 দিনে · আজই / N দিন দেরি / N দিন পরে")।
 - 💬 WhatsApp / ✉ SMS-এ ওষুধের নামসহ বাংলা রিমাইন্ডার বার্তা তৈরি হয়; CSV-তেও যোগ হয়েছে।
 - সীমা: গ্রাহক POS-এ নির্বাচিত না থাকলে (নাম মিললে ধরা হয়) হিসাব ব্যর্থ হতে পারে; ডোজ/দিনের সংখ্যা জানা নেই, শুধু কেনার ইতিহাস থেকে অনুমান।
+
+## v79 — Home page, Login page, Navbar/Sidebar
+- **Home (`home-v79.js`)**: scroll progress bar, scroll-spy nav, ☀/🌙 theme button (remembered), back-to-top, status strip (real server / demo, Dhaka time, online/offline), medicine search in the hero (`/` focuses it), 📦 order tracking (order no + phone; server mode checks on the server), 🎁 live offers from active coupons, 📍 contact card (from Settings → Store settings; phone/address now also saved into the public shop settings), two new FAQs. In server mode the demo-password table is hidden.
+- **Login (`login-v79.js`)**: server mode no longer pre-fills demo credentials; role summary under the role picker; Dhaka greeting + clock; server/demo/offline chip; "already signed in" banner; last successful login on this device; Forgot-password no longer fakes "link sent" (honest steps + copyable message for the Admin); autocomplete attributes; after login you return to the page that sent you (`mc_next` saved by `guard.js`).
+- **Navbar/Sidebar (`navbar-v79.js`, all staff pages)**: clock, ＋ Quick menu, fullscreen, ⌨ shortcut help (`?`, `g` then d/s/m/c/p/u/x/r/t/l/o/b/h), richer user menu on the dashboard, slim top bar on other pages, sidebar menu filter, scroll position kept, red count badges (low stock, pending Rx, online orders, customer dues, backup overdue).
+- Fixed in passing: shop footer uses the saved address/phone.
+- Limits: tracking in demo mode only finds orders made in the same browser; the demo contact number is a placeholder until set in Settings; badges refresh on storage events / every minute.
+
+## v80 — Settings
+- **Alerts & Session** (was the fake Email/SMS/WhatsApp tab): choose which alert groups you see (stock, expiry, dues, ops), the expiry warning window (30/60/90 days) and an **idle auto-logout** (5–60 min, 1-minute warning, works across tabs; server mode also ends the server session). Stored per user in `pharmacy_prefs_v80`; applied by `alerts-v62.js` and the sidebar badges.
+- **Store & Invoice (Admin)**: opening/closing time + weekly off day, saved to settings and the public shop settings → Home shows "এখন খোলা/বন্ধ", Shop footer shows the hours.
+- **Data & Tools**: browser storage meter (top 5 keys), settings Export/Import JSON (whitelisted keys only, no passwords/PINs), snooze reset.
+- Limits: no real SMS/email is sent anywhere; storage meter is an estimate against ~5 MB; alert-preference changes apply to the bell after a page refresh.

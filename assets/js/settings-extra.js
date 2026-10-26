@@ -40,7 +40,9 @@
     if (isNaN(tax) || tax < 0 || tax > 50) return msg('Tax must be 0–50%', 'danger');
     var s = rd('pharmacy_settings', {});
     Object.assign(s, { store: $('stName').value.trim(), phone: $('stPhone').value.trim(), address: $('stAddr').value.trim(), email: $('stEmail').value.trim(), taxPct: tax, lowDefault: isNaN(low) ? 20 : Math.max(low, 0) });
-    wr('pharmacy_settings', s); msg('Store settings saved');
+    wr('pharmacy_settings', s);
+    try { var shopDb = rd('mc_db', null); if (shopDb) { shopDb.settings = shopDb.settings || {}; shopDb.settings.phone = s.phone; shopDb.settings.address = s.address; shopDb.settings.email = s.email; wr('mc_db', shopDb); } } catch (e) {}
+    msg('Store settings saved');
   };
 
   window.updateProfile = function () {

@@ -22,7 +22,7 @@
   if (!KEYS[page]) return;                       // login / landing: nothing to guard
   var user = null, access = null;
   try { user = JSON.parse(get('user')); access = JSON.parse(get('user_access')); } catch (e) {}
-  if (!user || !get('auth_token') || !access) { location.replace('login.html'); return; }
+  if (!user || !get('auth_token') || !access) { try { if (page !== 'dashboard') sessionStorage.setItem('mc_next', page + '.html' + location.search); } catch (e) {} location.replace('login.html'); return; }
   // ---- absolute session limit (hours; Control Center -> Security) ----
   try {
     var _st = {}; try { _st = JSON.parse(localStorage.getItem('pharmacy_settings') || '{}'); } catch (e) {}

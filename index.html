@@ -144,6 +144,8 @@ footer{padding:2rem 0 3rem;border-top:1px solid var(--br);color:var(--mut);font-
   <details class="rev"><summary>ডেটা কোথায় থাকে?</summary><p>এটি ব্রাউজার-ভিত্তিক ডেমো — সব ডেটা আপনার ব্রাউজারের localStorage-এ থাকে। তাই নিয়মিত Backup নিন।</p></details>
   <details class="rev"><summary>পাসওয়ার্ড বদলানো যায়?</summary><p>হ্যাঁ। Settings থেকে নিজের পাসওয়ার্ড বদলানো যায়; Admin Control Center থেকে অন্যদের পাসওয়ার্ড রিসেট ও নতুন ইউজার তৈরি করা যায়।</p></details>
   <details class="rev"><summary>এটা কি আসল নিরাপত্তা দেয়?</summary><p>না। এটি সার্ভার ছাড়া ডেমো, তাই আসল ব্যবহারে সার্ভার-সাইড অথেনটিকেশন ও ডেটাবেস লাগবে।</p></details>
+  <details class="rev"><summary>প্রেসক্রিপশন লাগে এমন ওষুধ অনলাইনে কেনা যায়?</summary><p>যায়, তবে চেকআউটে প্রেসক্রিপশনের তথ্য দিতে হয় এবং ফার্মাসিস্ট যাচাই না করা পর্যন্ত অর্ডার “Prescription Review” অবস্থায় থাকে।</p></details>
+  <details class="rev"><summary>অর্ডার কীভাবে ট্র্যাক করব?</summary><p>এই পেজের “অর্ডার ট্র্যাক করুন” অংশে অর্ডার নম্বর ও ফোন নম্বর দিন, অথবা শপের Orders পেজ খুলুন।</p></details>
   <details class="rev"><summary>নিজের ব্র্যান্ড বসানো যায়?</summary><p>যায়। Admin → Control Center → Branding থেকে নাম, রং ও লোগো দিন; সব পেজে প্রযোজ্য হবে।</p></details>
 </div></section>
 
@@ -169,4 +171,5 @@ footer{padding:2rem 0 3rem;border-top:1px solid var(--br);color:var(--mut);font-
  try{var T=JSON.parse(localStorage.getItem('pharmacy_theme')||'null');if(T&&T.brand)document.querySelectorAll('.brand-name').forEach(function(e){e.textContent=T.brand});}catch(e){}
 })();
 </script>
+<script src="assets/js/home-v79.js"></script>
 </body></html>
