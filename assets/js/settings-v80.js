@@ -23,6 +23,17 @@
   ready(function () {
     var nav = document.querySelector('#settingsModal .nav-tabs'), content = document.querySelector('#settingsModal .tab-content'); if (!nav || !content) return;
 
+
+    /* ---------- 🎨 থিম (My Preferences-এ) ---------- */
+    (function () {
+      var mp = $('myprefs'); if (!mp || !window.MCTheme) return;
+      var old = $('pfDark'); if (old && old.closest('.form-check')) old.closest('.form-check').style.display = 'none';
+      var w = document.createElement('div'); w.className = 'mb-3';
+      w.innerHTML = '<label class="form-label fw-semibold" for="v80Theme">🎨 থিম</label><select class="form-select" id="v80Theme" data-mc-theme-sel><option value="light">☀️ Light — সবসময় দিনের রঙ</option><option value="dark">🌙 Dark — সবসময় রাতের রঙ</option><option value="auto">🖥️ Auto — ডিভাইসের সেটিং অনুযায়ী</option></select><div class="form-text">এই ডিভাইসের সব পেজে (স্টাফ, শপ, Ops, Home) একসাথে প্রযোজ্য।</div>';
+      var first = mp.querySelector('p'); if (first) first.after(w); else mp.insertBefore(w, mp.firstChild);
+      $('v80Theme').value = MCTheme.get();
+    })();
+
     /* ---------- 🔔 Alerts & Session ---------- */
     var pane = $('notifications'), tabA = nav.querySelector('a[href="#notifications"]');
     if (tabA) tabA.textContent = 'Alerts & Session';

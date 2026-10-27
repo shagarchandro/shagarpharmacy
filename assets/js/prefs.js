@@ -17,7 +17,7 @@
     if (+p.size !== 100) css += 'html{font-size:' + Math.min(Math.max(+p.size, 85), 130) + '%!important}';
     if (p.compact) css += '.card-body,.modal-body{padding:.6rem!important}.table td,.table th{padding:.3rem .5rem!important}.stat-card,.mcq,.mcd .pn{padding:.7rem!important}.main-content{padding-top:.6rem!important}';
     if (p.calm) css += '*,*::before,*::after{animation:none!important;transition:none!important}';
-    if (p.dark) css += 'html{filter:invert(.92) hue-rotate(180deg);background:#fff}img,video,canvas,svg image,.mc-avatar,.mcq{filter:invert(1) hue-rotate(180deg)}.sidebar{filter:invert(1) hue-rotate(180deg)}.sidebar img,.sidebar .mc-avatar{filter:none}';
+    /* v81: ডার্ক মোড এখন theme-mode.js (MCTheme) থেকে — পুরনো invert-ফিল্টার বাদ */
     var el = document.getElementById('mcPrefs'); if (!el) { el = document.createElement('style'); el.id = 'mcPrefs'; (document.head || document.documentElement).appendChild(el); }
     el.textContent = css;
     var q = document.getElementById('mcQuick'); if (q) q.style.display = p.quick ? '' : 'none';

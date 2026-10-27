@@ -16,7 +16,7 @@ Object.assign(I18.bn,{"Order again":"আবার অর্ডার করু�
 function bn(r){if(lang()!=='bn')return;const w=document.createTreeWalker(r,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){if(n.parentNode.tagName==='OPTION'&&!n.parentNode.hasAttribute('value'))continue;const t=n.nodeValue.trim();if(I18.bn[t])n.nodeValue=n.nodeValue.replace(t,I18.bn[t])}r.querySelectorAll('[placeholder],[aria-label]').forEach(e=>{for(const a of['placeholder','aria-label']){const v=e.getAttribute(a);if(v&&I18.bn[v])e.setAttribute(a,I18.bn[v])}})}
 const lang=()=>localStorage.getItem('mc_lang')||'en';
 const T=s=>(lang()==='bn'&&I18.bn[s])||s;
-function chrome(){document.documentElement.dataset.theme=localStorage.getItem('mc_theme')||'light';document.documentElement.lang=lang()}
+function chrome(){document.documentElement.dataset.theme=window.MCTheme?MCTheme.resolved():(localStorage.getItem('mc_theme')||'light');document.documentElement.lang=lang()}
 chrome();
 const DEMO_USERS=()=>[{id:'U1',name:'Owner Demo',role:'Owner',active:true},{id:'U2',name:'Pharmacist Demo',role:'Pharmacist',active:true},{id:'U3',name:'Cashier Demo',role:'Cashier',active:true},{id:'U4',name:'Inventory Demo',role:'Inventory Manager',active:true},{id:'U5',name:'Delivery Demo',role:'Delivery Staff',active:true}];
 function seed(){const d=new Date(),add=n=>new Date(d.getTime()+n*864e5).toISOString().slice(0,10);
@@ -33,4 +33,4 @@ function take(d,pid,q,ref,why){if(stock(d,pid)<q)throw new Error('Insufficient u
 function put(d,pid,q,ref){const b=usable(d,pid)[0]||d.batches.find(x=>x.pid===pid&&x.exp>=today());if(b){b.qty+=q;d.log.push({at:new Date().toISOString(),pid,batch:b.id,delta:q,ref,why:'restock'})}}
 const STATUS=['Pending','Confirmed','Prescription Review','Processing','Packed','Shipped','Delivered','Cancelled','Return Requested','Returned','Refunded'];
 function bar(title,links,tl){return h('header',{class:'bar'},h('a',{href:links[0][1],class:'brand'},'✚ '+title),h('nav',{'aria-label':'Main'},links.map(l=>h('a',{href:l[1]},T(l[0])))),h('span',{class:'tools'},tl))}
-function tools(){return[h('button',{'aria-label':'Toggle theme',onclick(){localStorage.setItem('mc_theme',document.documentElement.dataset.theme==='dark'?'light':'dark');chrome()}},'◐'),h('button',{'aria-label':'Toggle language',onclick(){localStorage.setItem('mc_lang',lang()==='bn'?'en':'bn');location.reload()}},lang()==='bn'?'EN':'বাং')]}
+function tools(){return[h('button',{'aria-label':'Toggle theme','data-mc-theme-btn':'',onclick(){if(window.MCTheme)return MCTheme.cycle();localStorage.setItem('mc_theme',document.documentElement.dataset.theme==='dark'?'light':'dark');chrome()}},'◐'),h('button',{'aria-label':'Toggle language',onclick(){localStorage.setItem('mc_lang',lang()==='bn'?'en':'bn');location.reload()}},lang()==='bn'?'EN':'বাং')]}

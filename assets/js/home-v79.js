@@ -43,11 +43,9 @@
     '.mcc a.btn{justify-content:center}';
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
-  /* ---------- থিম (☀/🌙) ---------- */
-  var root = document.documentElement;
-  function curTheme() { var t = null; try { t = localStorage.getItem('mc_home_theme'); } catch (e) { } if (t === 'dark' || t === 'light') return t; return window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
-  function applyTheme(t) { root.setAttribute('data-mc', t); var b = $('#mcTh'); if (b) { b.textContent = t === 'dark' ? '☀️' : '🌙'; b.title = t === 'dark' ? 'Light mode' : 'Dark mode'; b.setAttribute('aria-label', b.title); } }
-  applyTheme(curTheme());
+  /* থিম এখন theme-mode.js (MCTheme) থেকে */
+  function applyTheme() { }
+  function curTheme() { return ''; }
 
   function build() {
     /* নেভ */
@@ -55,8 +53,8 @@
     if (nav) {
       var cta = $('a.btn.p', nav);
       var th = document.createElement('button'); th.type = 'button'; th.className = 'mcth'; th.id = 'mcTh';
-      th.onclick = function () { var n = (root.getAttribute('data-mc') === 'dark') ? 'light' : 'dark'; try { localStorage.setItem('mc_home_theme', n); } catch (e) { } applyTheme(n); };
-      nav.insertBefore(th, cta); applyTheme(curTheme());
+      th.setAttribute('data-mc-theme-btn', ''); th.textContent = window.MCTheme ? MCTheme.icon[MCTheme.get()] : '🌙';
+      nav.insertBefore(th, cta);
       function addLink(href, txt, before) { if ($('a[href="' + href + '"]', nav)) return; var a = document.createElement('a'); a.href = href; a.textContent = txt; nav.insertBefore(a, before || th); }
       addLink('#track', 'ট্র্যাক'); addLink('#contact', 'যোগাযোগ');
       try {

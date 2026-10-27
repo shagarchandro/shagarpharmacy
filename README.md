@@ -376,3 +376,17 @@ Salted PBKDF2 password hashes + password policy (also for custom accounts changi
 - **Store & Invoice (Admin)**: opening/closing time + weekly off day, saved to settings and the public shop settings → Home shows "এখন খোলা/বন্ধ", Shop footer shows the hours.
 - **Data & Tools**: browser storage meter (top 5 keys), settings Export/Import JSON (whitelisted keys only, no passwords/PINs), snooze reset.
 - Limits: no real SMS/email is sent anywhere; storage meter is an estimate against ~5 MB; alert-preference changes apply to the bell after a page refresh.
+
+## v81 — Light / Dark / Auto theme (one system)
+- New `assets/js/theme-mode.js` (loaded first on every real page). Mode (`mc_theme_mode`: light | dark | auto) is per device/browser and changes all open pages/tabs at once. Auto follows the device and reacts live when the OS switches.
+- Before there were four separate mechanisms (dashboard-only toggle, an invert-filter "beta" in Settings, `prefers-color-scheme` only on some pages, `mc_theme` in shop/ops). All now use `MCTheme`; old choices are migrated once. Existing `@media (prefers-color-scheme)` rules obey the chosen mode (Light stays light on a dark device and vice-versa).
+- Buttons: dashboard 🌙/☀/🖥 button, Home nav, slim bar on staff pages, shop/ops toolbar, Settings → My Preferences → 🎨 Theme (select). Pages with no toggle get a small floating button (bottom-left).
+- Bootstrap staff pages got a proper dark skin (cards, modals, tables, inputs, dropdowns, navbar); the old invert filter is gone.
+- Limits: charts keep their own colours; third-party CDN CSS can't be rewritten (only same-origin styles follow the mode); the preference is not synced between devices on purpose.
+
+## v82 — Dashboard
+- **Real numbers.** The old dashboard generated random demo sales on every load when no sale existed, estimated "monthly profit" as 30 %, used random trend percentages and random medicine names in Top-selling / Recent Orders. `dash-v82.js` recomputes everything from `pharmacy_sales` (POS) and shop orders: today vs yesterday, last 7 days vs previous 7, month profit vs last month (profit uses each medicine's `purchasePrice`; shows "খরচ জানা N%" when some items have no cost).
+- **New widgets**: 🎯 daily/monthly goal with progress and month-end projection (`pharmacy_goal`, Admin/Pharmacist can edit); 📅 today summary (invoices, avg bill, units, profit, top item, busiest hour, payment mix); ✅ "what to do today" list with links (expired/low stock, pending Rx, online orders, dues, missing closing, old backup — honours Settings → Alerts); 📈 SVG sales chart 7 days / 30 days / 12 months (no CDN needed); 🏆 real Top selling (30 days); 🧾 Recent orders (POS + online, with source badge); Bangla time-based greeting.
+- **Buttons**: 🔄 refresh, 📤 share today's summary (WhatsApp / copy), ⚙ customise (show/hide sections per user, `pharmacy_dashprefs`). Auto-updates on new sale, storage/live-sync events and every minute.
+- Staff role sees only their own sales (matched by cashier name) and no profit/dues/goal editing.
+- Limits: refunds are not subtracted yet; online orders appear in Recent Orders but are not part of the KPI totals; cashier matching for staff uses the display name.

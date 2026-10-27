@@ -68,6 +68,7 @@
     var fs = document.createElement('button'); fs.type = 'button'; fs.className = 'mcn-btn mcn-fs'; fs.title = 'ফুলস্ক্রিন'; fs.setAttribute('aria-label', 'Fullscreen'); fs.textContent = '⛶';
     fs.onclick = function () { try { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); } catch (e) { } };
     var hp = document.createElement('button'); hp.type = 'button'; hp.className = 'mcn-btn'; hp.title = 'কীবোর্ড শর্টকাট (?)'; hp.setAttribute('aria-label', 'Keyboard shortcuts'); hp.textContent = '⌨'; hp.onclick = help;
+    if (!document.getElementById('darkModeToggle')) { var tb = document.createElement('button'); tb.type = 'button'; tb.className = 'mcn-btn'; tb.setAttribute('data-mc-theme-btn', ''); tb.textContent = window.MCTheme ? MCTheme.icon[MCTheme.get()] : '🌙'; f.appendChild(tb); }
     f.appendChild(fs); f.appendChild(hp); return f;
   }
 
