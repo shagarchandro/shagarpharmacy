@@ -68,4 +68,5 @@ document.addEventListener('click',function(e){var b=e.target.closest('[data-ack]
 document.addEventListener('change',function(e){var c=e.target;if(c.dataset&&c.dataset.tk){var d=db(),t=d.tasks.find(function(x){return String(x.id)===c.dataset.tk});if(t){t.done=c.checked;t.doneBy=c.checked?(u.name||role):'';t.doneAt=new Date().toISOString();save(d)}}else if(c.id==='mine'||c.id==='sd')draw()});
 draw();
 })();
-</script><script src="assets/js/team-extra.js"></script><script src="assets/js/team-daily.js"></script></body></html>
+</script><script src="assets/js/team-extra.js"></script><script src="assets/js/team-daily.js"></script><script src="assets/js/theme-fix.js"></script>
+</body></html>

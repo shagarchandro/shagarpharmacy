@@ -390,3 +390,15 @@ Salted PBKDF2 password hashes + password policy (also for custom accounts changi
 - **Buttons**: 🔄 refresh, 📤 share today's summary (WhatsApp / copy), ⚙ customise (show/hide sections per user, `pharmacy_dashprefs`). Auto-updates on new sale, storage/live-sync events and every minute.
 - Staff role sees only their own sales (matched by cashier name) and no profit/dues/goal editing.
 - Limits: refunds are not subtracted yet; online orders appear in Recent Orders but are not part of the KPI totals; cashier matching for staff uses the display name.
+
+## v83 — Customer Management ও POS Billing আপডেট
+- **POS (`assets/js/pos-v83.js`)**: গ্রাহক কার্ড (বাকি, ক্রেডিট লিমিট, টিয়ার/পয়েন্ট), `＋ নতুন গ্রাহক` দ্রুত যোগ (ডুপ্লিকেট ফোন আটকায়), আংশিক বাকি (এখন কত দিচ্ছেন), ক্রেডিট লিমিট চেক, `💰 বাকি আদায়`, `🔁 আগের অর্ডার`, বিক্রি গ্রাহকের সাথে লিংক (due, payments, ledger, purchases), ইনভয়েসে WhatsApp রসিদ বোতাম।
+- **Customers (`assets/js/cust-v83.js`)**: সেগমেন্ট চিপ (বাকি / ভালো / ৬০+ দিন আসেননি / নতুন / লিমিটের কাছে), কার্ডে শেষ ক্রয়-ভিজিট-টিয়ার, প্রোফাইলে POS খরচ/গড় বিল/প্রিয় ওষুধ/সাম্প্রতিক বিল, ফোন ভ্যালিডেশন + ডুপ্লিকেট চেক, CSV ইমপোর্ট + টেমপ্লেট।
+- সীমাবদ্ধতা: পয়েন্ট হিসাব করা হয় (জমা/রিডিম নয়); টিয়ার ফিক্সড (Silver ৫০০০, Gold ২০০০০, Platinum ৫০০০০); CSV সর্বোচ্চ 2 MB; আসল SMS/পেমেন্ট গেটওয়ে নেই।
+
+## v84 — Dark / Light / Auto মোডের টেক্সট-দৃশ্যমানতা ফিক্স
+- নতুন `assets/js/theme-fix.js` (theme-mode.js-এর পরে ২৫টি পেজে লোড হয়): ডার্কে সাদা/হালকা ব্যাকগ্রাউন্ডের বক্স (POS product card, Pharmacist worklist, insights কার্ড, Ops panel কার্ড ইত্যাদি) স্বয়ংক্রিয়ভাবে গাঢ় হয়; যেখানে টেক্সট ও ব্যাকগ্রাউন্ডের কনট্রাস্ট কম সেখানে পড়ার মতো রঙ বসে (লাইট মোডেও)।
+- থিম বদলালে (Light/Dark/Auto, OS বদলালে, অন্য ট্যাবে বদলালে) ও নতুন অংশ (modal, ডাইনামিক কার্ড) এলে নিজে আবার পরীক্ষা করে।
+- `backup.html`-এ স্টাইলশিট লিংক ছিল না (সাদা লেখা সাদা জমিনে) — `assets/css/styles.css` যোগ করা হয়েছে।
+- বন্ধ করতে: `localStorage.mc_theme_fix = 'off'`।
+- সীমাবদ্ধতা: রঙিন ব্যাজ/বাটন/গ্র্যাডিয়েন্টের উপর সাদা লেখা ইচ্ছাকৃতভাবে বদলানো হয় না; ১০০% নিশ্চিত করা সম্ভব নয় — নতুন কোনো জায়গায় সমস্যা দেখলে জানান।
