@@ -172,7 +172,7 @@ window.CCX = function (c) {
     const pend = (D.orders || []).filter(o => o.status === 'Pending').length; if (pend) add('info', pend + ' order(s) are waiting for confirmation.', null);
     if (!(s.zones || []).length && !(s.feeDhaka >= 0)) add('info', 'No delivery fee configured.', 'delivery', 'Fix');
     const acc = D.users || []; if (acc.some(u => u.password === 'admin123' || u.pass === 'admin123' || u.pin === '1234')) add('warn', 'A demo account still uses its default password.', 'accounts', 'Change');
-    const lb = +localStorage.getItem('pharmacy_lastbackup') || 0; if (!lb) add('info', 'No backup has been taken on this browser yet.', 'data', 'Back up'); else if (Date.now() - lb > 7 * 864e5) add('info', 'Last backup is more than 7 days old.', 'data', 'Back up');
+    const lbv = localStorage.getItem('pharmacy_lastbackup') || localStorage.getItem('mc_lastbackup') || '', lb = +lbv > 1e11 ? +lbv : (Date.parse(lbv) || 0); if (!lb) add('info', 'No backup has been taken on this browser yet.', 'data', 'Back up'); else if (Date.now() - lb > 7 * 864e5) add('info', 'Last backup is more than 7 days old.', 'data', 'Back up');
     if (S.posPayOff && S.posPayOff.includes('cash')) add('bad', 'Cash is disabled in POS.', 'rules', 'Fix');
     const ic = { bad: '⛔', warn: '⚠️', info: 'ℹ️' }, score = Math.max(0, 100 - out.filter(x => x.lvl === 'bad').length * 25 - out.filter(x => x.lvl === 'warn').length * 10 - out.filter(x => x.lvl === 'info').length * 3);
     return h('div', {}, h('h2', {}, '🩺 Checkup'), h('p', {}, h('b', { class: score >= 90 ? 'ok' : score >= 60 ? '' : 'bad', style: 'font-size:1.6rem' }, score + '/100'), ' ', h('span', { class: 'muted' }, out.length ? out.length + ' thing(s) to look at' : 'Everything looks good')),

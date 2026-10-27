@@ -373,6 +373,7 @@
     // ============================================
     // LOAD DATA FROM LOCALSTORAGE
     // ============================================
+    function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
     function loadSuppliersFromStorage() {
         const stored = localStorage.getItem(SUPPLIER_STORAGE_KEY);
         if (stored && stored !== 'undefined' && stored !== 'null') {
@@ -516,8 +517,8 @@
         filterSelect.innerHTML = '<option value="">All Suppliers</option>';
         suppliers.forEach(supplier => {
             if (supplier && supplier.id && supplier.name) {
-                supplierSelect.innerHTML += `<option value="${supplier.id}">${supplier.name} (${supplier.contact || ''})</option>`;
-                filterSelect.innerHTML += `<option value="${supplier.id}">${supplier.name}</option>`;
+                supplierSelect.innerHTML += `<option value="${supplier.id}">${esc(supplier.name)} (${esc(supplier.contact || '')})</option>`;
+                filterSelect.innerHTML += `<option value="${supplier.id}">${esc(supplier.name)}</option>`;
             }
         });
     }
@@ -527,7 +528,7 @@
         medicineSelect.innerHTML = '<option value="">Search Medicine...</option>';
         medicines.forEach(medicine => {
             if (medicine && medicine.id && medicine.name) {
-                medicineSelect.innerHTML += `<option value="${medicine.id}" data-price="${medicine.purchasePrice || 0}">${medicine.name} (৳${medicine.purchasePrice || 0})</option>`;
+                medicineSelect.innerHTML += `<option value="${medicine.id}" data-price="${medicine.purchasePrice || 0}">${esc(medicine.name)} (৳${medicine.purchasePrice || 0})</option>`;
             }
         });
         medicineSelect.onchange = function() {
@@ -578,9 +579,9 @@
             tbody.innerHTML = purchaseItems.map((item, index) => {
                 total += item.total;
                 return `<tr>
-                    <td>${item.medicineName}</td>
-                    <td>${item.batchNo || '-'}</td>
-                    <td>${item.expiryDate || '-'}</td>
+                    <td>${esc(item.medicineName)}</td>
+                    <td>${esc(item.batchNo || '-')}</td>
+                    <td>${esc(item.expiryDate || '-')}</td>
                     <td>${item.qty}</td>
                     <td>৳${item.unitPrice.toFixed(2)}</td>
                     <td>৳${item.total.toFixed(2)}</td>
@@ -738,8 +739,8 @@
             tbody.innerHTML = filtered.map(p => {
                 let statusClass = p.status === 'paid' ? 'status-paid' : (p.status === 'pending' ? 'status-pending' : 'status-partial');
                 return `<tr>
-                    <td><strong>${p.invoiceNo || 'N/A'}</strong></td>
-                    <td>${p.supplierName || 'N/A'}</td>
+                    <td><strong>${esc(p.invoiceNo || 'N/A')}</strong></td>
+                    <td>${esc(p.supplierName || 'N/A')}</td>
                     <td>${p.date || 'N/A'}</td>
                     <td>${p.items ? p.items.length : 0} items</td>
                     <td>৳${(p.totalAmount || 0).toFixed(2)}</td>
@@ -759,7 +760,7 @@
         const purchase = purchases.find(p => p.id === id);
         if(!purchase) return;
         
-        const itemsHtml = (purchase.items || []).map(item => `<tr><td>${item.medicineName || 'N/A'}</td><td>${item.batchNo || '-'}</td><td>${item.expiryDate || '-'}</td><td class="text-center">${item.qty || 0}</td><td class="text-center">৳${(item.unitPrice || 0).toFixed(2)}</td><td class="text-end">৳${(item.total || 0).toFixed(2)}</td></tr>`).join('');
+        const itemsHtml = (purchase.items || []).map(item => `<tr><td>${esc(item.medicineName || 'N/A')}</td><td>${esc(item.batchNo || '-')}</td><td>${esc(item.expiryDate || '-')}</td><td class="text-center">${item.qty || 0}</td><td class="text-center">৳${(item.unitPrice || 0).toFixed(2)}</td><td class="text-end">৳${(item.total || 0).toFixed(2)}</td></tr>`).join('');
         
         document.getElementById('purchaseDetailsContent').innerHTML = `
             <div class="container">
@@ -767,7 +768,7 @@
                     <div class="col-md-6">
                         <div class="bg-light p-3 rounded-3">
                             <h6 class="fw-bold text-primary mb-2"><i class="fas fa-info-circle me-2"></i>Purchase Information</h6>
-                            <p><strong>Invoice:</strong> ${purchase.invoiceNo || 'N/A'}<br><strong>Date:</strong> ${purchase.date || 'N/A'}<br><strong>Supplier:</strong> ${purchase.supplierName || 'N/A'}<br><strong>Status:</strong> <span class="status-badge status-${purchase.status || 'pending'}">${(purchase.status || 'pending').toUpperCase()}</span></p>
+                            <p><strong>Invoice:</strong> ${esc(purchase.invoiceNo || 'N/A')}<br><strong>Date:</strong> ${purchase.date || 'N/A'}<br><strong>Supplier:</strong> ${esc(purchase.supplierName || 'N/A')}<br><strong>Status:</strong> <span class="status-badge status-${purchase.status || 'pending'}">${(purchase.status || 'pending').toUpperCase()}</span></p>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -831,8 +832,8 @@
         } else {
             tbody.innerHTML = returns.map(r => `<tr>
                 <td>${r.id}</td>
-                <td>${r.invoiceNo || 'N/A'}</td>
-                <td>${r.supplierName || 'N/A'}</td>
+                <td>${esc(r.invoiceNo || 'N/A')}</td>
+                <td>${esc(r.supplierName || 'N/A')}</td>
                 <td>৳${(r.amount || 0).toFixed(2)}</td>
                 <td>${r.reason || '-'}</td>
                 <td>${r.date || 'N/A'}</td>
@@ -852,16 +853,16 @@
                         <div class="card-body p-4">
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div>
-                                    <h6 class="fw-bold mb-1">${s.name || 'N/A'}</h6>
-                                    <p class="text-muted small mb-0">${s.contact || 'N/A'}</p>
+                                    <h6 class="fw-bold mb-1">${esc(s.name || 'N/A')}</h6>
+                                    <p class="text-muted small mb-0">${esc(s.contact || 'N/A')}</p>
                                 </div>
                                 <div class="bg-primary bg-opacity-10 p-2 rounded-3">
                                     <i class="fas fa-truck fa-2x text-primary"></i>
                                 </div>
                             </div>
-                            <p class="small mb-1"><i class="fas fa-phone me-2 text-primary"></i> ${s.phone || 'N/A'}</p>
-                            <p class="small mb-1"><i class="fas fa-envelope me-2 text-primary"></i> ${s.email || 'N/A'}</p>
-                            <p class="small mb-3"><i class="fas fa-map-marker-alt me-2 text-primary"></i> ${s.address ? s.address.substring(0, 40) + (s.address.length > 40 ? '...' : '') : 'N/A'}</p>
+                            <p class="small mb-1"><i class="fas fa-phone me-2 text-primary"></i> ${esc(s.phone || 'N/A')}</p>
+                            <p class="small mb-1"><i class="fas fa-envelope me-2 text-primary"></i> ${esc(s.email || 'N/A')}</p>
+                            <p class="small mb-3"><i class="fas fa-map-marker-alt me-2 text-primary"></i> ${s.address ? esc(s.address.substring(0, 40)) + (s.address.length > 40 ? '...' : '') : 'N/A'}</p>
                             <div class="d-flex justify-content-between align-items-center pt-2 border-top">
                                 <span class="fw-bold">Due: <span class="${s.due > 0 ? 'text-danger' : 'text-success'}">৳${(s.due || 0).toFixed(2)}</span></span>
                                 <button class="btn btn-sm btn-outline-primary rounded-3" onclick="viewSupplierPurchases(${s.id})">View Purchases</button>
@@ -979,7 +980,7 @@
     
     gsap.from(".card", { duration: 0.6, y: 30, opacity: 0, stagger: 0.1, ease: "back.out(1.2)" });
 </script>
-<script src="assets/js/purchases-extra.js"></script><script src="assets/js/navbar-v79.js"></script>
+<script src="assets/js/purchases-extra.js"></script><script src="assets/js/pur-v86.js"></script><script src="assets/js/navbar-v79.js"></script>
 <script src="assets/js/theme-fix.js"></script>
 </body>
 </html>

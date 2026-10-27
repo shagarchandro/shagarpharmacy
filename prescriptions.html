@@ -578,6 +578,7 @@
     // ============================================
     // LOAD PRESCRIPTIONS FROM LOCALSTORAGE
     // ============================================
+    function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
     function loadPrescriptionsFromStorage() {
         const stored = localStorage.getItem(PRESCRIPTION_STORAGE_KEY);
         if (stored) {
@@ -732,13 +733,13 @@
         document.getElementById('scanResult').style.display = 'block';
         
         const ocrHtml = `
-            <p><strong>Patient:</strong> ${extractedData.patientName}</p>
-            <p><strong>Phone:</strong> ${extractedData.patientPhone}</p>
-            <p><strong>Doctor:</strong> ${extractedData.doctorName}</p>
-            <p><strong>Diagnosis:</strong> ${extractedData.diagnosis}</p>
+            <p><strong>Patient:</strong> ${esc(extractedData.patientName)}</p>
+            <p><strong>Phone:</strong> ${esc(extractedData.patientPhone)}</p>
+            <p><strong>Doctor:</strong> ${esc(extractedData.doctorName)}</p>
+            <p><strong>Diagnosis:</strong> ${esc(extractedData.diagnosis)}</p>
             <p><strong>Medicines:</strong></p>
             <ul>
-                ${extractedData.medicines.map(m => `<li>${m.name} - ${m.dosage} for ${m.duration}</li>`).join('')}
+                ${extractedData.medicines.map(m => `<li>${esc(m.name)} - ${esc(m.dosage)} for ${esc(m.duration)}</li>`).join('')}
             </ul>
         `;
         
@@ -908,16 +909,16 @@
                             <div class="card-body p-4">
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                     <span class="status-badge ${statusClass}">${statusText}</span>
-                                    <small class="text-muted">${p.prescriptionNo}</small>
+                                    <small class="text-muted">${esc(p.prescriptionNo)}</small>
                                 </div>
-                                <h5 class="fw-bold mb-1">${p.patientName}</h5>
-                                <p class="text-muted small mb-2"><i class="fas fa-user-md me-1"></i>${p.doctorName}</p>
+                                <h5 class="fw-bold mb-1">${esc(p.patientName)}</h5>
+                                <p class="text-muted small mb-2"><i class="fas fa-user-md me-1"></i>${esc(p.doctorName)}</p>
                                 <p class="small mb-2"><i class="fas fa-calendar-alt me-2 text-primary"></i>${p.prescriptionDate}</p>
                                 <div class="diagnosis-text mb-2">
-                                    <i class="fas fa-stethoscope me-2 text-primary"></i>${p.diagnosis ? p.diagnosis.substring(0, 60) : 'No diagnosis'}
+                                    <i class="fas fa-stethoscope me-2 text-primary"></i>${p.diagnosis ? esc(p.diagnosis.substring(0, 60)) : 'No diagnosis'}
                                 </div>
                                 <div class="mb-3">
-                                    ${p.medicines.map(m => `<span class="medicine-tag"><i class="fas fa-capsules me-1"></i>${m.name}</span>`).join('')}
+                                    ${p.medicines.map(m => `<span class="medicine-tag"><i class="fas fa-capsules me-1"></i>${esc(m.name)}</span>`).join('')}
                                 </div>
                                 <div class="d-flex gap-2 mt-3">
                                     <button class="btn btn-sm btn-outline-primary flex-grow-1 rounded-3" onclick="viewPrescription(${p.id})">
@@ -1001,16 +1002,16 @@
                 <div class="col-md-6">
                     <div class="bg-light rounded-3 p-3 mb-3">
                         <h6 class="fw-bold text-primary mb-2"><i class="fas fa-user me-2"></i>Patient Information</h6>
-                        <p class="mb-1"><strong>Name:</strong> ${prescription.patientName}<br>
-                        <strong>Phone:</strong> ${prescription.patientPhone || 'N/A'}<br>
-                        <strong>Prescription No:</strong> ${prescription.prescriptionNo}</p>
+                        <p class="mb-1"><strong>Name:</strong> ${esc(prescription.patientName)}<br>
+                        <strong>Phone:</strong> ${esc(prescription.patientPhone || 'N/A')}<br>
+                        <strong>Prescription No:</strong> ${esc(prescription.prescriptionNo)}</p>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="bg-light rounded-3 p-3 mb-3">
                         <h6 class="fw-bold text-primary mb-2"><i class="fas fa-user-md me-2"></i>Doctor Information</h6>
-                        <p class="mb-1"><strong>Name:</strong> ${prescription.doctorName}<br>
-                        <strong>Contact:</strong> ${prescription.doctorContact || 'N/A'}<br>
+                        <p class="mb-1"><strong>Name:</strong> ${esc(prescription.doctorName)}<br>
+                        <strong>Contact:</strong> ${esc(prescription.doctorContact || 'N/A')}<br>
                         <strong>Date:</strong> ${prescription.prescriptionDate}<br>
                         <strong>Valid Until:</strong> ${prescription.validUntil || 'N/A'}</p>
                     </div>
@@ -1018,7 +1019,7 @@
                 <div class="col-12">
                     <div class="bg-light rounded-3 p-3">
                         <h6 class="fw-bold text-primary mb-2"><i class="fas fa-stethoscope me-2"></i>Diagnosis</h6>
-                        <p class="mb-0">${prescription.diagnosis || 'No diagnosis notes'}</p>
+                        <p class="mb-0">${esc(prescription.diagnosis || 'No diagnosis notes')}</p>
                     </div>
                 </div>
             </div>
@@ -1028,13 +1029,13 @@
         
         document.getElementById('prescriptionMedicinesBody').innerHTML = prescription.medicines.map(m => `
             <tr>
-                <td>${m.name}</td>
-                <td>${m.dosage}</td>
-                <td>${m.duration}</td>
+                <td>${esc(m.name)}</td>
+                <td>${esc(m.dosage)}</td>
+                <td>${esc(m.duration)}</td>
                 <td><span class="badge ${m.status === 'filled' ? 'bg-success' : 'bg-warning'}">${m.status}</span></td>
                 <td>
                     ${m.status !== 'filled' ? `
-                        <button class="btn btn-sm btn-primary rounded-3" onclick="markMedicineFilled(${id}, '${m.name}')">
+                        <button class="btn btn-sm btn-primary rounded-3" onclick="markMedicineFilled(${id}, decodeURIComponent('${encodeURIComponent(m.name)}'))">
                             Mark Filled
                         </button>
                     ` : '-'}
@@ -1046,7 +1047,7 @@
             <div class="row">
                 ${prescription.images.length > 0 ? prescription.images.map(img => `
                     <div class="col-md-4 mb-3">
-                        <img src="${img}" class="prescription-image" onclick="viewImage('${img}')">
+                        <img src="${esc(img)}" class="prescription-image" onclick="viewImage(this.src)">
                     </div>
                 `).join('') : '<p class="text-muted">No images uploaded</p>'}
             </div>
@@ -1057,7 +1058,7 @@
             <div class="timeline">
                 <div class="timeline-item">
                     <small class="text-muted">${prescription.prescriptionDate}</small>
-                    <p class="mb-0">Prescription created by ${prescription.doctorName}</p>
+                    <p class="mb-0">Prescription created by ${esc(prescription.doctorName)}</p>
                 </div>
                 ${prescription.filledDate ? `
                     <div class="timeline-item">
@@ -1085,11 +1086,11 @@
             <div class="medicine-suggestion">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <h6 class="fw-bold mb-1">${s.name}</h6>
+                        <h6 class="fw-bold mb-1">${esc(s.name)}</h6>
                         <p class="small mb-1">${s.suggestion}</p>
                         <small class="text-success">${s.savings ? s.savings : s.cost}</small>
                     </div>
-                    <button class="btn btn-sm btn-outline-success rounded-3" onclick="applySuggestion('${s.name}')">
+                    <button class="btn btn-sm btn-outline-success rounded-3" onclick="applySuggestion(decodeURIComponent('${encodeURIComponent(s.name)}'))">
                         Apply
                     </button>
                 </div>
@@ -1167,7 +1168,7 @@
     function sendPrescriptionReminder() {
         const prescription = prescriptions.find(p => p.id === currentPrescriptionId);
         if(prescription) {
-            showToast(`Reminder sent to ${prescription.patientPhone || prescription.patientName}`, "success");
+            showToast(`Reminder sent to ${esc(prescription.patientPhone || prescription.patientName)}`, "success");
         }
     }
     
@@ -1178,7 +1179,7 @@
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content rounded-4">
                     <div class="modal-body text-center p-4">
-                        <img src="${src}" style="max-width: 100%; border-radius: 12px;">
+                        <img src="${esc(src)}" style="max-width: 100%; border-radius: 12px;">
                     </div>
                     <div class="modal-footer border-0">
                         <button class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Close</button>
@@ -1370,7 +1371,7 @@
     
     // ... rest of your existing code ...
 </script>
-<script src="assets/js/prescriptions-extra.js"></script><script src="assets/js/navbar-v79.js"></script>
+<script src="assets/js/rx-v86.js"></script><script src="assets/js/prescriptions-extra.js"></script><script src="assets/js/navbar-v79.js"></script>
 <script src="assets/js/theme-fix.js"></script>
 </body>
 </html>

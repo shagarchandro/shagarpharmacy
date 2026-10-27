@@ -595,9 +595,9 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <p class="small mb-1"><i class="fas fa-phone me-2 text-primary"></i>${sup.phone}</p>
-                                    <p class="small mb-1"><i class="fas fa-envelope me-2 text-primary"></i>${sup.email || 'N/A'}</p>
-                                    <p class="small mb-0"><i class="fas fa-map-marker-alt me-2 text-primary"></i>${sup.address ? (sup.address.substring(0, 30) + (sup.address.length > 30 ? '...' : '')) : 'N/A'}</p>
+                                    <p class="small mb-1"><i class="fas fa-phone me-2 text-primary"></i>${escapeHtml(sup.phone)}</p>
+                                    <p class="small mb-1"><i class="fas fa-envelope me-2 text-primary"></i>${escapeHtml(sup.email || 'N/A')}</p>
+                                    <p class="small mb-0"><i class="fas fa-map-marker-alt me-2 text-primary"></i>${sup.address ? (escapeHtml(sup.address.substring(0, 30)) + (sup.address.length > 30 ? '...' : '')) : 'N/A'}</p>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center pt-2 border-top">
                                     <div>
@@ -614,7 +614,7 @@
                                         <button class="btn btn-sm btn-outline-primary rounded-3" onclick="editSupplier(${sup.id})" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-outline-danger rounded-3" onclick="showDeleteConfirm(${sup.id}, '${escapeHtml(sup.companyName)}')" title="Delete">
+                                        <button class="btn btn-sm btn-outline-danger rounded-3" onclick="showDeleteConfirm(${sup.id}, decodeURIComponent('${encodeURIComponent(sup.companyName || '')}'))" title="Delete">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -736,6 +736,8 @@
             if(index !== -1) {
                 supplierData.totalPurchases = suppliers[index].totalPurchases || 0;
                 supplierData.totalPayments = suppliers[index].totalPayments || 0;
+                supplierData.status = suppliers[index].status || 'active';
+                supplierData.joinDate = suppliers[index].joinDate || supplierData.joinDate;
                 suppliers[index] = supplierData;
                 showToast('Supplier updated successfully!', 'success');
             }
@@ -935,7 +937,7 @@
     
     // ... rest of your existing code ...
 </script>
-<script src="assets/js/suppliers-extra.js"></script><script src="assets/js/navbar-v79.js"></script>
+<script src="assets/js/sup-v86.js"></script><script src="assets/js/suppliers-extra.js"></script><script src="assets/js/navbar-v79.js"></script>
 <script src="assets/js/theme-fix.js"></script>
 </body>
 </html>
