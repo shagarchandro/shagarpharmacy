@@ -13,7 +13,7 @@
     'html[data-mc=dark] [data-mcdk] [data-mcfg=d]{color:#16213a!important}';
   var st = document.createElement('style'); st.id = 'mcThemeFix'; st.textContent = css; (document.head || H).appendChild(st);
 
-  function parse(c) { var m = c && c.match(/[\d.]+/g); if (!m || m.length < 3) return null; return { r: +m[0], g: +m[1], b: +m[2], a: m.length > 3 ? +m[3] : 1 }; }
+  function parse(c) { var m = c && c.match(/[\d.]+/g); if (!m || m.length < 3) return null; var k = /^color\(\s*srgb/i.test(c) ? 255 : 1; /* color-mix()/color(srgb …) 0–1 স্কেলে আসে */ return { r: +m[0] * k, g: +m[1] * k, b: +m[2] * k, a: m.length > 3 ? +m[3] : 1 }; }
   function lin(v) { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }
   function L(c) { return .2126 * lin(c.r) + .7152 * lin(c.g) + .0722 * lin(c.b); }
   function mix(f, b) { return { r: f.r * f.a + b.r * (1 - f.a), g: f.g * f.a + b.g * (1 - f.a), b: f.b * f.a + b.b * (1 - f.a) }; }
