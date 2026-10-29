@@ -159,3 +159,18 @@
     if (sid && window.bootstrap) setTimeout(function () { try { resetPurchaseForm(); $('purchaseSupplier').value = sid; new bootstrap.Modal($('addPurchaseModal')).show(); } catch (e) { } }, 500);
   } catch (e) { }
 })();
+
+/* v88: Reorder List থেকে আসা ড্রাফট (mc_po_draft) → নতুন কেনার ফর্মে আইটেম ভরে দেয় */
+(function () {
+  try {
+    if (new URLSearchParams(location.search).get('draft') !== '1' || !window.bootstrap) return;
+    setTimeout(function () {
+      try {
+        var d = JSON.parse(localStorage.getItem('mc_po_draft') || 'null'); if (!d || Date.now() - d.at > 36e5) return;
+        resetPurchaseForm(); if (d.supplierId !== '') document.getElementById('purchaseSupplier').value = d.supplierId;
+        purchaseItems = d.items.map(function (i) { return { medicineId: i.medicineId, medicineName: i.medicineName, batchNo: '', expiryDate: '', qty: i.qty, unitPrice: i.unitPrice, total: i.qty * i.unitPrice }; });
+        updatePurchaseItemsTable(); new bootstrap.Modal(document.getElementById('addPurchaseModal')).show(); localStorage.removeItem('mc_po_draft');
+      } catch (e) { }
+    }, 700);
+  } catch (e) { }
+})();
