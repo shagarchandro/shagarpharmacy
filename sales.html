@@ -2,7 +2,7 @@
 <html lang="en">
 <head><script src="assets/js/server-sync.js"></script><script src="assets/js/theme-mode.js"></script><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
     <script src="assets/js/guard.js"></script>
-    <script src="assets/js/theme.js"></script><script src="assets/js/responsive.js"></script><script src="assets/js/prefs.js"></script><script src="assets/js/panel.js" defer></script>
+    <script src="assets/js/theme.js"></script><script src="assets/js/responsive.js"></script><script src="assets/js/prefs.js"></script><script src="assets/js/lock-v94.js"></script><script src="assets/js/panel.js" defer></script>
     <script src="assets/js/sync.js"></script>
     <script src="assets/js/enhance.js" defer></script>
     <meta charset="UTF-8">
@@ -1085,6 +1085,7 @@
                 <h3 class="fw-bold" style="color: #3b82f6;">🏥 ${esc(PSET().store || "MediCare Pharmacy")}</h3>
                 <p class="mb-0">${esc(PSET().address || "123 Healthcare Street, Medical District")}</p>
                 <p>📞 ${esc(PSET().phone || "+8801700000000")} | ✉️ ${esc(PSET().email || "info@medicare.com")}</p>
+                ${(PSET().licenseNo || PSET().binNo) ? `<p class="small mb-1">${PSET().licenseNo ? "Drug Licence: " + esc(PSET().licenseNo) : ""}${PSET().licenseNo && PSET().binNo ? " | " : ""}${PSET().binNo ? "BIN: " + esc(PSET().binNo) : ""}</p>` : ""}
                 <hr>
                 <h5>🧾 INVOICE</h5>
                 <p><strong>Invoice No:</strong> ${invoice.invoiceNo}<br>

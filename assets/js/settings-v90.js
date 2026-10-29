@@ -1,4 +1,4 @@
-/* v90 Settings: পাসওয়ার্ড শক্তি-মিটার + দেখান/লুকান, আমার সাম্প্রতিক লগইন (ব্যর্থ চেষ্টা সতর্কতা), ফোন ভ্যালিডেশন, Backup ট্যাবে বয়স + রিমাইন্ডার, ব্যাকআপ-দেরি হলে দিনে একবার টোস্ট, ব্যক্তিগত সেটিং রিসেট */
+/* v90 Settings: , ফোন ভ্যালিডেশন, Backup ট্যাবে বয়স + রিমাইন্ডার, ব্যাকআপ-দেরি হলে দিনে একবার টোস্ট, ব্যক্তিগত সেটিং রিসেট */
 (function () {
   'use strict';
   function run() {
@@ -9,29 +9,6 @@
   var u = who(); if (!u || !$('settingsModal')) return;
   var em = String(u.email || '').toLowerCase(), admin = u.role === 'admin';
   function toast(m, t) { if (typeof showToast === 'function') showToast(m, t || 'success'); }
-  /* ---- পাসওয়ার্ড শক্তি ---- */
-  var np = $('newPassword');
-  if (np) {
-    var box = document.createElement('div'); box.className = 'mb-3'; box.innerHTML = '<div class="progress" style="height:6px"><div id="s90Bar" class="progress-bar" style="width:0"></div></div><small id="s90Txt" class="text-muted"></small><div class="form-check mt-1"><input type="checkbox" class="form-check-input" id="s90Show"><label class="form-check-label" for="s90Show">পাসওয়ার্ড দেখান</label></div>';
-    np.parentNode.after(box);
-    var upd = function () {
-      var v = np.value, sc = 0; if (v.length >= 8) sc++; if (v.length >= 12) sc++; if (/[a-z]/.test(v) && /[A-Z]/.test(v)) sc++; if (/\d/.test(v)) sc++; if (/[^A-Za-z0-9]/.test(v)) sc++;
-      var L = [['', '#999', ''], ['খুব দুর্বল', '#dc3545', '20%'], ['দুর্বল', '#fd7e14', '40%'], ['মোটামুটি', '#ffc107', '60%'], ['ভালো', '#20c997', '80%'], ['শক্তিশালী', '#198754', '100%']], l = v ? L[Math.max(1, sc)] : L[0];
-      var b = $('s90Bar'); b.style.width = v ? l[2] : '0'; b.style.background = l[1]; var pe = ''; try { pe = v && window.MCPW ? (MCPW.policy(v, u.email) || '') : ''; } catch (e) { }
-      $('s90Txt').textContent = v ? l[0] + (pe ? ' — ' + pe : '') : '';
-    };
-    np.addEventListener('input', upd);
-    $('s90Show').onchange = function () { ['currentPassword', 'newPassword', 'confirmPassword'].forEach(function (i) { if ($(i)) $(i).type = $('s90Show').checked ? 'text' : 'password'; }); };
-  }
-  /* ---- আমার লগইন ইতিহাস ---- */
-  var sec = $('security');
-  if (sec) {
-    var lc = document.createElement('div'); lc.id = 's90Log'; sec.appendChild(document.createElement('hr')); sec.appendChild(lc);
-    var L = rj('pharmacy_loginlog', []).filter(function (x) { return x && String(x.email || '').toLowerCase() === em; }).slice(-8).reverse();
-    var recentFail = L.filter(function (x) { return !x.ok && Date.now() - new Date(x.at) < 864e5; }).length;
-    lc.innerHTML = '<h6>🕘 আমার সাম্প্রতিক লগইন</h6>' + (recentFail ? '<div class="alert alert-warning py-1 small">⚠ গত ২৪ ঘণ্টায় ' + recentFail + 'টি ব্যর্থ লগইন চেষ্টা — আপনি না করে থাকলে পাসওয়ার্ড বদলান।</div>' : '') +
-      (L.length ? '<ul class="list-unstyled small mb-0">' + L.map(function (x) { return '<li>' + (x.ok ? '✅' : '❌') + ' ' + esc(new Date(x.at).toLocaleString('en-GB', { timeZone: 'Asia/Dhaka' })) + ' <span class="text-muted">' + (x.ok ? 'সফল' : 'ব্যর্থ') + '</span></li>'; }).join('') + '</ul>' : '<p class="text-muted small mb-0">কোনো রেকর্ড নেই।</p>');
-  }
   /* ---- ফোন ভ্যালিডেশন ---- */
   var ph = $('profilePhone'), orig = ph ? ph.value : '';
   var oldUp = window.updateProfile;

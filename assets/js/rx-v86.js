@@ -80,7 +80,7 @@
     return r;
   };
   function slip(p) {
-    var name = (rj('pharmacy_theme', {}) || {}).name || 'MediCare Pharmacy', w = window.open('', '_blank'); if (!w) { toast('পপ-আপ ব্লক — ব্রাউজারে অনুমতি দিন', 'warning'); return; }
+    var name = (rj('pharmacy_theme', {}) || {}).name || 'MediCare Pharmacy', LN = (rj('pharmacy_settings', {}) || {}).licenseNo; if (LN) name += ' — Drug Licence: ' + LN; var w = window.open('', '_blank'); if (!w) { toast('পপ-আপ ব্লক — ব্রাউজারে অনুমতি দিন', 'warning'); return; }
     var rows = (p.medicines || []).map(function (m) { return '<tr><td>' + esc(m.name) + '</td><td>' + esc(m.dosage || '') + '</td><td>' + esc(m.duration || '') + '</td><td>' + (m.status === 'filled' ? '✔ দেওয়া হয়েছে' : 'বাকি') + '</td></tr>'; }).join('');
     w.document.write('<!doctype html><meta charset="utf-8"><title>' + esc(p.prescriptionNo) + '</title><style>body{font:14px system-ui,sans-serif;margin:24px;color:#111}h2{margin:0}table{border-collapse:collapse;width:100%;margin-top:10px}td,th{border:1px solid #999;padding:6px;text-align:left}.m{color:#555;font-size:12px}</style><h2>' + esc(name) + '</h2><div class="m">প্রেসক্রিপশন স্লিপ · ' + esc(today()) + '</div><hr><p><b>' + esc(p.prescriptionNo) + '</b> — রোগী: <b>' + esc(p.patientName) + '</b> ' + esc(p.patientPhone || '') + '<br>ডাক্তার: ' + esc(p.doctorName || '—') + ' · তারিখ: ' + esc(p.prescriptionDate || '') + ' · বৈধ: ' + esc(p.validUntil || '—') + '<br>রোগ নির্ণয়: ' + esc(p.diagnosis || '—') + '</p><table><tr><th>ওষুধ</th><th>ডোজ</th><th>মেয়াদ</th><th>অবস্থা</th></tr>' + rows + '</table><p class="m">এটি ডাক্তারের প্রেসক্রিপশনের বিকল্প নয়। ডোজ নিয়ে সন্দেহ হলে ডাক্তার/ফার্মাসিস্টের পরামর্শ নিন।</p><script>onload=function(){print()}<\/script>'); w.document.close();
   }

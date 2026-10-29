@@ -4,7 +4,7 @@
 (function () {
   'use strict';
   var KEY = 'pharmacy_prefs';
-  var DEF = { size: 100, compact: false, dark: false, calm: false, start: 'dashboard.html', quick: true, insights: true };
+  var DEF = { size: 100, compact: false, dark: false, calm: false, start: 'dashboard.html', quick: true, insights: true, big: false, contrast: false };
   function rj(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
   function who() { try { return JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')); } catch (e) { return null; } }
   function email() { var u = who(); return u ? String(u.email || '').toLowerCase() : ''; }
@@ -16,6 +16,8 @@
     var p = get(), css = '';
     if (+p.size !== 100) css += 'html{font-size:' + Math.min(Math.max(+p.size, 85), 130) + '%!important}';
     if (p.compact) css += '.card-body,.modal-body{padding:.6rem!important}.table td,.table th{padding:.3rem .5rem!important}.stat-card,.mcq,.mcd .pn{padding:.7rem!important}.main-content{padding-top:.6rem!important}';
+    if (p.big) css += 'button,.btn,.btn2,.nav-link,select,input:not([type=checkbox]):not([type=radio]),.form-control,.form-select{min-height:44px!important}input[type=checkbox],input[type=radio]{width:1.2rem;height:1.2rem}';
+    if (p.contrast) css += 'html{filter:contrast(1.12)}a,.nav-link{text-decoration:underline}*:focus-visible{outline:3px solid #f59e0b!important;outline-offset:2px!important}.text-muted,.muted{opacity:1!important;filter:brightness(.8)}';
     if (p.calm) css += '*,*::before,*::after{animation:none!important;transition:none!important}';
     /* v81: ডার্ক মোড এখন theme-mode.js (MCTheme) থেকে — পুরনো invert-ফিল্টার বাদ */
     var el = document.getElementById('mcPrefs'); if (!el) { el = document.createElement('style'); el.id = 'mcPrefs'; (document.head || document.documentElement).appendChild(el); }
