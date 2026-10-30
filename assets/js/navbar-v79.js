@@ -120,7 +120,7 @@
     return true;
   }
   function slimBar() {
-    var mc = document.getElementById('mainContent') || $('.main-content'); if (!mc || $('.mcn-bar', mc)) return;
+    var mc = document.getElementById('mainContent') || $('.main-content') || $('main'); if (!mc || $('.mcn-bar', mc)) return;
     var bar = document.createElement('div'); bar.className = 'mcn-bar';
     var ttl = (document.title || '').split(/[–—|-]/)[0].trim() || page.replace('.html', '');
     var h = document.createElement('b'); h.textContent = ttl; bar.appendChild(h);

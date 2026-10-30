@@ -19,6 +19,7 @@
     set: function (pin) { return hash(pin).then(function (h) { var c = cfg(); c.h = h; put(c); }); },
     clear: function () { var c = cfg(); delete c.h; put(c); try { sessionStorage.removeItem('mc_locked'); } catch (e) { } },
     idle: function () { return +cfg().idle || 0; }, setIdle: function (m) { var c = cfg(); c.idle = +m || 0; put(c); },
+    hide: function () { return !!cfg().hide; }, setHide: function (b) { var c = cfg(); if (b) c.hide = true; else delete c.hide; put(c); },
     lock: lock
   };
   var ov = null, fails = 0;
@@ -47,6 +48,8 @@
   /* অলস থাকলে */
   var last = Date.now(); ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(function (ev) { addEventListener(ev, function () { last = Date.now(); }, { passive: true, capture: true }); });
   setInterval(function () { var m = +cfg().idle || 0; if (m && cfg().h && !ov && Date.now() - last >= m * 60e3) lock(); }, 5000);
+  /* ট্যাব ছেড়ে ৩০ সেকেন্ডের বেশি থাকলে (v98) */
+  var hidAt = 0; document.addEventListener('visibilitychange', function () { if (document.hidden) hidAt = Date.now(); else if (hidAt && cfg().h && cfg().hide && !ov && Date.now() - hidAt >= 30000) { hidAt = 0; lock(); } else hidAt = 0; });
   /* পেজ বদলালে/রিলোডে লক বহাল */
   function boot() { try { if (sessionStorage.getItem('mc_locked') === '1' && cfg().h) lock(); } catch (e) { } }
   if (document.body) boot(); else document.addEventListener('DOMContentLoaded', boot);
