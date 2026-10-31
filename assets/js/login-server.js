@@ -17,7 +17,7 @@
     MCSRV.apost('/api/login', { scope: 'staff', email: email, password: pw, role: role, remember: remember, pin: pin }).then(function (r) {
       if (btn) btn.disabled = false; var j = r.json || {};
       if (r.status === 200 && j.ok) {
-        var u = j.user, ud = { id: u.ext || u.id, name: u.name, email: u.email, role: u.role, access: u.access, avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name) + '&background=667eea&color=fff' };
+        var u = j.user, ud = { id: u.ext || u.id, name: u.name, email: u.email, role: u.role, access: u.access, avatar: mcAvatar(u.name, '667eea') };
         MCSRV.setStaffSession(ud, remember); alertMsg('✅ লগইন সফল! স্বাগতম ' + u.name, 'success');
         setTimeout(function () { location.href = 'dashboard.html'; }, 700); return;
       }

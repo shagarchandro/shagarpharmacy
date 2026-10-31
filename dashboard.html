@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script src="assets/js/server-sync.js"></script><script src="assets/js/theme-mode.js"></script><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
+<head>
+<script src="assets/js/avatar-local.js"></script><script src="assets/js/server-sync.js"></script><script src="assets/js/theme-mode.js"></script><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
     <script src="assets/js/guard.js"></script>
-    <script src="assets/js/theme.js"></script><script src="assets/js/responsive.js"></script><script src="assets/js/prefs.js"></script><script src="assets/js/lock-v94.js"></script><script src="assets/js/avatar.js"></script><script src="assets/js/pw.js"></script><script src="assets/js/panel.js" defer></script><script src="assets/js/dash-extra.js" defer></script>
+    <script src="assets/js/theme.js"></script><script src="assets/js/site-v103.js"></script><script src="assets/js/responsive.js"></script><script src="assets/js/prefs.js"></script><script src="assets/js/lock-v94.js"></script><script src="assets/js/avatar.js"></script><script src="assets/js/pw.js"></script><script src="assets/js/panel.js" defer></script><script src="assets/js/dash-extra.js" defer></script>
     <script src="assets/js/enhance.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
@@ -12,16 +13,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
     
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="assets/vendor/chartjs/chart.umd.js"></script>
     
     <!-- GSAP -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="assets/vendor/gsap/gsap.min.js"></script>
     
     <style>
        /* ========================================
@@ -711,7 +712,7 @@ body.dark-mode .sidebar-overlay {
         </div>
         
         <div class="user-info text-center mb-4 sidebar-text">
-            <img src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff" class="rounded-circle mb-2" width="80" height="80" id="userAvatar">
+            <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22%233b82f6%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2233%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%20font-family%3D%22system-ui%2CSegoe%20UI%2CNoto%20Sans%20Bengali%2Csans-serif%22%20font-size%3D%2230%22%20font-weight%3D%22600%22%20fill%3D%22%23fff%22%3EU%3C%2Ftext%3E%3C%2Fsvg%3E" class="rounded-circle mb-2" width="80" height="80" id="userAvatar">
             <h6 class="text-white mb-1" id="userName">Admin User</h6>
             <small class="text-white-50" id="userRole">Super Admin</small>
         </div>
@@ -825,7 +826,7 @@ body.dark-mode .sidebar-overlay {
                 <!-- User Dropdown -->
                 <div class="dropdown">
                     <button class="btn btn-link dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown">
-                        <img src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff" class="rounded-circle" width="40" height="40" id="navUserAvatar">
+                        <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22%233b82f6%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2233%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%20font-family%3D%22system-ui%2CSegoe%20UI%2CNoto%20Sans%20Bengali%2Csans-serif%22%20font-size%3D%2230%22%20font-weight%3D%22600%22%20fill%3D%22%23fff%22%3EU%3C%2Ftext%3E%3C%2Fsvg%3E" class="rounded-circle" width="40" height="40" id="navUserAvatar">
                         <span class="d-none d-md-block" id="navUserName">Admin</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -1123,7 +1124,7 @@ body.dark-mode .sidebar-overlay {
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>
     // ============================================
     // STORAGE KEYS
@@ -1494,7 +1495,7 @@ body.dark-mode .sidebar-overlay {
             return false;
         }
         const userData = JSON.parse(user);
-        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.name)}&background=3b82f6&color=fff`;
+        const avatarUrl = `${mcAvatar(userData.name,'3b82f6')}`;
         document.getElementById('userName').textContent = userData.name;
         document.getElementById('userRole').textContent = userData.role.toUpperCase();
         document.getElementById('navUserName').textContent = userData.name.split(' ')[0];
@@ -1740,5 +1741,6 @@ body.dark-mode .sidebar-overlay {
 <script src="assets/js/settings-v80.js"></script>
 <script src="assets/js/dash-v82.js"></script><script src="assets/js/settings-v90.js"></script><script src="assets/js/settings-v94.js"></script><script src="assets/js/invoice-v96.js"></script><script src="assets/js/settings-v98.js"></script>
 <script src="assets/js/theme-fix.js"></script>
+<script src="assets/js/perm-v102.js"></script>
 </body>
 </html>

@@ -119,7 +119,7 @@
     var st = S.me.staff, op = S.me.ops, k;
     if (!st) { for (k in AUTHK) { lrem(k); try { nRem.call(NSS, k); } catch (e) { } } }
     else {
-      var inL = lget('user') != null, store = inL ? NLS : NSS, ud = { id: st.id, name: st.name, email: st.email, role: st.role, access: st.access, avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(st.name) + '&background=667eea&color=fff' };
+      var inL = lget('user') != null, store = inL ? NLS : NSS, ud = { id: st.id, name: st.name, email: st.email, role: st.role, access: st.access, avatar: mcAvatar(st.name, '667eea') };
       var cur = J(nGet.call(store, 'user') || 'null'); if (cur && cur.avatar) ud.avatar = cur.avatar;
       nSet.call(store, 'user', JSON.stringify(ud)); nSet.call(store, 'auth_token', 'server-session'); nSet.call(store, 'user_role', st.role); nSet.call(store, 'user_access', JSON.stringify(st.access));
     }
