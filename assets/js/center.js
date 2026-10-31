@@ -248,6 +248,7 @@
       h('h3', {}, 'Dashboard data'), tbl(['Dataset', 'Records', ''], rows),
       h('h3', {}, 'Shop & Ops data (mc_db)'), tbl(['Dataset', 'Records'], [['Products', D.products.length], ['Batches', D.batches.length], ['Orders', D.orders.length], ['Ops users', D.users.length], ['Notifications', (D.notes || []).length]].map(r => h('tr', {}, r.map(c => h('td', {}, c))))),
       h('div', { class: 'cc-card', style: 'margin-top:1rem;border-color:var(--bad)' }, h('h3', { class: 'bad' }, '⚠️ Danger zone'),
+        h('div', { class: 'row' }, btn('☢️ সব ডাটা একবারে রিসেট (সুরক্ষিত ধাপসহ)', () => show('reset'), 'btn')),
         h('div', { class: 'row' }, btn('Reset shop & Ops data to demo', () => { if (prompt('Type RESET to wipe shop and Ops data') !== 'RESET') return; localStorage.removeItem('mc_db'); localStorage.removeItem('mc_sync'); audit('Reset shop data'); ok('Shop data reset'); show('data'); }, 'btn2'), btn('Reset ALL dashboard data to demo', () => { if (prompt('Type RESET to wipe all dashboard data') !== 'RESET') return; sets.forEach(([k]) => localStorage.removeItem(k)); audit('Reset dashboard data'); ok('Dashboard data reset'); show('data'); }, 'btn2'))));
   };
 
