@@ -8,8 +8,8 @@
   var dh6 = function (t) { return new Date((t == null ? Date.now() : t) + 6 * 3600e3).toISOString().slice(0, 10); };
   var GROUPS = [
     ['home', '🏠 হোম', /overview|checkup|go-live|sales target/i],
-    ['store', '🏪 দোকান ও শপ', /branding|site studio|cart rules|rules|features|customer shop|coupons|payments|delivery|shop sync/i],
-    ['people', '👥 মানুষ ও নিরাপত্তা', /roles|accounts|security|sign-in|staff watch/i],
+    ['store', '🏪 দোকান ও শপ', /branding|site studio|customer voice|cart rules|rules|features|customer shop|coupons|payments|delivery|shop sync/i],
+    ['people', '👥 মানুষ ও নিরাপত্তা', /roles|accounts|security|sign-in|reset requests|staff watch/i],
     ['reports', '📊 রিপোর্ট ও লগ', /sales & audit|insights|audit|profit|customer segments|stock intelligence/i],
     ['tools', '🧰 টুলস ও ডেটা', /.*/]
   ];

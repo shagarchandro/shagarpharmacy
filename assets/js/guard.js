@@ -12,7 +12,7 @@
 })();
 (function () {
   'use strict';
-  var AUTH = ['user', 'auth_token', 'user_role', 'user_access', 'mc_started', 'mc_session_start'];
+  var AUTH = ['user', 'auth_token', 'user_role', 'user_access', 'mc_started', 'mc_session_start', 'mc_shared'];
   window.authClear = function () {
     AUTH.forEach(function (k) { try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (e) {} });
   };
@@ -76,5 +76,44 @@
       if (blocked) window[fn] = function () { alert('Read-only access for your role.'); };
     });
     document.querySelectorAll('#userName').forEach(function (e) { if (!e.textContent.trim() || e.textContent === 'Loading...') e.textContent = user.name; });
+  });
+})();
+
+/* v116 — অস্থায়ী পাসওয়ার্ডে লগইন করলে নতুন পাসওয়ার্ড দেওয়া বাধ্যতামূলক (Control Center → 🔑 Reset Requests থেকে দেওয়া)।
+   ক্লায়েন্ট-সাইড ব্লক (ডেমো মোড): ডেভটুল জানা কেউ এড়াতে পারে — সার্ভার মোডে সার্ভার যাচাই করে। */
+(function () {
+  'use strict';
+  var page = (location.pathname.split('/').pop() || '').replace('.html', '');
+  if (!{ dashboard: 1, medicines: 1, customers: 1, sales: 1, purchases: 1, suppliers: 1, prescriptions: 1, reports: 1, settings: 1 }[page]) return;
+  function get(k) { try { return localStorage.getItem(k) || sessionStorage.getItem(k); } catch (e) { return null; } }
+  function rj(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
+  var user = null; try { user = JSON.parse(get('user')); } catch (e) { } if (!user || !user.email || !get('auth_token')) return;
+  var em = String(user.email).toLowerCase(), MC = rj('pharmacy_mustchange', {}); if (!MC[em]) return;
+  function ready(fn) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
+  function withPW(cb) { if (window.MCPW) return cb(); var s = document.createElement('script'); s.src = (document.currentScript ? document.currentScript.src.replace(/guard\.js.*$/, '') : 'assets/js/') + 'pw.js'; s.onload = cb; document.head.appendChild(s); }
+  ready(function () {
+    var o = document.createElement('div'); o.setAttribute('role', 'dialog'); o.setAttribute('aria-modal', 'true'); o.setAttribute('aria-label', 'Set new password');
+    o.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:rgba(10,15,35,.92);display:grid;place-items:center;padding:1rem;font-family:system-ui,sans-serif';
+    o.innerHTML = '<form style="background:#fff;color:#16213a;border-radius:16px;padding:1.4rem;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)"><h2 style="margin:0 0 .3rem;font-size:1.2rem">🔑 নতুন পাসওয়ার্ড দিন</h2><p style="margin:.2rem 0 .9rem;font-size:.9rem;color:#556">আপনি অস্থায়ী পাসওয়ার্ডে ঢুকেছেন। চালিয়ে যেতে নিজের একটি নতুন পাসওয়ার্ড দিন (কমপক্ষে ৮ অক্ষর, অক্ষর + সংখ্যা)।</p>' +
+      '<input name="p1" type="password" autocomplete="new-password" placeholder="নতুন পাসওয়ার্ড" style="width:100%;box-sizing:border-box;padding:.6rem;border:1px solid #c8cfe6;border-radius:10px;margin-bottom:.5rem"><input name="p2" type="password" autocomplete="new-password" placeholder="আবার লিখুন" style="width:100%;box-sizing:border-box;padding:.6rem;border:1px solid #c8cfe6;border-radius:10px"><div id="mc116err" role="alert" style="color:#b42318;font-size:.85rem;min-height:1.2rem;margin:.4rem 0"></div>' +
+      '<button style="width:100%;padding:.65rem;border:0;border-radius:10px;background:#667eea;color:#fff;font-weight:700;cursor:pointer">সেভ করে চালিয়ে যান</button><p style="text-align:center;margin:.7rem 0 0;font-size:.85rem"><a href="#" id="mc116out" style="color:#667eea">সাইন-আউট</a></p></form>';
+    document.body.appendChild(o); var f = o.querySelector('form'), err = o.querySelector('#mc116err'); f.p1.focus();
+    o.querySelector('#mc116out').onclick = function (e) { e.preventDefault(); if (window.authClear) window.authClear(); location.replace('login.html'); };
+    f.addEventListener('submit', function (e) {
+      e.preventDefault(); var a = f.p1.value, b = f.p2.value;
+      if (a.length < 8 || !/[A-Za-z]/.test(a) || !/\d/.test(a)) { err.textContent = 'কমপক্ষে ৮ অক্ষর, অক্ষর ও সংখ্যা দুটোই লাগবে।'; return; }
+      if (a !== b) { err.textContent = 'দুটি পাসওয়ার্ড মেলেনি।'; return; }
+      if (a.toLowerCase().indexOf(em.split('@')[0]) > -1 || /^(admin123|pharm123|staff123|password|12345678)/i.test(a)) { err.textContent = 'এই পাসওয়ার্ড সহজে অনুমান করা যায় — অন্যটি দিন।'; return; }
+      err.textContent = 'সেভ হচ্ছে…';
+      withPW(function () {
+        MCPW.hash(a).then(function (h) {
+          var accts = rj('pharmacy_accounts', []), cu = accts.filter(function (x) { return String(x.email).toLowerCase() === em; })[0];
+          if (cu) { cu.hash = h; localStorage.setItem('pharmacy_accounts', JSON.stringify(accts)); } else { var cr = rj('pharmacy_creds', {}); cr[em] = h; localStorage.setItem('pharmacy_creds', JSON.stringify(cr)); }
+          var m2 = rj('pharmacy_mustchange', {}); delete m2[em]; localStorage.setItem('pharmacy_mustchange', JSON.stringify(m2));
+          var L = rj('pharmacy_loginlog', []); L.push({ at: new Date().toISOString(), email: em, ok: true, role: user.role, note: 'password changed after reset' }); localStorage.setItem('pharmacy_loginlog', JSON.stringify(L.slice(-100)));
+          o.remove();
+        }, function () { err.textContent = 'এই ব্রাউজারে সেভ করা গেল না।'; });
+      });
+    });
   });
 })();

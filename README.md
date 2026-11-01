@@ -622,3 +622,20 @@ Salted PBKDF2 password hashes + password policy (also for custom accounts changi
 - **Ask pharmacist:** 🔴 জরুরি, কার জন্য (শিশু/বয়স্ক/গর্ভবতী), অন্য ওষুধ, অ্যালার্জি, কলব্যাক সময় (প্রশ্নের শেষে `[...]` আকারে নোটে যায়, জরুরি হলে শুরুতে `🔴 URGENT`), ড্রাফট সেভ (সফল জমা হলে মুছে যায়)।
 - **নেভ ব্যাজ:** ফার্মেসি উত্তর দিলে Contact/Ask-এ 💬 N ব্যাজ; পেজ খুললে "নতুন উত্তর" ব্যানার, তারপর seen।
 - Limitation: সব ডাটা ব্রাউজারে (ডেমো); রেটিং/অনুরোধ Ops-এ যায় ডেমো `mc_db` দিয়ে, আলাদা সার্ভার না থাকলে শুধু একই ব্রাউজারে দেখা যায়; "এখন খোলা" শুধু `hours` এ "৯am–১০pm" ধাঁচের সময় থাকলে।
+
+## v115 — Control Center: 📣 Customer Voice + শপ-সুবিধার সুইচ
+- নতুন `assets/js/center-v115.js` (`admin-center.html`); `store-v114.js` এ সুইচ মানা যোগ; `center-v85.js` এ গ্রুপ (🏪 দোকান ও শপ)।
+- **ওষুধের চাহিদা:** শপের "ওষুধটি চাই" অনুরোধ + "স্টকে এলে জানান" একসাথে নামে গুনে (কতজন চান, অনুরোধ/জানান, শেষ সময়, এখন স্টকে আছে কি)। এক ক্লিকে সব অনুরোধকারীকে উত্তর: ✅ আনাচ্ছি · 📦 স্টকে এসেছে · 🚫 রাখব না বা নিজের লেখা — গ্রাহক শপের Ask/Contact পেজে 💬 ব্যাজসহ দেখে। CSV।
+- **উত্তরহীন প্রশ্ন:** 🔴 জরুরি আগে, কত ঘণ্টা অপেক্ষা, সরাসরি উত্তর বক্স।
+- **⭐ রেটিং:** গড়, কত ডেলিভারডে রেটিং এসেছে, ১–৫ বিতরণ, সবচেয়ে কম আগে (≤২★ লাল + গ্রাহকের ফোন)।
+- **শপের সুবিধা চালু/বন্ধ** (`settings.shopX`): ফিল্টার/ভিউ, ওষুধ-অনুরোধ, Wishlist টুল, Orders টুল, রেটিং, Help, Contact, Ask এক্সট্রা, 💬 ব্যাজ। পুরনো "Customer shop" ট্যাবের `shopOff` ছোঁয়া হয়নি (সেটা সেভে তালিকা মুছে ফেলত)।
+- Limitation: এই কন্ট্রোল সেন্টার থেকে উত্তর শুধু রেফারেন্স-ওয়ালা বার্তায় গ্রাহককে দেখায় (অনুরোধ/প্রশ্ন/Contact); "স্টকে এলে জানান" এ গ্রাহকের ফোন সংরক্ষণ হয় না, তাই সেখানে উত্তর পাঠানো যায় না; "কতজন" নাম ধরে গোনা।
+
+## v116 — Staff login upgrade
+- **Shared computer** checkbox: disables Remember me, keeps session in sessionStorage only, forgets last-login, forces idle sign-out ≤10 min.
+- **Recent accounts** chips (email + role only, max 3, removable).
+- **Password reset request** form in "Forgot password" (stored in `pharmacy_pwreq`; rate-limited; disabled in server mode).
+- **Control Center → 🔑 Reset Requests**: admin generates a one-time temporary password (shown once), clears lockout, audit-logged.
+- **Forced password change** on first login after a reset (`pharmacy_mustchange`, guard.js overlay; min 8 chars, letter+digit).
+- Files: `assets/js/login-v116.js`, `assets/js/center-v116.js`, `guard.js`, `panel.js`, `center-v85.js`, `login.html`, `admin-center.html`.
+- Limitation: demo mode enforcement is client-side only (devtools can bypass the forced-change overlay). Ops login (`admin/login.html`) unchanged.

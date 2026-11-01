@@ -12,6 +12,7 @@
   var rj = function (k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
   var wj = function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
   var BDP = /^(\+?88)?01[3-9]\d{8}$/;
+  var X = function (k) { return ((D && D.settings && D.settings.shopX) || []).indexOf(k) > -1; };   /* Control Center → Customer Voice থেকে বন্ধ করা সুবিধা */
   var route = function () { return (location.hash.slice(2) || 'catalog').split('/')[0]; };
   var prod = function (id) { return D.products.find(function (p) { return p.id === id; }); };
   var shopPhone = function () { return (D.settings && D.settings.phone) || '01700-000000'; };
@@ -54,7 +55,7 @@
     var cat0 = views.catalog;
     views.catalog = function () {
       var all = D.products;
-      if (F.form || F.maker) D.products = all.filter(function (p) { return (!F.form || p.form === F.form) && (!F.maker || p.maker === F.maker); });
+      if (!X('filters') && (F.form || F.maker)) D.products = all.filter(function (p) { return (!F.form || p.form === F.form) && (!F.maker || p.maker === F.maker); });
       try { return cat0.apply(this, arguments); } finally { D.products = all; }
     };
   }
@@ -69,7 +70,7 @@
     return best.sort(function (a, b) { return a[0] - b[0]; }).slice(0, 4).map(function (x) { return x[1]; });
   }
   function shopTools(a) {
-    var flt = a.querySelector('.filters'); if (!flt) return;
+    var flt = a.querySelector('.filters'); if (!flt || X('filters')) return;
     var forms = [], makers = []; D.products.forEach(function (p) { if (p.form && forms.indexOf(p.form) < 0) forms.push(p.form); if (p.maker && makers.indexOf(p.maker) < 0) makers.push(p.maker); });
     var sel = function (k, label, list) { return el('label', {}, label + ' ', el('select', { onchange: function (e) { if (e.target.value) F[k] = e.target.value; else delete F[k]; saveF(); S.page = 1; render(); } }, [el('option', { value: '' }, tx('সব', 'All'))].concat(list.sort().map(function (x) { return el('option', Object.assign({ value: x }, F[k] === x ? { selected: 'selected' } : {}), x); })))); };
     var list = localStorage.getItem('mc_view114') === 'list';
@@ -77,13 +78,12 @@
       el('button', { 'aria-pressed': String(list), class: list ? 'on' : '', onclick: function () { localStorage.setItem('mc_view114', list ? 'grid' : 'list'); render(); } }, list ? '▦ ' + tx('গ্রিড', 'Grid') : '☰ ' + tx('তালিকা', 'List')),
       (F.form || F.maker) ? el('button', { onclick: function () { F = {}; saveF(); render(); } }, '✕ ' + tx('ফিল্টার মুছুন', 'Clear')) : null));
     a.classList.toggle('l114', list);
-    if (!a.querySelector('article.card') && (S.q || S.cat || F.form || F.maker)) noResult(a);
   }
   function noResult(a) {
     var q = (S.q || '').trim(), box = el('div', { class: 'c114 w', role: 'note' }, el('h3', {}, '🔎 ' + tx('কিছু পাওয়া যায়নি', 'Nothing found') + (q ? ': “' + q + '”' : '')));
     var sg = q ? didYouMean(q) : []; if (sg.length) box.append(el('div', { class: 'r1' }, tx('এগুলো কি খুঁজছিলেন? ', 'Did you mean: '), sg.map(function (p) { return el('button', { onclick: function () { S.q = p.name; S.cat = ''; delete F.form; delete F.maker; saveF(); S.page = 1; render(); } }, p.name); })));
     if (F.form || F.maker || S.cat) box.append(el('div', { class: 'r1' }, el('button', { onclick: function () { F = {}; saveF(); S.cat = ''; render(); } }, '✕ ' + tx('সব ফিল্টার মুছে দেখুন', 'Clear filters'))));
-    if (q.length >= 3) {
+    if (q.length >= 3 && !X('medreq')) {
       var pf = rj('mc_prof', {}), done = rj('mc_medreq', []).indexOf(q.toLowerCase()) > -1;
       if (done) box.append(el('p', { class: 'ok' }, '✅ ' + tx('অনুরোধ আগেই পাঠানো হয়েছে — ফার্মেসি জানাবে', 'Request already sent — the pharmacy will contact you')));
       else {
@@ -101,6 +101,7 @@
   /* ---------- ♡ Wishlist ---------- */
   var WS = 'new';
   function wishPage(a) {
+    if (X('wishtools')) return;
     var ids = rj('mc_wish', []).filter(prod), grid = a.querySelector('.grid'), h1 = a.querySelector('h1'); if (!ids.length || !grid || !h1) return;
     var P = ids.map(prod), ins = P.filter(function (p) { return stock(D, p.id) > 0; }), val = P.reduce(function (t, p) { return t + eff(p); }, 0), valIn = ins.reduce(function (t, p) { return t + eff(p); }, 0);
     var srt = function () { var L = P.slice(); if (WS === 'new') L.reverse(); else if (WS === 'lo') L.sort(function (x, y) { return eff(x) - eff(y); }); else if (WS === 'hi') L.sort(function (x, y) { return eff(y) - eff(x); }); else if (WS === 'stock') L.sort(function (x, y) { return (stock(D, y.id) > 0) - (stock(D, x.id) > 0); }); return L; };
@@ -128,13 +129,13 @@
   }
   var ACTIVE = ['Pending', 'Confirmed', 'Prescription Review', 'Packed', 'Shipped'];
   function ordersPage(a) {
-    var m = me(); if (!m) return; var arts = [].slice.call(a.querySelectorAll('article.card')), rows = [];
+    if (X('orderplus')) return; var m = me(); if (!m) return; var arts = [].slice.call(a.querySelectorAll('article.card')), rows = [];
     arts.forEach(function (art) {
       var no = ((art.querySelector('h3') || {}).textContent || '').split(' · ')[0].trim(), o = D.orders.find(function (x) { return x.no === no && x.customer === m; }); if (!o) return; rows.push({ art: art, o: o });
       var ex = el('div', { class: 'r1 s114' }, el('button', { onclick: function () { printInvoice(o); } }, '🖨 ' + tx('ইনভয়েস', 'Invoice')), el('button', { onclick: function () { try { sessionStorage.setItem('mc_ctx_order', o.no); } catch (e) { } location.hash = '#/contact'; } }, '💬 ' + tx('এই অর্ডার নিয়ে সাহায্য', 'Help with this order')));
       var ageH = Math.max(0, Math.round((Date.now() - Date.parse(o.at)) / 36e5)); if (ACTIVE.indexOf(o.status) > -1) ex.append(el('small', { class: 'muted' }, '⏱ ' + tx(ageH + ' ঘণ্টা আগে অর্ডার করেছেন', 'placed ' + ageH + 'h ago')));
       art.append(ex);
-      if (o.status === 'Delivered') {
+      if (o.status === 'Delivered' && (o.rating || !X('rating'))) {
         if (o.rating) art.append(el('p', { class: 'ok' }, '⭐ ' + tx('আপনার রেটিং: ', 'Your rating: ') + '★'.repeat(o.rating.stars) + '☆'.repeat(5 - o.rating.stars) + (o.rating.comment ? ' — ' + o.rating.comment : '')));
         else {
           var sc = el('select', { 'aria-label': 'Rating' }, [el('option', { value: '' }, '⭐ ' + tx('রেটিং দিন…', 'Rate…'))].concat([5, 4, 3, 2, 1].map(function (n) { return el('option', { value: n }, '★'.repeat(n) + ' (' + n + ')'); }))), cm = el('input', { placeholder: tx('মন্তব্য (ঐচ্ছিক)', 'Comment (optional)'), maxlength: 160, 'aria-label': 'Comment' });
@@ -158,6 +159,7 @@
   var HC = 'all';
   var CATS = [['all', 'সব', 'All', null], ['del', '🚚 ডেলিভারি', '🚚 Delivery', /deliver|ডেলিভারি|fee|zone|free|ঢাকা/i], ['pay', '💳 পেমেন্ট', '💳 Payment', /pay|bkash|nagad|rocket|cash|cod|পেমেন্ট|কুপন|coupon/i], ['rx', '📋 প্রেসক্রিপশন', '📋 Prescription', /prescri|rx|প্রেসক্রিপশন/i], ['ret', '↩ ফেরত/বাতিল', '↩ Return/Cancel', /return|refund|cancel|ফেরত|বাতিল/i]];
   function helpPage(a) {
+    if (X('helpplus')) return;
     var sec = a.querySelector('section') || a, q = a.querySelector('input[type=search]'), box = q && q.nextElementSibling; if (!q) return;
     var apply = function () { var c = CATS.filter(function (x) { return x[0] === HC; })[0]; [].forEach.call(a.querySelectorAll('details.card'), function (d) { d.style.display = !c || !c[3] || c[3].test(d.textContent) ? '' : 'none'; }); };
     var chips = el('div', { class: 'r1 s114 c114' }, CATS.map(function (c) { return el('button', { class: HC === c[0] ? 'on' : '', onclick: function () { HC = c[0]; [].forEach.call(chips.querySelectorAll('button'), function (b) { b.classList.remove('on'); }); this.classList.add('on'); apply(); } }, tx(c[1], c[2])); }));
@@ -179,7 +181,7 @@
     return function () { localStorage.removeItem(key); };
   }
   function contactPage(a) {
-    var f = a.querySelector('form'); if (!f || f.elements.cb114) return; var s = D.settings || {}, ph = shopPhone().replace(/[^+\d]/g, ''), wa = ph.replace(/^\+?88/, '').replace(/^0/, '');
+    var f = a.querySelector('form'); if (!f || f.elements.cb114 || X('contactplus')) return; var s = D.settings || {}, ph = shopPhone().replace(/[^+\d]/g, ''), wa = ph.replace(/^\+?88/, '').replace(/^0/, '');
     var h1 = a.querySelector('h1'), o = chip(), tools = el('div', { class: 'c114' }, el('div', { class: 'r1' }, o, el('small', { class: 'muted' }, tx('(আপনার সময় অনুযায়ী নয়, ঢাকার সময়)', '(Dhaka time)'))),
       el('div', { class: 's114 r1' }, el('a', { class: 'btn2', target: '_blank', rel: 'noopener noreferrer', href: 'https://wa.me/880' + wa }, '💬 WhatsApp'), s.addr ? el('a', { class: 'btn2', target: '_blank', rel: 'noopener noreferrer', href: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(s.addr) }, '🗺 ' + tx('ম্যাপে দেখুন', 'Open map')) : null,
         el('button', { onclick: function () { (navigator.clipboard ? navigator.clipboard.writeText(shopPhone()) : Promise.reject()).then(function () { toast(tx('নম্বর কপি হয়েছে', 'Number copied')); }, function () { prompt('Copy:', shopPhone()); }); } }, '📋 ' + tx('ফোন নম্বর কপি', 'Copy phone'))));
@@ -191,7 +193,7 @@
     f.addEventListener('submit', function () { var m = ta.value.trim(); if (m.length < 5) return; var ex = []; if (ord.value.trim()) ex.push('Order ' + ord.value.trim().toUpperCase()); if (f.elements.cb114.value) ex.push('Call: ' + f.elements.cb114.value); if (ex.length) { ta.removeAttribute('maxlength'); ta.value = (m + ' [' + ex.join(' · ') + ']').slice(0, 330); } clear(); try { sessionStorage.removeItem('mc_ctx_order'); } catch (e) { } }, true);
   }
   function askPage(a) {
-    var f = a.querySelector('form'); if (!f || f.elements.who114) return; var ta = f.elements.q; if (!ta) return;
+    var f = a.querySelector('form'); if (!f || f.elements.who114 || X('askplus')) return; var ta = f.elements.q; if (!ta) return;
     var urg = el('select', { name: 'urg114', 'aria-label': 'Urgency' }, [el('option', { value: '' }, tx('সাধারণ', 'Normal')), el('option', { value: '1' }, '🔴 ' + tx('জরুরি (আজই কল চাই)', 'Urgent (call me today)'))]);
     var who = el('select', { name: 'who114', 'aria-label': 'For' }, [['', tx('নিজের জন্য (প্রাপ্তবয়স্ক)', 'Myself (adult)')], ['শিশু', tx('শিশুর জন্য', 'A child')], ['বয়স্ক', tx('বয়স্কের জন্য', 'An elderly person')], ['গর্ভবতী/দুগ্ধদানকারী', tx('গর্ভবতী/দুগ্ধদানকারী', 'Pregnant / nursing')]].map(function (o) { return el('option', { value: o[0] }, o[1]); }));
     var oth = el('input', { name: 'oth114', maxlength: 80, placeholder: tx('এখন যে অন্য ওষুধ খাচ্ছেন (থাকলে)', 'Other medicines being taken'), 'aria-label': 'Other medicines' }), alg = el('input', { name: 'alg114', maxlength: 60, placeholder: tx('অ্যালার্জি (থাকলে)', 'Allergies (if any)'), 'aria-label': 'Allergies' });
@@ -211,13 +213,13 @@
     try {
       document.querySelectorAll('.b114').forEach(function (e) { e.remove(); });
       var n = unseenReplies();
-      if (n && r !== 'ask' && r !== 'contact') ['#/ask', '#/contact'].forEach(function (hh) { var l = document.querySelector('a[href="' + hh + '"]'); if (l) l.append(el('span', { class: 'b114', title: tx('ফার্মেসির নতুন উত্তর', 'New reply') }, '💬 ' + n)); });
-      if (r === 'catalog' || r === '') shopTools(a);
+      if (n && !X('badge') && r !== 'ask' && r !== 'contact') ['#/ask', '#/contact'].forEach(function (hh) { var l = document.querySelector('a[href="' + hh + '"]'); if (l) l.append(el('span', { class: 'b114', title: tx('ফার্মেসির নতুন উত্তর', 'New reply') }, '💬 ' + n)); });
+      if (r === 'catalog' || r === '') { shopTools(a); if (!a.querySelector('article.card') && (S.q || S.cat || (!X('filters') && (F.form || F.maker)))) noResult(a); }
       else if (r === 'wishlist') wishPage(a);
       else if (r === 'orders') ordersPage(a);
       else if (r === 'info') helpPage(a);
       else if (r === 'contact' || r === 'ask') {
-        if (n) { var h1 = a.querySelector('h1'); h1 && h1.after(el('div', { class: 'c114 w', role: 'status' }, '💬 ' + tx('ফার্মেসির ' + n + 'টি নতুন উত্তর এসেছে — নিচে “আপনার পাঠানো বার্তা” দেখুন।', n + ' new repl' + (n > 1 ? 'ies' : 'y') + ' from the pharmacy — see your messages below.'))); localStorage.setItem('mc_rseen114', new Date().toISOString()); }
+        if (n && !X('badge')) { var h1 = a.querySelector('h1'); h1 && h1.after(el('div', { class: 'c114 w', role: 'status' }, '💬 ' + tx('ফার্মেসির ' + n + 'টি নতুন উত্তর এসেছে — নিচে “আপনার পাঠানো বার্তা” দেখুন।', n + ' new repl' + (n > 1 ? 'ies' : 'y') + ' from the pharmacy — see your messages below.'))); localStorage.setItem('mc_rseen114', new Date().toISOString()); }
         if (r === 'contact') contactPage(a); else askPage(a);
       }
     } catch (e) { /* এক্সট্রা কখনো শপ ভাঙবে না */ }

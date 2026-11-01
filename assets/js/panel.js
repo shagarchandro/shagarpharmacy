@@ -114,7 +114,7 @@
     // ---- idle auto sign-out (minutes set in Control Center → Rules; 0 = off) ----
     (function () {
       var set = {}; try { set = JSON.parse(localStorage.getItem('pharmacy_settings') || '{}'); } catch (e) {}
-      var mins = set.idleMin == null ? 30 : +set.idleMin; if (!(mins > 0)) return;
+      var mins = set.idleMin == null ? 30 : +set.idleMin; try { if (sessionStorage.getItem('mc_shared') === '1') mins = mins > 0 ? Math.min(mins, 10) : 10; } catch (e) {} if (!(mins > 0)) return;
       var last = Date.now(), warned = false, wb = null;
       ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(function (ev) { document.addEventListener(ev, function () { last = Date.now(); if (warned) { warned = false; if (wb) { wb.remove(); wb = null; } } }, { passive: true }); });
       setInterval(function () {
