@@ -12,7 +12,7 @@
     };
   } catch (e) {}
   // clickjacking guard: never render inside someone else's frame
-  try { if (window.top !== window.self) { document.documentElement.style.display = 'none'; try { window.top.location = window.self.location; } catch (e) {} } } catch (e) { document.documentElement.style.display = 'none'; }
+  try { var okFrame = false; try { okFrame = window.parent !== window && /admin-center\.html$/.test(window.parent.location.pathname); } catch (e2) { okFrame = false; } /* v106: শুধু একই-অরিজিনের Control Center-এর প্রিভিউ iframe-এ ফ্রেমিং চলে; বাইরের সাইট থেকে নয় */ if (!okFrame && window.top !== window.self) { document.documentElement.style.display = 'none'; try { window.top.location = window.self.location; } catch (e) {} } } catch (e) { document.documentElement.style.display = 'none'; }
   var css = '' +
   'html{-webkit-text-size-adjust:100%}img,video,canvas,svg{max-width:100%}' +
   ':focus-visible{outline:3px solid rgba(102,126,234,.55)!important;outline-offset:2px}' +

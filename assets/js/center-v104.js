@@ -48,111 +48,11 @@
   window.CCX = function (c) {
     var x = prev(c), rjc = c.rj;
     x.panels.reset = function () {
-      css();
-      var root = el('div', {}), srv = !!(window.MCSRV && MCSRV.active), keys = allKeys(), last = rjc('pharmacy_resetlog', null), pt = rj('mc_resetpoint', null);
-      var by = isAdmin() ? (user().name || 'Admin') : 'Owner';
-      var st = { backup: false, a1: false, a2: false, phrase: false, pw: !isAdmin(), pin: true };   // Owner: পাসওয়ার্ড-ধাপ নেই
-      var S = rjc('pharmacy_settings', {}), needPin = isAdmin() && !!S.adminPin; st.pin = !needPin;
-      var biz = keys.filter(function (k) { return grp(k) === 'biz'; });
-      if (last) root.append(el('p', { class: 'muted' }, '🕘 শেষ রিসেট: ' + new Date(last.at).toLocaleString('bn-BD', { timeZone: 'Asia/Dhaka' }) + ' · ' + last.by + ' · ' + last.mode));
-      if (pt && pt.data) root.append(el('div', { class: 'cc-card', style: 'border-color:#e8a317;margin-bottom:1rem' }, [el('b', {}, '↩ রিসেট বাতিল করা যাবে'), el('p', { class: 'muted' }, 'রিসেটের আগের কপি এই ব্রাউজারে রাখা আছে (' + new Date(pt.at).toLocaleString('bn-BD', { timeZone: 'Asia/Dhaka' }) + ')। পরের রিসেটে এটি বদলে যাবে।'),
-        el('button', { type: 'button', class: 'btn2', onclick: function () {
-          if (!confirm('রিসেটের আগের সব ডাটা ফিরিয়ে আনবেন? এখনকার ডাটা বদলে যাবে।')) return;
-          Object.keys(pt.data).forEach(function (k) { try { localStorage.setItem(k, pt.data[k]); } catch (e) { } }); localStorage.removeItem('mc_resetpoint');
-          try { c.audit('Reset undone (restored ' + Object.keys(pt.data).length + ' keys)'); } catch (e) { } c.ok('ডাটা ফিরে এসেছে'); c.show('reset');
-        } }, '↩ রিসেট বাতিল করুন')]));
-      /* ---- সতর্কতা ---- */
-      var tot = biz.reduce(function (a, k) { return a + sz(k); }, 0);
-      var warn = el('div', { class: 'v104w', role: 'alert' }, [
-        el('h2', {}, '☢️ চরম সতর্কতা — সব ডাটা মুছে যাবে'),
-        el('p', { style: 'margin:.2rem 0;font-weight:700' }, 'এটি ফেরানো যায় না (ডাউনলোড-করা ব্যাকআপ ফাইল ছাড়া)। বিক্রি, স্টক, কাস্টমার, অর্ডার, হিসাব — সব শূন্য হয়ে যাবে।'),
-        el('ul', {}, [
-          el('li', {}, 'মুছবে: ' + biz.length + ' ধরনের ব্যবসায়িক ডাটা (প্রায় ' + kb(tot) + ') — নিচের তালিকায় সব দেখুন।'),
-          el('li', {}, 'আজকের বিক্রি, ক্যাশ ক্লোজিং, বাকি-খাতা, ক্রয়, প্রেসক্রিপশন ও রিপোর্টের সব ইতিহাস হারাবে।'),
-          el('li', {}, 'অনলাইন শপের পণ্য-ব্যাচ-অর্ডার মুছলে গ্রাহকের চলমান অর্ডারও হারাবে — আগে সব অর্ডার ডেলিভারি/বাতিল করে নিন।'),
-          el('li', {}, 'এই ব্রাউজারের ডাটাই মুছবে; অন্য ডিভাইস/ব্রাউজারের আলাদা কপি থাকলে সেগুলো আলাদা থাকবে।'),
-          srv ? el('li', { style: 'color:#c0261c;font-weight:700' }, '🖥 সার্ভার মোড: সার্ভারের ডাটাবেসের সব সিঙ্ক-ডাটাও মুছবে (সার্ভার আগে নিজে একটি সেফটি ব্যাকআপ নেবে)। নিচের নির্বাচন এখানে কাজ করবে না — সব সিঙ্ক-ডাটা যাবে।') : null])]);
-      root.append(warn);
-      /* ---- কী মুছবে ---- */
-      var opt = {}, optBox = el('div', { class: 'cc-card', style: 'margin-bottom:1rem' });
-      function chk(id, label, hint, on, dis) { var i = el('input', { type: 'checkbox', checked: on, disabled: !!dis }); opt[id] = i; return el('label', { style: 'display:flex;gap:.5rem;align-items:flex-start;margin:.35rem 0' }, [i, el('span', {}, [el('b', {}, label), ' — ', el('span', { class: 'muted' }, hint)])]); }
-      var nAcc = keys.filter(function (k) { return grp(k) === 'acc'; }).length, nSet = keys.filter(function (k) { return grp(k) === 'set'; }).length, au = rjc('pharmacy_audit', []).length;
-      optBox.append(el('h3', {}, '১) কী কী মুছবেন'),
-        chk('biz', '🗂 ব্যবসার সব ডাটা', 'পণ্য, ওষুধ, কাস্টমার, সাপ্লায়ার, বিক্রি, ক্রয়, অর্ডার, প্রেসক্রিপশন… (' + biz.length + ' ধরন)', true, true),
-        chk('acc', '👥 অ্যাকাউন্ট ও পাসওয়ার্ড', 'তৈরি-করা অ্যাকাউন্ট, বদলানো পাসওয়ার্ড, লগইন লগ (' + nAcc + ') — মুছলে ডিফল্ট লগইন (admin123…) ফিরবে', false, srv),
-        chk('set', '⚙️ সেটিংস, রোল ও ডিজাইন', 'রোল-অনুমতি, ছাড়ের সীমা, Branding, Site Studio, Store ও Invoice সেটিংস (' + nSet + ')', false, srv),
-        chk('aud', '📜 অডিট ট্রেইল', 'কে কী বদলেছে তার লগ (' + au + ' টি) — সাধারণত রেখে দেওয়াই ভালো', false, srv));
-      var modeSel = el('select', {}, [el('option', { value: 'empty' }, 'একদম খালি থেকে শুরু (নিজের ডাটা বসাব)'), el('option', { value: 'demo' }, 'ডেমো ডাটা ফিরিয়ে আনুন (ফ্যাক্টরি অবস্থা)')]);
-      optBox.append(el('label', { style: 'display:flex;flex-direction:column;gap:.25rem;margin-top:.6rem' }, ['রিসেটের পর অবস্থা', modeSel]),
-        el('button', { type: 'button', class: 'btn2', style: 'margin-top:.6rem', onclick: function () { ['acc', 'set', 'aud'].forEach(function (k) { if (!opt[k].disabled) opt[k].checked = true; }); modeSel.value = 'demo'; refresh(); } }, '🏭 সম্পূর্ণ ফ্যাক্টরি রিসেট বেছে নিন (সব কিছু)'));
-      var det = el('details', { style: 'margin-top:.8rem' }, [el('summary', { style: 'cursor:pointer' }, 'মুছতে যাওয়া সব ডাটার তালিকা দেখুন (' + keys.length + ')'),
-        el('div', { class: 'scroll' }, el('table', {}, [el('thead', {}, el('tr', {}, ['ডাটা', 'ধরন', 'রেকর্ড', 'সাইজ'].map(function (t) { return el('th', {}, t); }))),
-          el('tbody', {}, keys.map(function (k) { var g = grp(k); return el('tr', {}, [el('td', {}, LBL[k] ? LBL[k] + ' (' + k + ')' : k), el('td', {}, { biz: '🗂 ব্যবসা', acc: '👥 অ্যাকাউন্ট', set: '⚙️ সেটিংস', aud: '📜 অডিট' }[g]), el('td', {}, String(cnt(k))), el('td', {}, kb(sz(k)))]); }))]))]);
-      optBox.append(det); root.append(optBox);
-      /* ---- গেট ---- */
-      var gate = el('div', { class: 'cc-card', style: 'margin-bottom:1rem' }), list = el('div', { class: 'v104g' });
-      var bkBtn = el('button', { type: 'button', class: 'btn', onclick: function () {
-        var d = {}; allKeys().forEach(function (k) { d[k] = localStorage.getItem(k); });
-        var blob = new Blob([JSON.stringify({ app: 'medicare', at: new Date().toISOString(), by: by, note: 'pre-reset full backup', data: d }, null, 2)], { type: 'application/json' }), a = el('a', { href: URL.createObjectURL(blob), download: 'medicare-FULL-backup-before-reset-' + new Date().toISOString().replace(/[:T]/g, '-').slice(0, 16) + '.json' });
-        document.body.append(a); a.click(); a.remove(); st.backup = true; try { localStorage.setItem('pharmacy_lastbackup', new Date().toISOString()); } catch (e) { } refresh(); c.ok('ব্যাকআপ ডাউনলোড শুরু হয়েছে — ফাইলটি নিরাপদ জায়গায় রাখুন');
-      } }, '⬇ পূর্ণ ব্যাকআপ ডাউনলোড করুন');
-      var ack1 = el('input', { type: 'checkbox', onchange: function () { st.a1 = ack1.checked; refresh(); } }), ack2 = el('input', { type: 'checkbox', onchange: function () { st.a2 = ack2.checked; refresh(); } });
-      var ph = el('input', { type: 'text', placeholder: PHRASE, autocomplete: 'off', spellcheck: false, style: 'width:100%;font-family:monospace', oninput: function () { st.phrase = ph.value.trim() === PHRASE; refresh(); } });
-      var pw = el('input', { type: 'password', placeholder: 'আপনার Admin পাসওয়ার্ড', autocomplete: 'off', style: 'width:100%', oninput: function () { clearTimeout(pw._t); pw._t = setTimeout(function () { verifyAdmin(pw.value).then(function (ok) { st.pw = ok; refresh(); }); }, 300); } });
-      var pin = el('input', { type: 'password', placeholder: 'Admin PIN', inputMode: 'numeric', autocomplete: 'off', style: 'width:100%', oninput: function () { clearTimeout(pin._t); pin._t = setTimeout(function () { MCPW.verify(pin.value, S.adminPin).then(function (ok) { st.pin = ok; refresh(); }); }, 300); } });
-      var go = el('button', { type: 'button', class: 'btn2 v104go', disabled: true, onclick: start }, '☢️ এখনই সব মুছে ফেলুন'), cd = el('div', { hidden: true }), msg = el('p', { class: 'muted' });
-      gate.append(el('h3', {}, '২) নিশ্চিত করুন — সবকটি ধাপ পূরণ হলে তবেই বোতাম চালু হবে'), list,
-        el('div', { style: 'display:grid;gap:.5rem;margin:.6rem 0' }, [bkBtn,
-          el('label', { style: 'display:flex;gap:.5rem' }, [ack1, 'আমি বুঝেছি — রিসেট করলে নির্বাচিত সব ডাটা চিরতরে মুছে যাবে।']),
-          el('label', { style: 'display:flex;gap:.5rem' }, [ack2, 'ব্যাকআপ ফাইলটি আমি নিরাপদ জায়গায় রেখেছি এবং খুলে দেখেছি।']),
-          el('label', { style: 'display:flex;flex-direction:column;gap:.2rem' }, ['নিশ্চিত করতে ঠিক এই লেখাটি লিখুন: ' + PHRASE, ph]),
-          isAdmin() ? el('label', { style: 'display:flex;flex-direction:column;gap:.2rem' }, ['Admin পাসওয়ার্ড দিন', pw]) : el('p', { class: 'muted' }, 'Ops Owner হিসেবে আছেন — পাসওয়ার্ড-ধাপ নেই; বাকি সব ধাপ বাধ্যতামূলক।'),
-          needPin ? el('label', { style: 'display:flex;flex-direction:column;gap:.2rem' }, ['Admin PIN দিন', pin]) : null]), go, cd, msg);
-      root.append(gate);
-      function refresh() {
-        var items = [[st.backup, 'পূর্ণ ব্যাকআপ ডাউনলোড করা হয়েছে'], [st.a1, 'ফেরানো যাবে না — বুঝেছি'], [st.a2, 'ব্যাকআপ নিরাপদে রেখেছি'], [st.phrase, '"' + PHRASE + '" লেখা হয়েছে']];
-        if (isAdmin()) items.push([st.pw, 'Admin পাসওয়ার্ড সঠিক']); if (needPin) items.push([st.pin, 'Admin PIN সঠিক']);
-        list.replaceChildren.apply(list, items.map(function (i) { return el('div', { class: 'it' + (i[0] ? ' ok' : '') }, [el('span', { class: 'ic' }, i[0] ? '✔' : '✖'), i[1]]); }));
-        go.disabled = !items.every(function (i) { return i[0]; }) || !!timer;
-      }
-      var timer = null;
-      function start() {
-        if (timer) return; var n = 5, bar = el('i', {}), cancel = el('button', { type: 'button', class: 'btn', onclick: function () { clearInterval(timer); timer = null; cd.hidden = true; refresh(); msg.textContent = 'বাতিল করা হয়েছে — কিছুই মোছা হয়নি।'; } }, '✋ থামুন — বাতিল করুন');
-        var txt = el('b', { style: 'color:#c0261c;font-size:1.1rem' }, ''); cd.hidden = false; cd.replaceChildren(txt, el('div', { class: 'v104bar' }, bar), cancel); go.disabled = true;
-        function tick() { txt.textContent = '⏳ ' + n + ' সেকেন্ডে মোছা শুরু হবে…'; bar.style.width = ((5 - n + 1) * 20) + '%'; }
-        tick(); timer = setInterval(function () { n--; if (n <= 0) { clearInterval(timer); timer = null; cd.hidden = true; run(); } else tick(); }, 1000);
-      }
-      function run() {
-        var sel = { acc: opt.acc.checked || srv, set: opt.set.checked || srv, aud: opt.aud.checked || srv }, empty = modeSel.value === 'empty';
-        var targets = allKeys().filter(function (k) { var g = grp(k); return g === 'biz' || sel[g]; });
-        /* রিস্টোর পয়েন্ট */
-        var data = {}, saved = false; targets.forEach(function (k) { data[k] = localStorage.getItem(k); });
-        try { localStorage.setItem('mc_resetpoint', JSON.stringify({ at: new Date().toISOString(), by: by, data: data })); saved = true; } catch (e) { try { localStorage.removeItem('mc_resetpoint'); } catch (x) { } }
-        function wipe() {
-          var n = 0;
-          targets.forEach(function (k) {
-            var v = rj(k, null);
-            if (empty && grp(k) === 'biz') {
-              if (k === 'mc_db' && v && typeof v === 'object') { var o = { v: v.v }; if (v.users) o.users = v.users; if (v.settings) o.settings = v.settings; Object.keys(v).forEach(function (p) { if (Array.isArray(v[p]) && p !== 'users') o[p] = []; }); localStorage.setItem(k, JSON.stringify(o)); n++; return; }
-              if (Array.isArray(v)) { localStorage.setItem(k, '[]'); n++; return; }
-            }
-            localStorage.removeItem(k); n++;
-          });
-          try { localStorage.removeItem('mc_sync'); sessionStorage.removeItem('mc_ops_last'); } catch (e) { }
-          var log = { at: new Date().toISOString(), by: by, mode: (empty ? 'খালি শুরু' : 'ডেমো ডাটা') + ' · ' + (sel.acc ? 'অ্যাকাউন্ট+' : '') + (sel.set ? 'সেটিংস+' : '') + (sel.aud ? 'অডিট+' : '') + 'ব্যবসা', n: n, server: srv };
-          localStorage.setItem('pharmacy_resetlog', JSON.stringify(log));
-          if (!sel.aud) { try { c.audit('☢️ FULL DATA RESET (' + log.mode + ', ' + n + ' keys, server=' + srv + ')'); } catch (e) { } }
-          var f = el('div', { class: 'cc-card', style: 'border-color:#2e9e5b' }, [el('h3', {}, '✅ রিসেট সম্পন্ন'), el('p', {}, n + ' টি ডাটা-সেট মোছা হয়েছে' + (saved ? '। এই ব্রাউজারে রিস্টোর পয়েন্ট রাখা আছে — ইচ্ছে হলে উপরের "রিসেট বাতিল করুন" দিয়ে ফেরানো যাবে।' : '। ⚠ ব্রাউজারে জায়গা কম বলে রিস্টোর পয়েন্ট রাখা যায়নি — ফেরাতে ডাউনলোড-করা ব্যাকআপ ব্যবহার করুন (Backup পেজ → রিস্টোর)।')), el('div', { class: 'row', style: 'display:flex;gap:.5rem;flex-wrap:wrap' }, [el('a', { class: 'btn', href: 'dashboard.html' }, 'ড্যাশবোর্ডে যান'), el('a', { class: 'btn2', href: 'shop.html' }, 'শপ দেখুন'), el('button', { type: 'button', class: 'btn2', onclick: function () { c.show('reset'); } }, 'এই পেজ রিফ্রেশ')])]);
-          root.replaceChildren(f); window.scrollTo(0, 0); c.ok('সব ডাটা রিসেট হয়েছে');
-        }
-        if (srv && window.MCSRV && MCSRV.apost) {
-          msg.textContent = 'সার্ভারে রিসেট চলছে…';
-          MCSRV.apost('/api/reset', { confirm: 'RESET' }).then(function (r) {
-            if (r && r.status === 200) wipe(); else { c.bad((r && r.json && r.json.error) || 'সার্ভার রিসেট হয়নি — কিছু মোছা হয়নি'); try { localStorage.removeItem('mc_resetpoint'); } catch (e) { } refresh(); }
-          });
-        } else wipe();
-      }
-      refresh(); return root;
+      var admin = (function () { try { var u = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')) || {}; return u.role === 'admin' && !!(localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token')) ? u : null; } catch (e) { return null; } })();
+      var S = rjc('pharmacy_settings', {});
+      return MCReset.build({ rj: rjc, audit: function (m) { c.audit(m); }, ok: c.ok, bad: c.bad, rerender: function () { c.show('reset'); }, by: admin ? (admin.name || 'Admin') : 'Owner',
+        verifyPw: admin ? verifyAdmin : null, pwLabel: 'Admin পাসওয়ার্ড', verifyPin: admin && S.adminPin && window.MCPW ? function (p) { return MCPW.verify(p, S.adminPin); } : null,
+        links: [['dashboard.html', 'ড্যাশবোর্ডে যান'], ['shop.html', 'শপ দেখুন']] });
     };
     var di = -1; x.tabs.forEach(function (t, i) { if (/data/i.test(t[0]) || t[0] === 'maint') di = i; });
     x.tabs.push(['reset', '☢️ সব ডাটা রিসেট']);

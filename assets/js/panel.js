@@ -32,7 +32,9 @@
   ].filter(function (x) { return x.k === '*' || (x.k === '_ph' ? (isAdmin || isPh) : x.k === '_ad' ? isAdmin : can(x.k)); });
 
   var SETG = {}; try { SETG = JSON.parse(localStorage.getItem('pharmacy_settings') || '{}'); } catch (e) {}
-  var OFF = SETG.features || {}, FMAP = { 'team.html': 'team', 'refunds.html': 'refunds', 'writeoff.html': 'writeoff', 'register.html': 'register', 'closing.html': 'closing', 'reorder.html': 'reorder' };
+  /* v113: সময়-সীমা শেষ হলে (featuresUntil) সুইচ নিজে থেকে আবার চালু */
+  try { var FU = SETG.featuresUntil || {}, chg = false; Object.keys(FU).forEach(function (k) { if (+FU[k] <= Date.now()) { if (SETG.features) delete SETG.features[k]; delete FU[k]; chg = true; } }); if (chg) { SETG.featuresUntil = FU; localStorage.setItem('pharmacy_settings', JSON.stringify(SETG)); } } catch (e) {}
+  var OFF = SETG.features || {}, FMAP = { 'team.html': 'team', 'refunds.html': 'refunds', 'writeoff.html': 'writeoff', 'register.html': 'register', 'closing.html': 'closing', 'reorder.html': 'reorder', 'customers.html': 'customers', 'suppliers.html': 'suppliers', 'purchases.html': 'purchases', 'reports.html': 'reports', 'prescriptions.html': 'prescriptions' };
   ITEMS = ITEMS.filter(function (x) { return OFF[FMAP[x.u]] !== false; });
   var css = '' +
   '.mcp-o{position:fixed;inset:0;background:rgba(10,15,35,.55);backdrop-filter:blur(3px);z-index:3000;display:none;align-items:flex-start;justify-content:center;padding:10vh 12px 0}.mcp-o.on{display:flex}' +
@@ -70,7 +72,8 @@
     if (FMAP[page] && OFF[FMAP[page]] === false) {
       var dv = document.createElement('div'); dv.setAttribute('role', 'alert');
       dv.style.cssText = 'position:fixed;inset:0;z-index:5000;background:#10171f;color:#fff;display:grid;place-items:center;text-align:center;padding:1rem;font-family:system-ui';
-      dv.innerHTML = '<div><h2>🔒 এই ফিচারটি Admin বন্ধ করে রেখেছেন</h2><p>Control Center → Features থেকে চালু করা যায়।</p><a href="dashboard.html" style="color:#aab4ff">← Dashboard</a></div>'; document.body.appendChild(dv);
+      var fk = FMAP[page], fm = (SETG.featureMsg || {})[fk], fu = (SETG.featuresUntil || {})[fk], esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+      dv.innerHTML = '<div><h2>🔒 এই ফিচারটি Admin বন্ধ করে রেখেছেন</h2>' + (fm ? '<p style="font-size:1.1rem">' + esc(fm) + '</p>' : '') + (fu ? '<p>⏱ আবার চালু হবে: ' + new Date(+fu).toLocaleString('en-GB', { timeZone: 'Asia/Dhaka', dateStyle: 'medium', timeStyle: 'short' }) + '</p>' : '<p>Control Center → Features থেকে চালু করা যায়।</p>') + '<a href="dashboard.html" style="color:#aab4ff">← Dashboard</a></div>'; document.body.appendChild(dv);
     }
     if (OFF) { var hide = []; for (var fu in FMAP) if (OFF[FMAP[fu]] === false) hide.push('a[href="' + fu + '"]'); if (hide.length) { var hs = document.createElement('style'); hs.textContent = hide.join(',') + '{display:none!important}'; document.head.appendChild(hs); } }
     // ---- command palette ----
