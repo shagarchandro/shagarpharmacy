@@ -639,3 +639,35 @@ Salted PBKDF2 password hashes + password policy (also for custom accounts changi
 - **Forced password change** on first login after a reset (`pharmacy_mustchange`, guard.js overlay; min 8 chars, letter+digit).
 - Files: `assets/js/login-v116.js`, `assets/js/center-v116.js`, `guard.js`, `panel.js`, `center-v85.js`, `login.html`, `admin-center.html`.
 - Limitation: demo mode enforcement is client-side only (devtools can bypass the forced-change overlay). Ops login (`admin/login.html`) unchanged.
+
+## v117 — Invoice download upgrade
+- `assets/js/invoice-v117.js` (sales.html + dashboard.html, after invoice-v96): download any saved invoice from **📜 Sales history** (PDF / PNG / HTML / CSV dropdown per bill) without opening the modal; **📥 এই তালিকা CSV** exports the filtered list.
+- Invoice modal: new ⬇ PNG / ⬇ HTML / ⬇ CSV buttons; PDF button now uses the new self-contained layout (works offline, vendored html2pdf), honours paper size A4/A5/80mm.
+- Invoice layout: Code128 barcode, PAID / DUE / VOID stamp, batch/expiry, amount in words, return policy, thanks line.
+- Admin → Settings → Store & Invoice: file-name template (`{no} {customer} {date}`), barcode, stamp, thanks line toggles.
+- Every download logged to `pharmacy_dllog` (last 300: time, invoice, format, user). No viewer UI yet.
+- CSV cells starting with `= + - @` are neutralised (formula-injection safe).
+
+## v118 — All invoices, one style + Invoice Log
+- `assets/js/invoice-v118.js` (purchases.html, refunds.html, shop.html): common document template (store info/logo/licence, stamp, barcode, thanks line) with ⬇ PDF / PNG / HTML / CSV.
+  - **Purchases**: Purchase-details modal gets download dropdown; Print Invoice now uses own styles (no Bootstrap dependency).
+  - **Refunds**: each history row gets ⬇ Credit Note (CN-<invoice>-<time>).
+  - **Shop (customer)**: each order in Orders gets ⬇ invoice (previously only browser print).
+- `assets/js/center-v118.js` (admin-center.html): **🧾 Invoice Log** tab (reports group) — KPIs, filters, CSV export, clear log (audited). Reads `pharmacy_dllog`.
+- v117 sales invoices unchanged. Limitation: customers.html statements not included; shop `by` field uses the browser's logged-in staff name if any.
+
+## v119 — Adjustable invoice size
+- `assets/js/invoice-layout-v119.js` (shared; loaded before invoice-v117/v118 on sales, dashboard, purchases, refunds, shop): **📐 Size dialog** with live preview — paper (A4/A5/A6/Letter/80mm/58mm/custom W×H), orientation, zoom 50–200%, text size 70–150%, margin 0–20mm.
+- Applies to print, PDF, PNG and HTML for sales invoices (v117) and purchase / credit-note / shop-order documents (v118). PDF page size follows the paper (thermal/custom width → height auto-measured).
+- Entry points: invoice modal → 📐 সাইজ; Sales history & other download dropdowns → "📐 সাইজ / প্রিন্ট…"; Dashboard → Settings → ⬇ ইনভয়েস ডাউনলোড → ডিফল্ট সাইজ.
+- Per-device choice in `mc_inv_layout`; Admin can ⭐ set default for everyone (`pharmacy_settings.invLayout`, audited); ↺ resets own choice.
+- `printInvoiceModal` now prints the same document as downloads (uses `@page` size). Old v96 paper dropdown is hidden (migrated).
+- Limitations: CSS `zoom` for print/HTML needs a modern browser (Chrome/Edge/Safari, Firefox 126+); thermal print height depends on printer driver; sales-history quick receipt (🖨 রিসিট) keeps its own fixed 380px layout.
+
+## v120 — POS bill invoice print & download upgrade
+- `assets/js/pos-print-v120.js` (sales.html, dashboard.html; after invoice-v117): ⚡ quick print (one click, receipt size, own layout untouched), copies 1–3 with CUSTOMER/SHOP/OFFICE COPY labels, auto-print / auto-PDF after each sale (Settings, default off), 📤 Share (Web Share API with PDF; falls back to download), 🖨 Last bill button in POS toolbar, Alt+P / Alt+Q / Alt+D / Alt+S shortcuts while the invoice modal is open, Sales-history "🖨 রিসিট" now uses the same quick print.
+- Reprint tracking: `pharmacy_sales[].prints / lastPrintAt / lastPrintBy`; reprints show "DUPLICATE COPY — reprint #n" (toggle in Settings); prints logged in Invoice Log (`print`, `share`).
+- Bill note (doctor/patient) now appears on invoice/PDF/print.
+- `invoice-layout-v119.js`: printing now uses a hidden iframe (no pop-up blocker), layout can take a preset (`MCLAY.get({paper:'t80',...})`), `MCLAY.blob()` for sharing.
+- `invoice-v117.js`: `fullHtml(sale,{copies,L})`, `printSale` with counter; exposes `window.mcInv117`.
+- Limitations: browsers always show the print dialog (silent print needs kiosk-printing mode); Web Share files only on supported mobile/desktop browsers; reprint counter is client-side in demo mode.
